@@ -1,0 +1,130 @@
+/* Genel Stiller */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #8f94fb, #4e54c8);
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    justify-content: flex-start;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px; /* Navbar ve başlık arasına boşluk bırak */
+    margin-top: 20px; /* Sayfanın üst kısmına daha yakın hizala */
+}
+
+.navbar button {
+    background-color: #ffffff;
+    color: #4e54c8;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.navbar button:hover {
+    background-color: #4e54c8;
+    color: #ffffff;
+}
+
+/* Ana Sayfa */
+.page {
+    display: none;
+    width: 80%;
+    text-align: center;
+}
+
+/* Welcome başlığı */
+.page h1 {
+    margin-bottom: 30px;
+}
+
+.page:not(.hidden) {
+    display: block;
+}
+
+/* Profil Kartları */
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+    justify-items: center;
+    margin-top: 50px; /* Profil kartlarını daha aşağı it */
+}
+
+.profile-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    width: 200px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-card img {
+    border-radius: 10px; /* Kare görünüm için köşeleri hafif yuvarlak yapar */
+    width: 100%; /* Kartın genişliğini kaplar */
+    height: auto; /* Oranlı bir yükseklik sağlar */
+    max-width: 80px; /* Sabit genişlik için maksimum genişlik belirler */
+    max-height: 80px; /* Sabit yükseklik için maksimum yükseklik belirler */
+    object-fit: cover; /* Görselin tam olarak alanı kaplamasını sağlar */
+    margin: 0 auto 10px auto; /* Ortalamak için kenar boşlukları */
+    display: block; /* Görseli blok düzende gösterir */
+}
+
+/* Login ve Register Formları */
+.form-container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4e54c8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #6b72e6;
+}

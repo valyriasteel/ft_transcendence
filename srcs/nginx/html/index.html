@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA Ana Sayfa</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body>
+    <!-- Üst Menü -->
+    <nav class="navbar">
+        <button onclick="showPage('home')">Anasayfa</button>
+        <button onclick="showPage('login')">Login</button>
+        <button onclick="showPage('register')">Register</button>
+    </nav>
+
+    <!-- Sayfa İçerikleri -->
+    <div id="home" class="page">
+        <h1>Meet the Team!</h1>
+        <div class="profile-grid">
+            <div class="profile-card">
+                <img src="stark.png" alt="Profile Picture">
+                <h2>Kullanici 1</h2>
+                <p>Web Geliştirici</p>
+            </div>
+            <div class="profile-card">
+                <img src="stark.png" alt="Profile Picture">
+                <h2>Kullanici 2</h2>
+                <p>Grafik Tasarimci</p>
+            </div>
+            <div class="profile-card">
+                <img src="stark.png" alt="Profile Picture">
+                <h2>Kullanici 3</h2>
+                <p>Veri Bilimcisi</p>
+            </div>
+            <div class="profile-card">
+                <img src="stark.png" alt="Profile Picture">
+                <h2>Kullanici 4</h2>
+                <p>Mobil Geliştirici</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="login" class="page hidden">
+        <h2>Login</h2>
+        <form onsubmit="return handleLogin(event)" class="form-container">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter your password" required>
+
+            <button type="submit" class="button">Login</button>
+        </form>
+    </div>
+
+    <div id="register" class="page hidden">
+        <h2>Register</h2>
+        <form onsubmit="return handleRegister(event)" class="form-container">
+            <label>Email</label>
+            <input type="email" id="register-email" placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" id="register-password" placeholder="Create a password" required>
+
+            <label>Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm your password" required>
+
+            <button type="submit" class="button">Register</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

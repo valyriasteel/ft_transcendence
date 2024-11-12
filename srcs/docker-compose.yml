@@ -1,0 +1,15 @@
+services:
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+      - "80:80"
+    restart: on-failure
+    env_file:
+      - .env
+    networks:
+      - ft_transcendence-network
+
+networks:
+  ft_transcendence-network:
+    name: ft_transcendence-network
