@@ -49,5 +49,8 @@ rm_networks:
 		docker network rm $$(docker network ls --filter type=custom -q); \
 	fi
 
+rm_all:
+	@docker system prune -af
+
 logs:
 	@docker-compose -f $(COMPOSE_FILE) logs -f

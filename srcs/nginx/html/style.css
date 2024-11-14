@@ -6,28 +6,65 @@
     font-family: Arial, sans-serif;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+html {
+    background: url('geo.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+
 body {
-    background: linear-gradient(135deg, #8f94fb, #4e54c8);
-    color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
+    color: #333;
     min-height: 100vh;
-    justify-content: flex-start;
+    position: relative;
+    z-index: 1;
 }
+
+/* body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #ff9a9e);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+    z-index: -1;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+} */
+
 
 /* Navbar */
 .navbar {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-bottom: 20px; /* Navbar ve başlık arasına boşluk bırak */
-    margin-top: 20px; /* Sayfanın üst kısmına daha yakın hizala */
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .navbar button {
-    background-color: #ffffff;
-    color: #4e54c8;
+    background-color: #929292;
+    color: #212233;
     padding: 10px 20px;
     border: none;
     border-radius: 20px;
@@ -38,20 +75,36 @@ body {
 }
 
 .navbar button:hover {
-    background-color: #4e54c8;
+    background-color: #2d2f61;
     color: #ffffff;
 }
 
-/* Ana Sayfa */
+/* Sayfa İçerikleri */
 .page {
     display: none;
     width: 80%;
     text-align: center;
 }
 
-/* Welcome başlığı */
-.page h1 {
-    margin-bottom: 30px;
+.page.active {
+    display: block;
+}
+
+#home.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+#home .home-content {
+    margin-top: 200px;
+    width: 100%;
+}
+
+/* 'Meet the Team!' yazısının rengini ayarlama */
+#home .home-content h1 {
+    color: #ffffff; /* İstediğiniz rengi buraya girin */
 }
 
 .page:not(.hidden) {
@@ -61,22 +114,45 @@ body {
 /* Profil Kartları */
 .profile-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
     justify-items: center;
-    margin-top: 50px; /* Profil kartlarını daha aşağı it */
+    margin-bottom: 50px;
 }
 
 .profile-card {
-    background-color: #ffffff;
-    border-radius: 10px;
+    background-color: rgba(51, 51, 51, 0.7); /* %60 opaklıkta beyaz renk */
+    border-radius: 20px;
     padding: 20px;
     text-align: center;
-    width: 200px;
+    width: 100%;
+    max-width: 200px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    cursor: pointer;
 }
+
+.card-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-decoration: none; /* Link alt çizgisini kaldırır */
+    z-index: 10; /* Linkin diğer içeriklerin önünde olmasını sağlar */
+}
+
+.profile-card h2 {
+    color: #000000; /* Siyah renk */
+    font-weight: bold; /* Kalın yazı tipi */
+}
+
+.profile-card p {
+    color: #b1b1b1; /* Koyu gri renk */
+    font-size: 14px; /* Yazı boyutunu ayarlayabilirsiniz */
+}
+
 
 .profile-card:hover {
     transform: translateY(-5px);
@@ -84,19 +160,30 @@ body {
 }
 
 .profile-card img {
-    border-radius: 10px; /* Kare görünüm için köşeleri hafif yuvarlak yapar */
-    width: 100%; /* Kartın genişliğini kaplar */
-    height: auto; /* Oranlı bir yükseklik sağlar */
-    max-width: 80px; /* Sabit genişlik için maksimum genişlik belirler */
-    max-height: 80px; /* Sabit yükseklik için maksimum yükseklik belirler */
-    object-fit: cover; /* Görselin tam olarak alanı kaplamasını sağlar */
-    margin: 0 auto 10px auto; /* Ortalamak için kenar boşlukları */
-    display: block; /* Görseli blok düzende gösterir */
+    width: 100%;
+    max-width: 80px;
+    height: auto;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Yazı Stilleri */
+h1 {
+    font-size: 32px;
+}
+
+h2 {
+    font-size: 24px;
+}
+
+p {
+    font-size: 16px;
 }
 
 /* Login ve Register Formları */
 .form-container {
-    background-color: #ffffff;
+    background-color: #08091a;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
@@ -116,7 +203,7 @@ input {
 .button {
     width: 100%;
     padding: 10px;
-    background-color: #4e54c8;
+    background-color: #474a85;
     color: white;
     border: none;
     border-radius: 4px;
@@ -126,5 +213,168 @@ input {
 }
 
 .button:hover {
+    background-color: #6b72e6;
+}
+
+/* Medya Sorguları */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .navbar button {
+        width: 100%;
+        max-width: 300px;
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 14px;
+    }
+
+    .profile-card {
+        padding: 15px;
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar button {
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    p {
+        font-size: 12px;
+    }
+
+    .profile-card {
+        max-width: 100%;
+    }
+
+    .profile-card img {
+        max-width: 60px;
+    }
+
+    .form-container {
+        padding: 15px;
+    }
+
+    input, .button {
+        font-size: 14px;
+    }
+}
+
+/* Profil Sayfası Stilleri */
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    max-width: 800px; /* İçeriğin genişliğini sınırlamak için */
+    margin: 0 auto; /* Ortalamak için */
+}
+
+.profile-content h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #d3d3d3;
+}
+
+.profile-img {
+    width: 150px; /* Resmin genişliğini ayarlar */
+    height: 150px; /* Resmin yüksekliğini ayarlar */
+    border-radius: 50%; /* Resmi daire şekline getirir */
+    object-fit: cover; /* Resmin kesilmesini önler */
+    margin-bottom: 20px;
+}
+
+.profile-content p {
+    font-size: 16px;
+    text-align: center;
+    max-width: 600px; /* Metinlerin genişliğini sınırlar */
+    margin-bottom: 10px;
+    color: #ebebeb;
+}
+
+.profile-content .button {
+    margin-top: 20px;
+    background-color: #4e54c8;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.profile-content .button:hover {
+    background-color: #6b72e6;
+}
+
+/* Profil Detay Kartı Stilleri */
+.profile-detail-card {
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+    height: auto;
+    max-width: 600px;
+    margin: 100px auto;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.profile-detail-card .profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.profile-detail-card h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #333333;
+}
+
+.profile-detail-card p {
+    font-size: 16px;
+    color: #949494;
+    word-wrap: break-word; /* Satırların kırılmasını sağlar */
+    margin-bottom: 10px;
+}
+
+.profile-detail-card .button {
+    margin-top: 20px;
+    background-color: #4e54c8;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.profile-detail-card .button:hover {
     background-color: #6b72e6;
 }

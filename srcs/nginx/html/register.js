@@ -1,24 +1,13 @@
-import React from 'react';
+function handleRegister(event) {
+  event.preventDefault();
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
 
-function Register({ showLogin }) {
-  return (
-    <div>
-      <h2>Register</h2>
-      <form>
-        <label>Email</label>
-        <input type="email" required />
+  if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return false;
+  }
 
-        <label>Password</label>
-        <input type="password" required />
-
-        <label>Confirm Password</label>
-        <input type="password" required />
-
-        <button type="submit">Register</button>
-      </form>
-      <p>Already have an account? <a onClick={showLogin}>Login here</a></p>
-    </div>
-  );
+  alert("Registration successful!");
 }
-
-export default Register;

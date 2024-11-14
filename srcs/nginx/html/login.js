@@ -1,21 +1,11 @@
-import React from 'react';
+function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
 
-function Login({ showRegister }) {
-  return (
-    <div>
-      <h2>Login</h2>
-      <form>
-        <label>Email</label>
-        <input type="email" required />
-
-        <label>Password</label>
-        <input type="password" required />
-
-        <button type="submit">Login</button>
-      </form>
-      <p>Don't have an account? <a onClick={showRegister}>Register here</a></p>
-    </div>
-  );
+  if (email === "test@example.com" && password === "password") {
+      alert("Login successful!");
+  } else {
+      alert("Invalid email or password.");
+  }
 }
-
-export default Login;
