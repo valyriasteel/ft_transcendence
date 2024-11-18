@@ -1,380 +1,64 @@
-/* Genel Stiller */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
-html {
+/* Genel Ayarlar */
+body {
     background: url('geo.png') no-repeat center center fixed;
     background-size: cover;
+    color: #fff;
+    padding-top: 70px; /* Sabit navbar için boşluk bırak */
 }
 
-
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #333;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-}
-
-/* body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #ff9a9e);
-    background-size: 400% 400%;
-    animation: gradientBG 10s ease infinite;
-    z-index: -1;
-}
-
-@keyframes gradientBG {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-} */
-
-
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-
-.navbar button {
-    background-color: #929292;
-    color: #212233;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.navbar button:hover {
-    background-color: #2d2f61;
-    color: #ffffff;
-}
-
-/* Sayfa İçerikleri */
+/* Sayfa Görünümü */
 .page {
     display: none;
-    width: 80%;
-    text-align: center;
 }
-
 .page.active {
     display: block;
 }
 
-#home.active {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 20px;
+/* Başlıklar */
+h1.text-light {
+    font-size: 48px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
 }
 
-#home .home-content {
-    margin-top: 200px;
-    width: 100%;
+/* Navbar */
+.navbar {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 'Meet the Team!' yazısının rengini ayarlama */
-#home .home-content h1 {
-    color: #ffffff; /* İstediğiniz rengi buraya girin */
-}
-
-.page:not(.hidden) {
-    display: block;
-}
-
-/* Profil Kartları */
-.profile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    justify-items: center;
-    margin-bottom: 50px;
-}
-
-.profile-card {
-    background-color: rgba(51, 51, 51, 0.7); /* %60 opaklıkta beyaz renk */
-    border-radius: 20px;
-    padding: 20px;
-    text-align: center;
-    width: 100%;
-    max-width: 200px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+/* Kartlar */
+.card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    cursor: pointer;
+    margin: 0 auto; /* Kartları merkezde tut */
+}
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5);
+}
+.card-img-top {
+    width: 100%; /* Genişlik her zaman kartın genişliğine eşit */
+    height: auto; /* Yükseklik genişliğe göre ayarlanır */
+    max-height: 200px; /* Çok uzun resimlerin taşmasını engelle */
+    object-fit: contain; /* Resim taşma yapmaz, kartın içinde kalır */
+    border-bottom: 1px solid #ddd; /* Kartla resim arasında ayrım için bir çizgi */
 }
 
-.card-link {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    text-decoration: none; /* Link alt çizgisini kaldırır */
-    z-index: 10; /* Linkin diğer içeriklerin önünde olmasını sağlar */
+/* Butonlar */
+.btn-primary {
+    background-color: #00aaff;
+    border: none;
+}
+.btn-primary:hover {
+    background-color: #0088cc;
 }
 
-.profile-card h2 {
-    color: #000000; /* Siyah renk */
-    font-weight: bold; /* Kalın yazı tipi */
-}
-
-.profile-card p {
-    color: #b1b1b1; /* Koyu gri renk */
-    font-size: 14px; /* Yazı boyutunu ayarlayabilirsiniz */
-}
-
-
-.profile-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-.profile-card img {
-    width: 100%;
-    max-width: 80px;
-    height: auto;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 10px;
-}
-
-/* Yazı Stilleri */
-h1 {
-    font-size: 32px;
-}
-
-h2 {
-    font-size: 24px;
-}
-
-p {
-    font-size: 16px;
-}
-
-/* Login ve Register Formları */
-.form-container {
-    background-color: #08091a;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    width: 100%;
+/* Formlar */
+form {
     max-width: 400px;
     margin: 0 auto;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.button {
-    width: 100%;
-    padding: 10px;
-    background-color: #474a85;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #6b72e6;
-}
-
-/* Medya Sorguları */
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .navbar button {
-        width: 100%;
-        max-width: 300px;
-        font-size: 14px;
-    }
-
-    h1 {
-        font-size: 28px;
-    }
-
-    h2 {
-        font-size: 20px;
-    }
-
-    p {
-        font-size: 14px;
-    }
-
-    .profile-card {
-        padding: 15px;
-        max-width: 180px;
-    }
-}
-
-@media (max-width: 480px) {
-    .navbar button {
-        font-size: 12px;
-    }
-
-    h1 {
-        font-size: 24px;
-    }
-
-    h2 {
-        font-size: 18px;
-    }
-
-    p {
-        font-size: 12px;
-    }
-
-    .profile-card {
-        max-width: 100%;
-    }
-
-    .profile-card img {
-        max-width: 60px;
-    }
-
-    .form-container {
-        padding: 15px;
-    }
-
-    input, .button {
-        font-size: 14px;
-    }
-}
-
-/* Profil Sayfası Stilleri */
-.profile-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     padding: 20px;
-    max-width: 800px; /* İçeriğin genişliğini sınırlamak için */
-    margin: 0 auto; /* Ortalamak için */
-}
-
-.profile-content h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
-    color: #d3d3d3;
-}
-
-.profile-img {
-    width: 150px; /* Resmin genişliğini ayarlar */
-    height: 150px; /* Resmin yüksekliğini ayarlar */
-    border-radius: 50%; /* Resmi daire şekline getirir */
-    object-fit: cover; /* Resmin kesilmesini önler */
-    margin-bottom: 20px;
-}
-
-.profile-content p {
-    font-size: 16px;
-    text-align: center;
-    max-width: 600px; /* Metinlerin genişliğini sınırlar */
-    margin-bottom: 10px;
-    color: #ebebeb;
-}
-
-.profile-content .button {
-    margin-top: 20px;
-    background-color: #4e54c8;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.profile-content .button:hover {
-    background-color: #6b72e6;
-}
-
-/* Profil Detay Kartı Stilleri */
-.profile-detail-card {
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
-    padding: 30px;
-    height: auto;
-    max-width: 600px;
-    margin: 100px auto;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    text-align: center;
-}
-
-.profile-detail-card .profile-img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 20px;
-}
-
-.profile-detail-card h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
-    color: #333333;
-}
-
-.profile-detail-card p {
-    font-size: 16px;
-    color: #949494;
-    word-wrap: break-word; /* Satırların kırılmasını sağlar */
-    margin-bottom: 10px;
-}
-
-.profile-detail-card .button {
-    margin-top: 20px;
-    background-color: #4e54c8;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-.profile-detail-card .button:hover {
-    background-color: #6b72e6;
+    border-radius: 10px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
 }
