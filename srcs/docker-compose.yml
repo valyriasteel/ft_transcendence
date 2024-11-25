@@ -1,15 +1,16 @@
 services:
-  nginx:
-    container_name: nginx
-    build: ./nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
-    restart: on-failure
+      - "8443:443"
     env_file:
       - .env
     networks:
-      - ft_transcendence-network
+      - frontend_net
+    restart: on-failure
 
 networks:
-  ft_transcendence-network:
-    name: ft_transcendence-network
+  frontend_net:
+    driver: bridge

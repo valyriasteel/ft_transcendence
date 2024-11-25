@@ -1,28 +1,19 @@
 COMPOSE_FILE=./srcs/docker-compose.yml
-#DATA_DIR=$(HOME)/data
-#WORDPRESS_DIR=$(DATA_DIR)/wordpress
-#MARIADB_DIR=$(DATA_DIR)/mariadb
 
-.PHONY: all down re clean stop_containers rm_containers rm_images rm_networks logs #rm_volumes add_host
+.PHONY: all down re clean stop_containers rm_containers rm_images rm_networks logs
 
-all: #add_host
-#	@mkdir -p $(WORDPRESS_DIR)
-#	@mkdir -p $(MARIADB_DIR)
-	@docker-compose -f $(COMPOSE_FILE) up
-
-#add_host:
-#	@if ! grep -q "127.0.0.1	bbosnak.42.fr" /etc/hosts; then \
-#		echo "127.0.0.1	bbosnak.42.fr" | sudo tee -a /etc/hosts > /dev/null; \
-#	fi
+all:
+	@trap "docker-compose -f $(COMPOSE_FILE) down; exit 0" INT; \
+	docker-compose -f $(COMPOSE_FILE) up --abort-on-container-exit
 
 down:
 	@docker-compose -f $(COMPOSE_FILE) down
 
 re:
-	@docker-compose -f $(COMPOSE_FILE) up --build
+	@trap "docker-compose -f $(COMPOSE_FILE) down; exit 0" INT; \
+	docker-compose -f $(COMPOSE_FILE) up --build || true
 
-clean: stop_containers rm_containers rm_images rm_networks #rm_volumes
-#	@sudo rm -rf $(DATA_DIR)
+clean: stop_containers rm_containers rm_images rm_networks rm_all
 
 stop_containers:
 	@if [ -n "$$(docker ps -q)" ]; then \
@@ -37,11 +28,6 @@ rm_containers:
 rm_images:
 	@if [ -n "$$(docker images -q)" ]; then \
 		docker rmi -f $$(docker images -q); \
-	fi
-
-#rm_volumes:
-#	@if [ -n "$$(docker volume ls -q)" ]; then \
-		docker volume rm $$(docker volume ls -q); \
 	fi
 
 rm_networks:
