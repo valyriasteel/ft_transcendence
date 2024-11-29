@@ -1,0 +1,138 @@
+/* Genel arka plan */
+body {
+    background: #0d1b2a; /* Koyu mavi/siyah ton */
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Hero Bölgesi */
+.hero {
+    background: linear-gradient(135deg, #1b263b, #0077b6); /* Koyu degrade */
+    color: white;
+    padding: 120px 0;
+    text-align: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    animation: gradient-animation 6s infinite alternate; /* Arka plan animasyonu */
+}
+
+@keyframes gradient-animation {
+    0% {
+        background: linear-gradient(135deg, #1b263b, #0077b6);
+    }
+    100% {
+        background: linear-gradient(135deg, #0077b6, #1b263b);
+    }
+}
+
+.hero h1 {
+    font-size: 4rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+    color: #ffffff; /* Beyaz başlık */
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #d9d9d9; /* Hafif gri alt metin */
+}
+
+.hero button {
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Hafif gölge */
+}
+
+.hero button:hover {
+    background: #e63946; /* Kırmızı hover */
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0px 8px 15px rgba(230, 57, 70, 0.5); /* Hover sırasında daha yoğun gölge */
+}
+
+/* Features Section */
+.features-section {
+    background: #1b263b; /* Daha koyu arka plan */
+    color: #ffffff;
+    padding: 60px 0;
+    border-radius: 20px;
+    margin-top: -40px;
+}
+
+.features-section .row {
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* Kartları aynı yüksekliğe getirir */
+}
+
+.features-section h2 {
+    color: #0077b6; /* Canlı mavi */
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3); /* Hafif gölge */
+    text-transform: uppercase; /* Büyük harfler */
+}
+
+/* Kart Stilleri */
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Kart içeriğini yukarı ve aşağıda eşit dağıtır */
+    height: 100%; /* Tüm kartlar aynı yüksekliği paylaşır */
+    background: #f4f4f4; /* Açık gri */
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Daha yoğun gölge */
+    border: 2px solid #0077b6; /* Mavi kenarlık hover */
+}
+
+.card-body {
+    flex-grow: 1; /* Kart içeriği boş alanı kaplar */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* İçeriği dikeyde ortalar */
+    align-items: center; /* İçeriği yatayda ortalar */
+    text-align: center;
+}
+
+.card:hover i {
+    color: #e63946; /* Kırmızı ikon hover */
+    transform: scale(1.2); /* İkon büyüme hover */
+}
+
+/* Footer */
+.footer {
+    background: #0d1b2a; /* Footer için daha koyu bir renk */
+    color: #d9d9d9;
+    padding: 20px 0;
+    text-align: center;
+    border-top: 2px solid #0077b6; /* Üst kenar çizgisi */
+}
+
+.footer a {
+    color: #0077b6; /* Link için canlı mavi */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #e63946; /* Hover için kırmızı */
+    text-decoration: underline;
+}
+
+/* Navbar Aktif Link */
+.navbar-nav .nav-link.active {
+    border-bottom: 2px solid #e63946; /* Kırmızı alt çizgi */
+    transition: border-bottom 0.3s ease;
+}
+
+/* Genel Hover Geçişler */
+button:hover, .card:hover {
+    transition: all 0.3s ease;
+}

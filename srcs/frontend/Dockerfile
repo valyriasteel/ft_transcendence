@@ -1,17 +1,14 @@
-FROM nginx:latest
+FROM nginx:alpine
 
-# Sertifikalar için OpenSSL yükleniyor
-RUN apt-get update && apt-get install -y openssl && apt-get clean
+RUN apk update && apk upgrade && \
+    apk add openssl && rm -rf /var/cache/apk/*
 
-# HTTPS Sertifikası oluşturuluyor
-RUN mkdir -p /etc/nginx/ssl && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/nginx-selfsigned.key \
-    -out /etc/nginx/ssl/nginx-selfsigned.crt \
-    -subj "/C=TR/ST=Kocaeli/L=Gebze/O=42Kocaeli/OU=DelikanlilikveMertlikDepartment/CN=localhost"
-
-# Nginx yapılandırması ekleniyor
+COPY nginx_certs.sh /tmp
+COPY html /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# SPA dosyaları kopyalanıyor
-COPY public /usr/share/nginx/html
+RUN chmod +x /tmp/nginx_certs.sh
+
+ENTRYPOINT ["/tmp/nginx_certs.sh"]
+
+CMD ["nginx", "-g", "daemon off;"]
