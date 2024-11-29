@@ -1,17 +1,17 @@
 services:
   nginx:
-    container_name: nginx
-    build: ./frontend
+    container_name: nginx  # Oluşturulacak konteynerin ismi 'nginx' olarak belirleniyor.
+    build: ./frontend  # Nginx servisi için Docker image'i, './frontend' dizinindeki Dockerfile kullanılarak oluşturulacak.
     ports:
-      - "8443:443"
+      - "8443:443"  # Host'un 8443 portu, konteynerin 443 portuna yönlendiriliyor. (HTTPS trafiği için)
     env_file:
-      - .env
+      - .env  # Konteynerin çalıştırılmasında kullanılacak ortam değişkenlerini içeren '.env' dosyasını yüklüyor.
     networks:
-      - frontend_net
-    restart: on-failure
+      - frontend_net  # Bu servis 'frontend_net' adlı özel bir Docker ağına dahil ediliyor.
+    restart: on-failure  # Konteyner bir hata nedeniyle durursa, otomatik olarak yeniden başlatılacak.
     volumes:
-      - ./frontend/html:/usr/share/nginx/html:ro
+      - ./frontend/html:/usr/share/nginx/html:ro  # Host'taki './frontend/html' dizini, konteynerin '/usr/share/nginx/html' dizinine sadece-okunur (ro) modunda bağlanıyor.
 
 networks:
   frontend_net:
-    name: frontend_net
+    name: frontend_net  # 'frontend_net' adında özel bir Docker ağı oluşturuluyor.
