@@ -11,11 +11,11 @@ services:
     restart: on-failure  # Konteyner bir hata nedeniyle durursa, otomatik olarak yeniden başlatılacak.
     volumes:
       - ./frontend/html:/usr/share/nginx/html:ro  # Host'taki './frontend/html' dizini, konteynerin '/usr/share/nginx/html' dizinine sadece-okunur (ro) modunda bağlanıyor.
+      - ./backend/static:/usr/src/app/static:ro
 
   backend:
     container_name: backend
     build: ./backend
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/usr/src/app
     env_file:

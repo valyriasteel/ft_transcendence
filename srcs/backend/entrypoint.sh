@@ -22,6 +22,8 @@ if not User.objects.filter(username="$DJANGO_SUPERUSER_USERNAME").exists():
 EOF
 fi
 
+python manage.py collectstatic --noinput
+
 # Django geliştirme sunucusunu başlat
 echo "Starting Django server..."
 exec python manage.py runserver 0.0.0.0:8000
