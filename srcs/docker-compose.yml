@@ -11,7 +11,34 @@ services:
     restart: on-failure  # Konteyner bir hata nedeniyle durursa, otomatik olarak yeniden başlatılacak.
     volumes:
       - ./frontend/html:/usr/share/nginx/html:ro  # Host'taki './frontend/html' dizini, konteynerin '/usr/share/nginx/html' dizinine sadece-okunur (ro) modunda bağlanıyor.
+      - ./backend/static:/usr/src/app/static:ro
+
+  backend:
+    container_name: backend
+    build: ./backend
+    volumes:
+      - ./backend:/usr/src/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - frontend_net
+
+  db:
+    image: postgres:13
+    container_name: postgres
+    restart: on-failure
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - frontend_net
 
 networks:
   frontend_net:
     name: frontend_net  # 'frontend_net' adında özel bir Docker ağı oluşturuluyor.
+
+volumes:
+  postgres_data:  # Postgres konteyneri için bir Docker volume oluşturuluyor.
