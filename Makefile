@@ -1,19 +1,17 @@
 COMPOSE_FILE=./srcs/docker-compose.yml
 
-.PHONY: all down re clean stop_containers rm_containers rm_images rm_networks logs
+.PHONY: all down re clean stop_containers rm_containers rm_images rm_networks logs rm_volumes rm_all
 
 all:
-	@trap "docker-compose -f $(COMPOSE_FILE) down; exit 0" INT; \
-	docker-compose -f $(COMPOSE_FILE) up --abort-on-container-exit
+	docker-compose -f $(COMPOSE_FILE) up
 
 down:
 	@docker-compose -f $(COMPOSE_FILE) down
 
 re:
-	@trap "docker-compose -f $(COMPOSE_FILE) down; exit 0" INT; \
-	docker-compose -f $(COMPOSE_FILE) up --build || true
+	docker-compose -f $(COMPOSE_FILE) up --build
 
-clean: stop_containers rm_containers rm_images rm_networks rm_all
+clean: stop_containers rm_containers rm_images rm_networks rm_volumes rm_all
 
 stop_containers:
 	@if [ -n "$$(docker ps -q)" ]; then \
@@ -33,6 +31,11 @@ rm_images:
 rm_networks:
 	@if [ -n "$$(docker network ls --filter type=custom -q)" ]; then \
 		docker network rm $$(docker network ls --filter type=custom -q); \
+	fi
+
+rm_volumes:
+	@if [ -n "$$(docker volume ls -q)" ]; then \
+		docker volume rm $$(docker volume ls -q); \
 	fi
 
 rm_all:
