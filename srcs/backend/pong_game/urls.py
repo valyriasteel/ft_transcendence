@@ -20,5 +20,5 @@ from django.http import HttpResponse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', lambda request: HttpResponse("Pong Game Backend is Running!")),
+    path('accounts/', include('accounts.urls')),
 ]
