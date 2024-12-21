@@ -42,4 +42,4 @@ rm_all:
 	@docker system prune -af
 
 logs:
-	@docker-compose -f $(COMPOSE_FILE) logs -f
+	@docker-compose -f $(COMPOSE_FILE) logs

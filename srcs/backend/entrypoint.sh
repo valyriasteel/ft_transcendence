@@ -1,18 +1,26 @@
 #!/bin/bash
 
-# Veritabanı bağlantısının hazır olmasını bekle
-echo "Waiting for database..."
-until python -c "import socket; socket.create_connection(('$POSTGRES_HOST', $POSTGRES_PORT))"; do
-  sleep 0.1
+echo "Waiting for PostgreSQL to be ready..."
+until python -c "
+import socket
+import time
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+while True:
+    try:
+        s.connect(('db', 5432))
+        s.close()
+        break
+    except socket.error:
+        time.sleep(1)
+"; do
+  echo "Waiting for database connection at db:5432..."
 done
-echo "Database is ready!"
+echo "PostgreSQL is ready!"
 
-# Django migrasyon işlemleri
 echo "Applying migrations..."
 python manage.py makemigrations
 python manage.py migrate
 
-# Eğer süper kullanıcı oluşturulmamışsa oluştur
 if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
   echo "Checking if superuser exists..."
   python manage.py shell <<EOF
@@ -24,6 +32,5 @@ fi
 
 python manage.py collectstatic --noinput
 
-# Django geliştirme sunucusunu başlat
 echo "Starting Django server..."
 exec python manage.py runserver 0.0.0.0:8000

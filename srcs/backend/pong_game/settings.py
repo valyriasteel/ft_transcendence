@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-umo$zm_3ncb*ta5h@!afn(v9+b)a3ig1bm3*@lw398h+w!2-k*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*'] # 'localhost', '127.0.0.1'
 
 
 # Application definition
@@ -128,4 +128,4 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8443']
+CSRF_TRUSTED_ORIGINS = ['https://localhost', 'https://192.168.64.5']
