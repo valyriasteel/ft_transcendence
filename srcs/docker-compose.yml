@@ -1,16 +1,16 @@
 services:
   nginx:
-    container_name: nginx  # Oluşturulacak konteynerin ismi 'nginx' olarak belirleniyor.
-    build: ./frontend  # Nginx servisi için Docker image'i, './frontend' dizinindeki Dockerfile kullanılarak oluşturulacak.
+    container_name: nginx
+    build: ./frontend
     ports:
-      - "8443:443"  # Host'un 8443 portu, konteynerin 443 portuna yönlendiriliyor. (HTTPS trafiği için)
+      - 443:443
     env_file:
-      - .env  # Konteynerin çalıştırılmasında kullanılacak ortam değişkenlerini içeren '.env' dosyasını yüklüyor.
+      - .env  
     networks:
-      - frontend_net  # Bu servis 'frontend_net' adlı özel bir Docker ağına dahil ediliyor.
-    restart: on-failure  # Konteyner bir hata nedeniyle durursa, otomatik olarak yeniden başlatılacak.
+      - transcendence_net 
+    restart: on-failure 
     volumes:
-      - ./frontend/html:/usr/share/nginx/html:ro  # Host'taki './frontend/html' dizini, konteynerin '/usr/share/nginx/html' dizinine sadece-okunur (ro) modunda bağlanıyor.
+      - ./frontend/www/:/usr/share/nginx/html:ro
       - ./backend/static:/usr/src/app/static:ro
 
   backend:
@@ -23,7 +23,7 @@ services:
     depends_on:
       - db
     networks:
-      - frontend_net
+      - transcendence_net
 
   db:
     image: postgres:13
@@ -34,11 +34,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - frontend_net
+      - transcendence_net
 
 networks:
-  frontend_net:
-    name: frontend_net  # 'frontend_net' adında özel bir Docker ağı oluşturuluyor.
+  transcendence_net:
+    name: transcendence_net
 
 volumes:
-  postgres_data:  # Postgres konteyneri için bir Docker volume oluşturuluyor.
+  postgres_data:

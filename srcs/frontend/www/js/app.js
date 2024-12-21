@@ -1,110 +1,93 @@
 document.addEventListener('DOMContentLoaded', () => { 
-    // DOM yüklendiğinde çalıştırılacak kod bloğu.
-
     const content = document.getElementById('content'); 
-    // Dinamik içeriğin yükleneceği ana konteyner.
-
-    // Routes
     const routes = {
-        home: 'home.html',         // Anasayfa için HTML dosyası.
-        tournament: 'tournament.html', // Turnuva sayfası için HTML dosyası.
-        game: 'game.html',         // Oyun sayfası için HTML dosyası.
+        home: '../html/home.html',
+        tournament: '../html/tournament.html',
+        game: '../html/game.html',
     };
-
-    // Router Function
     const router = async (state) => {
-        // Sayfaları yüklemek için yönlendirme işlevi.
+        console.log('Router called with state:', state);
         const page = routes[state] || routes['home']; 
-        // Geçersiz bir state gönderilirse varsayılan olarak 'home' yüklenir.
         try {
             const response = await fetch(page); 
-            // Belirtilen HTML dosyasını getir.
+            console.log('Fetch response:', response);
             if (response.ok) {
                 const html = await response.text(); 
-                // HTML içeriğini metin olarak al.
                 content.innerHTML = html; 
-                // İçeriği sayfada göster.
+                console.log('Page loaded successfully:', page);
                 initializePage(state); 
-                // Yüklenen sayfa için özel işlemleri çalıştır.
             } else {
+                console.error(`Failed to load page: ${response.statusText}`);
                 content.innerHTML = `<p>Error loading page: ${response.statusText}</p>`; 
-                // Sayfa yüklenemezse hata mesajı göster.
             }
         } catch (error) {
+            console.error(`Error during fetch: ${error.message}`);
             content.innerHTML = `<p>Error loading page: ${error.message}</p>`; 
-            // Ağ hatası durumunda hata mesajı göster.
         }
     };
-
-    // Sayfa Özel İşlemleri
     const initializePage = (state) => {
-        // Sayfa bazında yapılacak ek işlemler.
+        console.log('Initializing page for state:', state);
         if (state === 'tournament') {
-            // Turnuva sayfasında, form gönderimini yakala.
             document.getElementById('tournament-form').addEventListener('submit', (e) => {
                 e.preventDefault(); 
-                // Formun normal gönderim işlemini engelle.
                 alert(`Thank you, ${document.getElementById('player-name').value}, for registering!`);
-                // Kayıt için teşekkür mesajı göster.
             });
         }
+        if (state === 'game') {
+            console.log('Game page initialized');
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div id="pong-game-container">
+                    <canvas id="gameCanvas"></canvas>
+                </div>
+            `;
+            const scripts = [
+                '/js/three.js',
+                '/js/Player.js',
+                '/js/Ball.js',
+                '/js/Camera.js',
+                '/js/AudioMan.js',
+                '/js/MenuStuff.js',
+                '/js/script.js',
+            ];
+            scripts.forEach((src) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.type = 'module';
+                document.body.appendChild(script);
+            });
+        }                 
     };
-
-    // Navigation Function (URL değişmeden)
     const navigateTo = (state) => {
-        // Sayfayı yönlendirirken tarayıcı URL'sini değiştirme.
         window.history.pushState({ state }, '', ''); 
-        // State'i tarayıcı geçmişine ekle.
         router(state); 
-        // Sayfayı yükle.
     };
-
-    // Navbar Link Highlighting
     document.querySelectorAll('.nav-link').forEach(link => {
-        // Navbar'daki tüm bağlantılar için tıklama olaylarını dinle.
         link.addEventListener('click', () => {
             document.querySelector('.nav-link.active')?.classList.remove('active'); 
-            // Önceki aktif bağlantıyı temizle.
             link.classList.add('active'); 
-            // Tıklanan bağlantıya 'active' sınıfı ekle.
         });
     });
-
-    // Event Listeners for Navigation Links
     document.getElementById('home-link').addEventListener('click', (e) => {
         e.preventDefault(); 
-        // Varsayılan bağlantı davranışını engelle.
         navigateTo('home'); 
-        // Anasayfaya yönlendir.
     });
-
     document.getElementById('tournament-link').addEventListener('click', (e) => {
         e.preventDefault();
         navigateTo('tournament'); 
-        // Turnuva sayfasına yönlendir.
     });
-
     document.getElementById('game-link').addEventListener('click', (e) => {
         e.preventDefault();
+        console.log("Navigating to game page...");
         navigateTo('game'); 
-        // Oyun sayfasına yönlendir.
     });
-
-    // Handle Browser Navigation (Back/Forward Buttons)
     window.addEventListener('popstate', (event) => {
-        // Tarayıcı geri/ileri düğmelerine basıldığında çalışır.
         if (event.state && event.state.state) {
             router(event.state.state); 
-            // Geçerli state'e göre sayfayı yükle.
         } else {
             router('home'); 
-            // Varsayılan olarak anasayfayı yükle.
         }
     });
-
-    // Initial Route
     const initialState = window.history.state ? window.history.state.state : 'home'; 
-    // Tarayıcı geçmişindeki mevcut state'i kontrol et.
     router(initialState); 
-    // Başlangıç rotasını yükle.
 });
