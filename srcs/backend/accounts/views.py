@@ -3,30 +3,46 @@ from .models import UserCreateProfile, TwoFactorAuth
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.cache import cache
 from django.core.mail import send_mail
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
 import requests
 from django.utils.crypto import get_random_string
-from requests.exceptions import RequestException
 from django.core.exceptions import ObjectDoesNotExist
-import jwt
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
 from datetime import timedelta
+from rest_framework.throttling import UserRateThrottle
+from rest_framework import serializers
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import logout
 
 
 # Utility function to decode the JWT token and get the user
 def get_user_from_token(token):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        user = UserCreateProfile.objects.filter(id=payload['user_id']).first()
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
+        user = UserCreateProfile.objects.get(id=payload['user_id'])
         return user
     except jwt.ExpiredSignatureError:
         raise AuthenticationFailed('Token expired')
     except jwt.InvalidTokenError:
         raise AuthenticationFailed('Invalid token')
+    except UserCreateProfile.DoesNotExist:
+        raise AuthenticationFailed('User not found')
+
+
+# Serializer for 2FA validation
+class Verify2FASerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.RegexField(regex=r'^\d{6}$', max_length=6)
+    token = serializers.CharField()
+
+
+# Throttle for 2FA verification
+class Verify2FAThrottle(UserRateThrottle):
+    rate = '5/min'
 
 
 class LoginIntra42View(APIView):
@@ -54,27 +70,22 @@ class CallbackIntra42View(APIView):
                 }
             )
             token_response.raise_for_status()
-        except RequestException:
-            return Response({'error': 'Failed to get token'}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
             access_token = token_response.json().get('access_token')
-        except ValueError:
-            return Response({'error': 'Failed to parse token response'}, status=status.HTTP_400_BAD_REQUEST)
+        except (RequestException, ValueError) as e:
+            return Response({'error': 'Failed to get token', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Fetch user data
         try:
-            user_response = requests.get(settings.USER_URL, headers={'Authorization': f'Bearer {access_token}'})
+            user_response = requests.get(
+                settings.USER_URL,
+                headers={'Authorization': f'Bearer {access_token}'}
+            )
             user_response.raise_for_status()
-        except RequestException:
-            return Response({'error': 'Failed to fetch user data'}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
             user_data = user_response.json()
             username = user_data.get('login')
             email = user_data.get('email')
-        except ValueError:
-            return Response({'error': 'Failed to parse user data response'}, status=status.HTTP_400_BAD_REQUEST)
+        except (RequestException, ValueError) as e:
+            return Response({'error': 'Failed to fetch user data', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if user already exists
         user, created = UserCreateProfile.objects.get_or_create(
@@ -102,10 +113,11 @@ class CallbackIntra42View(APIView):
         # Set expiration time (5 minutes from now)
         expires_at = timezone.now() + timedelta(minutes=5)
 
-        # Save the 2FA code in the database
+        # Hash the code before saving
+        hashed_code = make_password(code)
         TwoFactorAuth.objects.create(
             email=email,
-            code=code,
+            code=hashed_code,
             expires_at=expires_at
         )
 
@@ -120,19 +132,21 @@ class CallbackIntra42View(APIView):
 
 
 class Verify2FAView(APIView):
+    throttle_classes = [Verify2FAThrottle]
+
     def post(self, request):
-        email = request.data.get('email')
-        code = request.data.get('code')
-        token = request.data.get('token')  # Token received for validation
+        serializer = Verify2FASerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        code = serializer.validated_data['code']
+        token = serializer.validated_data['token']
 
         # Token validation
-        if token:
-            try:
-                user = get_user_from_token(token)  # Check if the token is valid
-            except AuthenticationFailed:
-                return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response({'error': 'Token is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = get_user_from_token(token)
+        except AuthenticationFailed as e:
+            return Response({'error': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
         # Retrieve 2FA code from the database
         try:
@@ -141,11 +155,11 @@ class Verify2FAView(APIView):
             return Response({'error': '2FA code not found'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if the code is expired
-        if two_factor_record.is_expired():
+        if two_factor_record.expires_at < timezone.now():
             return Response({'error': '2FA code expired'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate the code
-        if two_factor_record.code == code:
+        if check_password(code, two_factor_record.code):
             two_factor_record.delete()  # Delete the record after successful validation
 
             # Generate JWT tokens for the user
@@ -158,16 +172,46 @@ class Verify2FAView(APIView):
         return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LogoutView(APIView):
-    def post(self, request):
-        try:
-            refresh_token = request.data.get('refresh_token')
-            if not refresh_token:
-                return Response({'error': 'Refresh token required'}, status=status.HTTP_400_BAD_REQUEST)
+class LogoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-            # Blacklist the refresh token to log out the user
+    def post(self, request):
+        refresh_token = request.data.get('refresh_token')  # request.body yerine request.data kullanılıyor.
+        if not refresh_token:
+            return Response(
+                {'error': 'Refresh token is required.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Refresh token'ı blacklist'e ekle
             token = RefreshToken(refresh_token)
-            token.blacklist()  # Requires django-redis or appropriate blacklist configuration
-            return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+            token.blacklist()
+        except TokenError:
+            return Response(
+                {'error': 'Invalid or expired refresh token.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
-            return Response({'error': 'Failed to logout', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'An unexpected error occurred.', 'details': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Kullanıcı oturumunu sonlandır
+        logout(request)
+        request.session.flush()
+
+        # Çerezleri temizle
+        for cookie in ['sessionid', 'access_token', 'refresh_token']:
+            request.COOKIES.pop(cookie, None)  # Çerez varsa temizle.
+
+        response = Response(
+            {'message': 'Successfully logged out.'}, 
+            status=status.HTTP_200_OK
+        )
+        response.delete_cookie('sessionid')
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+
+        return response
