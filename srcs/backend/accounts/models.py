@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
 class UserCreateProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')  # Relation to the User model
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     username = models.CharField(max_length=150, unique=True)
     name = models.CharField(max_length=50)
@@ -12,7 +14,7 @@ class UserCreateProfile(models.Model):
         return self.username
 
 class TwoFactorAuth(models.Model):
-    user = models.OneToOneField(UserCreateProfile, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)  # Now relates to User instead of UserCreateProfile
     code = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
