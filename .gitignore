@@ -1,2 +1,3 @@
 .vscode
-srcs/backend/static
+srcs/backend/static/
+srcs/backend/backend/
