@@ -8,28 +8,13 @@ from django.conf import settings
 import requests
 from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password, check_password
-from rest_framework.exceptions import AuthenticationFailed
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import logout
-import jwt
-from rest_framework import serializers
-
-
-# Utility function to decode the JWT token and get the user
-def get_user_from_token(token):
-    try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
-        user = UserCreateProfile.objects.get(id=payload['user_id'])
-        return user
-    except jwt.ExpiredSignatureError:
-        raise AuthenticationFailed('Token expired')
-    except jwt.InvalidTokenError:
-        raise AuthenticationFailed('Invalid token')
-    except UserCreateProfile.DoesNotExist:
-        raise AuthenticationFailed('User not found')
+from .serializers import Verify2FASerializer
+from django.contrib.auth.models import User
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -79,25 +64,40 @@ class CallbackIntra42View(APIView):
             return Response({'error': 'Failed to fetch user data', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if user already exists
-        user, created = UserCreateProfile.objects.get_or_create(
-            username=username,
-            defaults={
-                'avatar': user_data.get('image_url'),
-                'name': user_data.get('first_name'),
-                'surname': user_data.get('last_name'),
-                'email': email,
-            }
-        )
+        try:
+            # Retrieve or create the actual User instance
+            user, user_created = User.objects.get_or_create(
+                username=username,
+                defaults={
+                    'email': email,
+                    'first_name': user_data.get('first_name'),
+                    'last_name': user_data.get('last_name'),
+                }
+            )
+
+            # Retrieve or create the UserCreateProfile instance
+            profile, profile_created = UserCreateProfile.objects.get_or_create(
+                user=user,
+                defaults={
+                    'avatar': user_data.get('image_url'),
+                    'username': username,
+                    'name': user_data.get('first_name'),
+                    'surname': user_data.get('last_name'),
+                    'email': email,
+                }
+            )
+        except IntegrityError as e:
+            return Response({'error': 'Database integrity error', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Send 2FA code to email
-        self.send_2fa_code(user)
+        self.send_2fa_code(profile)
 
-        if created:
-            return Response({'message': 'User created and 2FA code sent to email.'})
+        if profile_created:
+            return Response({'message': 'User profile created and 2FA code sent to email.'})
         else:
             return Response({'message': '2FA code sent to email.'})
 
-    def send_2fa_code(self, user):
+    def send_2fa_code(self, profile):
         # Generate a 6-digit code for 2FA
         code = get_random_string(length=6, allowed_chars='0123456789')
 
@@ -106,18 +106,20 @@ class CallbackIntra42View(APIView):
 
         # Hash the code before saving
         hashed_code = make_password(code)
-        TwoFactorAuth.objects.create(
-            user=user,
-            code=hashed_code,
-            expires_at=expires_at
-        )
+        two_factor_auth, created = TwoFactorAuth.objects.update_or_create(
+        user=profile.user,  # Ensure it's linked to the correct User
+        defaults={
+            'code': hashed_code,
+            'expires_at': expires_at,
+        }
+    )
 
         # Send the 2FA code to the user's email
         send_mail(
             'Your 2FA Code',
             f'Your verification code is: {code}',
             'no-reply@example.com',
-            [user.email],
+            [profile.email],
             fail_silently=False,
         )
 
@@ -131,17 +133,19 @@ class Verify2FAView(APIView):
 
         email = serializer.validated_data['email']
         code = serializer.validated_data['code']
-        token = serializer.validated_data['token']
 
-        # Token validation
+        # Retrieve the user profile
         try:
-            user = get_user_from_token(token)
-        except AuthenticationFailed as e:
-            return Response({'error': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            user_profile = UserCreateProfile.objects.get(email=email)
+        except UserCreateProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the related User instance
+        user = user_profile.user
 
         # Retrieve 2FA code from the database
         try:
-            two_factor_record = TwoFactorAuth.objects.get(user=user)
+            two_factor_record = TwoFactorAuth.objects.get(user=user)  # Now relates to User
         except TwoFactorAuth.DoesNotExist:
             return Response({'error': '2FA code not found'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -155,7 +159,7 @@ class Verify2FAView(APIView):
             two_factor_record.delete()  # Delete the record after successful validation
 
             # Generate JWT tokens for the user
-            refresh = RefreshToken.for_user(user)
+            refresh = RefreshToken.for_user(user)  # Use the actual User instance here
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
@@ -176,7 +180,7 @@ class LogoutAPIView(APIView):
             )
 
         try:
-            # Refresh token'ı blacklist'e ekle
+            # Blacklist the refresh token
             token = RefreshToken(refresh_token)
             token.blacklist()
         except TokenError:
@@ -190,11 +194,11 @@ class LogoutAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Kullanıcı oturumunu sonlandır
+        # Logout the user
         logout(request)
         request.session.flush()
 
-        # Çerezleri temizle
+        # Clear cookies
         for cookie in ['sessionid', 'access_token', 'refresh_token']:
             request.COOKIES.pop(cookie, None)
 
