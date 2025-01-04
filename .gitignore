@@ -1,3 +1,6 @@
 .vscode
 srcs/backend/static/
-srcs/backend/backend/
+srcs/backend/pong_game/__pycache__/
+srcs/backend/accounts/migrations/__pycache__/
+srcs/backend/accounts/migrations/0001_initial.py
+srcs/backend/accounts/__pycache__/
