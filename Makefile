@@ -11,7 +11,7 @@ down:
 re:
 	docker-compose -f $(COMPOSE_FILE) up --build
 
-clean: stop_containers rm_containers rm_images rm_networks rm_volumes rm_all
+clean: stop_containers rm_containers rm_images rm_networks rm_volumes rm_all rm_files
 
 stop_containers:
 	@if [ -n "$$(docker ps -q)" ]; then \
@@ -40,6 +40,13 @@ rm_volumes:
 
 rm_all:
 	@docker system prune -af
+
+rm_files:
+	@rm -rf ./srcs/backend/static/
+	@rm -rf ./srcs/backend/pong_game/__pycache__/
+	@rm -rf ./srcs/backend/accounts/migrations/__pycache__/
+	@rm -rf ./srcs/backend/accounts/migrations/0001_initial.py
+	@rm -rf ./srcs/backend/accounts/__pycache__/
 
 logs:
 	@docker-compose -f $(COMPOSE_FILE) logs
