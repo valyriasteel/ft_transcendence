@@ -1,32 +1,35 @@
 services:
   nginx:
     container_name: nginx
-    build: ./frontend
+    build: ./srcs/frontend
     ports:
       - 443:443
+      - 80:80
     env_file:
-      - .env  
+      - .env
     networks:
-      - transcendence_net 
-    restart: on-failure 
+      - transcendence_net
+    restart: on-failure
+    depends_on:
+      - backend
     volumes:
-      - ./frontend/www/:/usr/share/nginx/html:ro
-      - ./backend/static:/usr/src/app/static:ro
+      - ./srcs/frontend:/usr/share/nginx/html
 
   backend:
     container_name: backend
-    build: ./backend
+    build: ./srcs
     volumes:
-      - ./backend:/usr/src/app
+      - ./srcs:/app
     env_file:
       - .env
     depends_on:
       - db
     networks:
       - transcendence_net
+    restart: on-failure
 
   db:
-    image: postgres:13
+    image: postgres:17.2
     container_name: postgres
     restart: on-failure
     env_file:
