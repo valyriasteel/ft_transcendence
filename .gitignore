@@ -1,6 +1,7 @@
 .vscode
-srcs/backend/static/
-srcs/backend/pong_game/__pycache__/
-srcs/backend/accounts/migrations/__pycache__/
-srcs/backend/accounts/migrations/0001_initial.py
-srcs/backend/accounts/__pycache__/
+.DS_Store
+srcs/accounts/__pycache__
+srcs/accounts/migrations/__pycache__
+srcs/accounts/migrations/0001_initial.py
+srcs/frontend/static
+srcs/pong_game/__pycache__

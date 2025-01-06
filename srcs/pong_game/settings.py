@@ -70,7 +70,7 @@ ROOT_URLCONF = 'pong_game.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'frontend' / 'html'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -136,7 +136,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = BASE_DIR / 'frontend' / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -161,7 +161,7 @@ SIMPLE_JWT = {
 # 42Aut# OAuth settings
 SOCIAL_AUTH_42_KEY = os.getenv('SOCIAL_AUTH_42_KEY')
 SOCIAL_AUTH_42_SECRET = os.getenv('SOCIAL_AUTH_42_SECRET')
-SOCIAL_AUTH_42_REDIRECT_URI = os.getenv('SOCIAL_AUTH_42_REDIRECT_URI')
+SOCIAL_AUTH_42_REDIRECT_URI = os.getenv('REDIRECT_URI')
 
 # 42Aut
 OAUTH_AUTHORIZE=os.getenv('OAUTH_AUTHORIZE')

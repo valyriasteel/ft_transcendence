@@ -15,6 +15,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import logout
 from .serializers import Verify2FASerializer
 from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -92,10 +94,7 @@ class CallbackIntra42View(APIView):
         # Send 2FA code to email
         self.send_2fa_code(profile)
 
-        if profile_created:
-            return Response({'message': 'User profile created and 2FA code sent to email.'})
-        else:
-            return Response({'message': '2FA code sent to email.'})
+        return redirect('/accounts/verify-2fa/')
 
     def send_2fa_code(self, profile):
         # Generate a 6-digit code for 2FA
@@ -126,6 +125,10 @@ class CallbackIntra42View(APIView):
 
 class Verify2FAView(APIView):
     throttle_classes = [Verify2FAThrottle]
+
+    def get(self, request):
+        # 2FA doğrulama sayfasını döndürür
+        return render(request, 'verify-2fa.html')
 
     def post(self, request):
         serializer = Verify2FASerializer(data=request.data)

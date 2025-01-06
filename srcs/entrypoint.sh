@@ -1,25 +1,15 @@
 #!/bin/bash
 
 echo "Waiting for PostgreSQL to be ready..."
-until python -c "
-import socket
-import time
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-while True:
-    try:
-        s.connect(('db', 5432))
-        s.close()
-        break
-    except socket.error:
-        time.sleep(1)
-"; do
-  echo "Waiting for database connection at db:5432..."
+until pg_isready -h db -p 5432 -U $POSTGRES_USER; do
+  echo "PostgreSQL is not ready yet. Retrying in 5 seconds..."
+  sleep 5
 done
 echo "PostgreSQL is ready!"
 
 echo "Applying migrations..."
 python manage.py makemigrations
-python manage.py migrate
+python manage.py migrate --noinput
 
 if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
   echo "Checking if superuser exists..."
