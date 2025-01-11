@@ -2,9 +2,8 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get upgrade && \
-	apt-get install -y --no-install-recommends \
-    postgresql-client \
+RUN apt-get update && apt-get upgrade -y && \
+	apt-get install -y postgresql-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

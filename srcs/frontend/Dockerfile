@@ -1,7 +1,9 @@
 FROM nginx:1.27.3-alpine
 
 RUN apk update && apk upgrade && \
-    apk add --no-cache openssl
+    apk add openssl && \
+    rm -rf /var/cache/apk/* && \
+    apk cache clean
 
 COPY nginx_certs.sh /tmp
 COPY . /usr/share/nginx/html
