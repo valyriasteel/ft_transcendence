@@ -22,6 +22,8 @@ export class Ball
 		this.geometry;
 		this.material;
 		this.sphere;
+		this.flag = true;
+		this.texture;
     }
 
 }

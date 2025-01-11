@@ -1,5 +1,5 @@
 // Player.js
-import { PerspectiveCamera } from "./three.js";
+import { PerspectiveCamera } from "three";
 export class Camera 
 {
     constructor() 

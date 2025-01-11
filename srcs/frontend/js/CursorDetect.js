@@ -1,5 +1,5 @@
-import { Raycaster } from "./three.js";
-import { Vector2 } from "./three.js";
+import { Raycaster } from "three";
+import { Vector2 } from "three";
 
 
 export class ray

@@ -28,7 +28,7 @@ document.getElementById('2fa-form').addEventListener('submit', async (event) => 
 
             // Redirect to homepage after 2 seconds
             setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = '/html/game.html';
             }, 2000);
         } else {
             // Error: Show error message
