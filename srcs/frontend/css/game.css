@@ -136,23 +136,30 @@ body
 
 /* Settings */
 
+#settings 
+{
+	display: flex;
+	flex-direction: column;  /* Align children vertically */
+	justify-content: center; /* Center children vertically */
+	align-items: center;     /* Center children horizontally */
+	height: 100vh;           /* Make sure the parent takes up the full height of the viewport */
+	width: 100vw;            /* Make sure the parent takes up the full width of the viewport */
+}  
+
 #optionsText
 {
 	position: absolute;
 	top: 5%;
-	left: 50%;
 	z-index: 10;
 	color: white;
 	display: none;
 	font-size: 3rem;
-	transform-origin: center;
 }
 
 #volumeControl 
 {
 	position: absolute;
 	top: 15%;
-	left: 50%;
 	color: white;
 	z-index: 10;
 	display: none;
@@ -163,8 +170,7 @@ body
 #ballText
 {
 	position: absolute;
-	top: 30%;
-	left: 40%;
+	top: 60%;
 	z-index: 10;
 	color: white;
 	display: none;
@@ -175,7 +181,6 @@ body
 {
 	position: absolute;
 	top: 40%;
-	left: 39%;
 	z-index: 10;
 	color: white;
 	display: none;
@@ -185,8 +190,8 @@ body
 #volumeUp
 {
 	position: absolute;
+	left: 7.5%;
 	top: 16.5%;
-	left: 58%;
 	z-index: 10;
 	display: none;
 }
@@ -195,7 +200,7 @@ body
 {
 	position: absolute;
 	top: 16.5%;
-	left: 48%;
+	right: 7.5%;
 	z-index: 10;
 	display: none;
 }
@@ -203,8 +208,7 @@ body
 #ballSwap
 {
 	position: absolute;
-	top: 30%;
-	left: 45%;
+	top: 60%;
 	z-index: 10;
 	display: none;
 }
@@ -213,7 +217,6 @@ body
 {
 	position: absolute;
 	top: 41%;
-	left: 52%;
 	z-index: 10;
 	display: none;
 }
@@ -221,8 +224,7 @@ body
 #backBut
 {
 	position: absolute;
-	top: 10%;
-	left: 10%;
+	left: -45%;
 	z-index: 10;
 	display: none;
 	font-size: 3rem;
@@ -231,16 +233,9 @@ body
 #ballSelection
 {
 	position: absolute;
-	top: 31.3%;
-	left: 48%;
+	top: 61.3%;
 	z-index: 10;
 	display: none;
-}
-
-#settings
-{
-	top: 10%;
-	left: 50%;
 }
 
 /* Select Screen */
