@@ -226,7 +226,7 @@ function loadTourneyElements()
         tourney.statusText.style.display = "block";
         if (tourney.playerArray.length < 3)
         {
-            tourney.statusText.innerText = `Please submit atleast 3 players.`;
+            tourney.statusText.innerText = `Please submit ${ 3 - tourney.playerArray.length} more players.`;
             return;
         }
         mode.isTourney = true;
@@ -560,8 +560,10 @@ function winScreen()
     else
     {
         end.winner.innerText = p2.name + " Wins!";
-        tmpWinner = p1.name;   
+        tmpWinner = p2.name;   
     }
+
+    console.log("winner is: ", tmpWinner);
     
     end.winner.style.display = "block";
     optMenu.backBut.style.display = "block";
@@ -989,8 +991,6 @@ function checkBallColl()
         {
             cam.camera.position.y = 100;
             winScreen();
-            mode.inEnd = true;
-            mode.inGame = false;
             renderer.setAnimationLoop(endLoop);
         }
         else
@@ -1841,6 +1841,11 @@ tourney.submitButton.addEventListener("click", function()
 {
     if (tourney.inputBox.value == "")
         return;
+    if (tourney.playerArray.length == 8)
+    {
+        tourney.statusText.innerText = "Maximum number of players are 8.";
+        tourney.statusText.style.display = "block";
+    }
     tourney.playerArray.push(tourney.inputBox.value); 
     tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>"; 
     tourney.inPlayers.style.display = "block";
