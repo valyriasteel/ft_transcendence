@@ -85,15 +85,12 @@ function loadSettingsElements()
 
     optMenu.backBut.addEventListener("click", function()
     {
-        mode.inOptions = false;
-        mode.inMenu = true;
+        end.winner.style.display = "none";
         if (mode.isTourney)
         {
             mode.isTourney = false;
-            end.winner.style.display = "none";
             end.champ.style.display = "none";
             end.nextBut.style.display = "none";
-            end.winner.style.display = "none";
             tourney.playerArray = [];
             tourney.MatchArray = [];
             p1.name = "P1";
@@ -139,6 +136,7 @@ function loadSettingsElements()
     {
         mode.volume = Math.round(optMenu.volumeSlider.value * 100) / 10000;
         optMenu.volumeLabel.textContent = `Volume: %${Math.floor(mode.volume * 100)}`
+        Aud.volumeChange(mode.volume);
     });
 
     optMenu.darkModeBut.addEventListener('click', function() 
@@ -162,7 +160,7 @@ function loadSelectElements()
     select.twoVsTwoBut = document.getElementById("twoVstwo");
     select.vsimpBut = document.getElementById("pVsimp");
     select.tourneyBut = document.getElementById("tourney");
-    select.backBut = document.getElementById("tourney");
+    select.backBut = document.getElementById("backSelect");
 
     select.oneVsOneBut.addEventListener('click', function() 
     {
@@ -207,6 +205,12 @@ function loadSelectElements()
         visibleControl(select.everything, false);
 
         renderer.setAnimationLoop(tourneyLoop);
+    });
+
+    select.backSelect.addEventListener('click', function() 
+    {
+        visibleControl(select.everything, false);
+        startGame();
     });
 }
 
@@ -306,27 +310,33 @@ function loadFont() {
 
 // Function to resize and center the canvas
 function resizeRenderer() {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const aspect = width / height;
-
-  if (width / height > aspect) {
-    // Wider than 16:9, adjust width
-    renderer.setSize(height * aspect, height);
-  } else {
-    // Taller than 16:9, adjust height
-    renderer.setSize(width, width / aspect);
+    const targetAspect = 16 / 9; // Target aspect ratio (16:9)
+  
+    // Determine the maximum size for the renderer while preserving the aspect ratio
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+  
+    if (width / height > targetAspect) {
+      // Window is too wide, adjust width
+      width = height * targetAspect;
+    } else {
+      // Window is too tall, adjust height
+      height = width / targetAspect;
+    }
+  
+    // Set the renderer size
+    renderer.setSize(width, height);
+  
+    // Center canvas
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = `${(window.innerHeight - height) / 2}px`;
+    renderer.domElement.style.left = `${(window.innerWidth - width) / 2}px`;
+  
+    // Update camera aspect ratio
+    cam.camera.aspect = targetAspect;
+    cam.camera.updateProjectionMatrix();
   }
-
-  // Center canvas
-  renderer.domElement.style.position = "absolute";
-  renderer.domElement.style.top = `${(window.innerHeight - renderer.domElement.height) / 2}px`;
-  renderer.domElement.style.left = `${(window.innerWidth - renderer.domElement.width) / 2}px`;
-
-  // Update camera aspect ratio
-  cam.camera.aspect = aspect;
-  cam.camera.updateProjectionMatrix();
-}
+  
 
 // Initial resize and on window resize
 
@@ -928,7 +938,7 @@ function checkBallColl()
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 33 || p2.score == 33)
+        if (p1.score == 3 || p2.score == 3)
         {
             cam.camera.position.y = 100;
             winScreen();
@@ -1391,8 +1401,8 @@ document.addEventListener('keydown', (event) =>
     else
     {
         p1KeyDown(event);
-        //if (modeSingle)
-        //    return;
+        if (modeSingle)
+            return;
         p2KeyDown(event);
         p3KeyDown(event);
         p4KeyDown(event);
