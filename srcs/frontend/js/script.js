@@ -928,7 +928,7 @@ function checkBallColl()
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 33 || p2.score == 33)
+        if (p1.score == 3 || p2.score == 3)
         {
             cam.camera.position.y = 100;
             winScreen();
