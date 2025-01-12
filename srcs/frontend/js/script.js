@@ -93,6 +93,7 @@ function loadSettingsElements()
             end.nextBut.style.display = "none";
             tourney.playerArray = [];
             tourney.MatchArray = [];
+            tourney.inPlayers.innerHTML = `Players:<br>`    ;
             p1.name = "P1";
             p2.name = "P2";
         }
@@ -207,10 +208,11 @@ function loadSelectElements()
         renderer.setAnimationLoop(tourneyLoop);
     });
 
-    select.backSelect.addEventListener('click', function() 
+    select.backBut.addEventListener('click', function() 
     {
         visibleControl(select.everything, false);
-        startGame();
+        visibleControl(myMenu.everything, 1);
+        renderer.setAnimationLoop(menuLoop);
     });
 }
 
@@ -218,6 +220,7 @@ function loadTourneyElements()
 {
     tourney.lockBut = document.getElementById("lockBut");
     tourney.statusText = document.getElementById("statusTourney");
+    tourney.inPlayers = document.getElementById("inPlayers");
     tourney.lockBut.addEventListener("click", function()
     {
         tourney.statusText.style.display = "block";
@@ -233,8 +236,25 @@ function loadTourneyElements()
         tourney.showButton.style.display = "none";
         tourney.lockBut.style.display = "none";
         tourney.startTourneyBut.style.display = "block";
-        tourney.statusText.innerText = `Next Match: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+        tourney.statusText.innerText = `Match ${tourney.MatchArray[0].id}: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+        if (tourney.MatchArray.length > 1)
+            tourney.inPlayers.innerHTML = `Following Matches: ${announceNextMatches()}`;
+        else
+            tourney.inPlayers.innerHTML = "";
     });
+}
+
+function announceNextMatches()
+{
+    let i = 1;
+    let text = "";
+    while (i < tourney.MatchArray.length )
+    {
+        text += `<br>Match ${tourney.MatchArray[i].id}: ${tourney.MatchArray[i].leftSide} vs ${tourney.MatchArray[i].rightSide}`;
+        i++;
+    }
+    console.log(text);
+    return text;
 }
 
 function loadEndElements()
@@ -248,6 +268,8 @@ function loadEndElements()
         end.nextBut.style.display = "none";
         end.winner.style.display = "none";
         end.champ.style.display = "none";
+        tourney.inPlayers.style.display = "none";
+        optMenu.backBut.style.display = "none";
         playNextMatch();
     });
 }
@@ -308,34 +330,44 @@ function loadFont() {
     });
 }
 
+const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
-function resizeRenderer() {
-    const targetAspect = 16 / 9; // Target aspect ratio (16:9)
+function resizeRenderer() 
+{
+    const targetAspect = 16 / 9; 
+    const windowAspect = window.innerWidth / window.innerHeight;
   
-    // Determine the maximum size for the renderer while preserving the aspect ratio
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-  
-    if (width / height > targetAspect) {
-      // Window is too wide, adjust width
-      width = height * targetAspect;
+    // Calculate the new size of the renderer
+    let width, height;
+    if (windowAspect > targetAspect) {
+      // Screen is wider than the target aspect
+      width = window.innerHeight * targetAspect;
+      height = window.innerHeight;
     } else {
-      // Window is too tall, adjust height
-      height = width / targetAspect;
+      // Screen is taller than the target aspect
+      width = window.innerWidth;
+      height = window.innerWidth / targetAspect;
     }
   
-    // Set the renderer size
-    renderer.setSize(width, height);
+    // Resize the renderer to fill the screen
+    renderer.setSize(window.innerWidth, window.innerHeight);
   
-    // Center canvas
-    renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.top = `${(window.innerHeight - height) / 2}px`;
-    renderer.domElement.style.left = `${(window.innerWidth - width) / 2}px`;
-  
-    // Update camera aspect ratio
+    // Adjust the camera's aspect ratio and frustum
     cam.camera.aspect = targetAspect;
     cam.camera.updateProjectionMatrix();
-  }
+  
+    // Scale the scene to fit the visible area
+    const scaleX = window.innerWidth / width;
+    const scaleY = window.innerHeight / height;
+    const scale = Math.max(scaleX, scaleY); // Use the larger scale to cover the canvas fully
+  
+    // Apply scaling to the scene
+    cam.camera.position.z = originalZPosition * scale; // Adjust Z based on scale
+  
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = "0px";
+    renderer.domElement.style.left = "0px";
+}
   
 
 // Initial resize and on window resize
@@ -518,16 +550,24 @@ async function initWinScreen()
 
 function winScreen()
 {
+    let tmpWinner = "";
+
     if (p1.score == 3)
+    {
         end.winner.innerText = p1.name + " Wins!";
+        tmpWinner = p1.name;
+    }
     else
+    {
         end.winner.innerText = p2.name + " Wins!";
+        tmpWinner = p1.name;   
+    }
     
     end.winner.style.display = "block";
     optMenu.backBut.style.display = "block";
     if (mode.isTourney)
     {
-        tourney.playerArray.push(end.winner.innerText);
+        tourney.playerArray.push(tmpWinner);
         end.nextBut.style.display = "block";
         end.champ.style.display = "block";
         if (tourney.MatchArray.length < 1)
@@ -537,7 +577,14 @@ function winScreen()
         }
         if (tourney.MatchArray.length > 0)
         {
-            end.champ.innerText = `Next Match: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+            end.champ.innerText = `Match ${tourney.MatchArray[0].id}: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+            if (tourney.MatchArray.length > 1)
+            {
+                tourney.inPlayers.style.display = "block";
+                tourney.inPlayers.innerHTML = `Following Matches: ${announceNextMatches()}`;
+            }
+            else
+                tourney.inPlayers.style.display = "none";
         }
         if (tourney.MatchArray.length < 1 && tourney.playerArray.length <= 1)
         {
@@ -1795,6 +1842,8 @@ tourney.submitButton.addEventListener("click", function()
     if (tourney.inputBox.value == "")
         return;
     tourney.playerArray.push(tourney.inputBox.value); 
+    tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>"; 
+    tourney.inPlayers.style.display = "block";
     tourney.inputBox.value = "";
 });
 
@@ -1810,5 +1859,6 @@ tourney.startTourneyBut.addEventListener("click", function()
     tourney.startTourneyBut.style.display = "none";
     tourney.lockBut.style.display = "none";
     tourney.statusText.style.display = "none";
+    tourney.inPlayers.style.display = "none";
     playNextMatch();
 });

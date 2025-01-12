@@ -103,6 +103,7 @@ export class tourneyMenu
 		this.statusText;
 		this.playerArray = [];
 		this.MatchArray = [];
+		this.inPlayers;
 		this.everything;
 	}
 }
