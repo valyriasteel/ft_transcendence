@@ -96,6 +96,7 @@ export class tourneyMenu
 	constructor()
 	{
 		this.submitButton;
+		this.backToSelectBut;
 		this.showButton;
 		this.inputBox;
 		this.lockBut;
