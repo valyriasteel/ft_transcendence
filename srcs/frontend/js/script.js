@@ -231,6 +231,28 @@ function loadTourneyElements()
         tourney.startTourneyBut.style.display = "block";
         tourney.statusText.innerText = `Next Match: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
     });
+    tourney.submitButton.addEventListener("click", function() 
+    {
+        if (tourney.inputBox.value == "")
+            return;
+        tourney.playerArray.push(tourney.inputBox.value); 
+        tourney.inputBox.value = "";
+    });
+
+    tourney.showButton.addEventListener("click", function()
+    {
+        printPlayers();
+    });
+
+
+
+    tourney.startTourneyBut.addEventListener("click", function()
+    {
+        tourney.startTourneyBut.style.display = "none";
+        tourney.lockBut.style.display = "none";
+        tourney.statusText.style.display = "none";
+        playNextMatch();
+    });
 }
 
 function loadEndElements()
@@ -249,19 +271,7 @@ function loadEndElements()
 }
 
 
-window.onload = function() 
-{
-    loadMenuElements();
 
-    loadSettingsElements();
-
-    loadSelectElements();
-
-    loadTourneyElements();
-
-    loadEndElements();
-
-}
 
 
 // Create scene, camera, and renderer
@@ -1780,25 +1790,8 @@ function matchMaker()
     }
 }
 
-tourney.submitButton.addEventListener("click", function() 
-{
-    if (tourney.inputBox.value == "")
-        return;
-    tourney.playerArray.push(tourney.inputBox.value); 
-    tourney.inputBox.value = "";
-});
-
-tourney.showButton.addEventListener("click", function()
-{
-    printPlayers();
-});
-
-
-
-tourney.startTourneyBut.addEventListener("click", function()
-{
-    tourney.startTourneyBut.style.display = "none";
-    tourney.lockBut.style.display = "none";
-    tourney.statusText.style.display = "none";
-    playNextMatch();
-});
+loadMenuElements();
+loadSettingsElements();
+loadSelectElements();
+loadTourneyElements();
+loadEndElements();
