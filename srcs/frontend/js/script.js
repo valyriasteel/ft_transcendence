@@ -9,7 +9,6 @@ import * as MENU from './MenuStuff.js'; // Import the class
 import * as THREE from 'three';
 import { TextGeometry } from 'TextGeo';
 import { EXRLoader  } from 'ExrLoader';
-import { OrbitControls } from 'OrbitControl';
 
 
 const   p1 = new Player('P1', 2, 'blue');
