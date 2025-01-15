@@ -32,15 +32,6 @@ body
 	display: none; 
 }
 
-#showBut 
-{ 
-	position: absolute; 
-	top: 63vh; 
-	left: 48vw; 
-	z-index: 10; 
-	display: none; 
-}
-
 #startTourneyBut 
 { 
 	position: absolute; 
@@ -102,6 +93,17 @@ body
 	font-size: 2rem;
 }
 
+#inPlayers
+{
+	position: absolute; 
+	top: 30%; 
+	left: 10%; 
+	z-index: 10; 
+	color: white; 
+	display: none; 
+	font-size: 2rem;
+}
+
 /* Main Menu */
 #startBut
 {
@@ -123,25 +125,41 @@ body
 	display: block;
 }
 
+#backToSelect {
+    z-index: 10;
+    display: none;
+    top: 6%;
+    left: 5%;
+    position: absolute;
+    font-size: 2rem;
+}
+
 /* Settings */
+
+#settings 
+{
+	display: flex;
+	flex-direction: column;  /* Align children vertically */
+	justify-content: center; /* Center children vertically */
+	align-items: center;     /* Center children horizontally */
+	height: 100vh;           /* Make sure the parent takes up the full height of the viewport */
+	width: 100vw;            /* Make sure the parent takes up the full width of the viewport */
+}  
 
 #optionsText
 {
 	position: absolute;
 	top: 5%;
-	left: 50%;
 	z-index: 10;
 	color: white;
 	display: none;
 	font-size: 3rem;
-	transform-origin: center;
 }
 
 #volumeControl 
 {
 	position: absolute;
 	top: 15%;
-	left: 50%;
 	color: white;
 	z-index: 10;
 	display: none;
@@ -152,8 +170,8 @@ body
 #ballText
 {
 	position: absolute;
-	top: 30%;
-	left: 40%;
+	top: 33%;
+	left: 44%;
 	z-index: 10;
 	color: white;
 	display: none;
@@ -163,8 +181,8 @@ body
 #darkModeText
 {
 	position: absolute;
-	top: 40%;
-	left: 39%;
+	top: 24%;
+	left: 42%;
 	z-index: 10;
 	color: white;
 	display: none;
@@ -174,8 +192,8 @@ body
 #volumeUp
 {
 	position: absolute;
-	top: 16.5%;
-	left: 58%;
+	left: 54%;
+	top: 17.5%;
 	z-index: 10;
 	display: none;
 }
@@ -183,8 +201,8 @@ body
 #volumeDown
 {
 	position: absolute;
-	top: 16.5%;
-	left: 48%;
+	top: 17.5%;
+	right: 54%;
 	z-index: 10;
 	display: none;
 }
@@ -192,8 +210,7 @@ body
 #ballSwap
 {
 	position: absolute;
-	top: 30%;
-	left: 45%;
+	top: 60%;
 	z-index: 10;
 	display: none;
 }
@@ -201,8 +218,8 @@ body
 #darkMode
 {
 	position: absolute;
-	top: 41%;
-	left: 52%;
+	top: 25.2%;
+	left: 54%;
 	z-index: 10;
 	display: none;
 }
@@ -210,8 +227,8 @@ body
 #backBut
 {
 	position: absolute;
+	left: 5%;
 	top: 10%;
-	left: 10%;
 	z-index: 10;
 	display: none;
 	font-size: 3rem;
@@ -220,16 +237,10 @@ body
 #ballSelection
 {
 	position: absolute;
-	top: 31.3%;
-	left: 48%;
+	top: 34.5%;
+	left: 52%;
 	z-index: 10;
 	display: none;
-}
-
-#settings
-{
-	top: 10%;
-	left: 50%;
 }
 
 /* Select Screen */
@@ -241,6 +252,8 @@ body
 	left: 20%;
 	z-index: 10;
 	display: none;
+	opacity: 0%;
+	pointer-events: none;
 }
 
 #twoVstwo
@@ -250,6 +263,8 @@ body
 	left: 40%;
 	z-index: 10;
 	display: none;
+	opacity: 0%;
+	pointer-events: none;
 }
 
 #pVsimp
@@ -259,6 +274,8 @@ body
 	left: 60%;
 	z-index: 10;
 	display: none;
+	opacity: 0%;
+	pointer-events: none;
 }
 
 #tourney
@@ -268,4 +285,69 @@ body
 	left: 80%;
 	z-index: 10;
 	display: none;
+	opacity: 0%;
+	pointer-events: none;
+}
+
+#backSelect {
+    z-index: 10;
+    display: none;
+    top: 6%;
+    left: 5%;
+    position: absolute;
+    font-size: 2rem;
+	opacity: 0%;
+	pointer-events: none;
+}
+
+/* Game Screen*/
+
+#gameScreen
+{
+	display: flex;
+	flex-direction: column;  /* Align children vertically */
+	justify-content: center; /* Center children vertically */
+	align-items: center;     /* Center children horizontally */
+	width: 100vw;  
+}
+
+#leftScore
+{
+	position: absolute;
+	left: 20%;
+	top: 0%;
+	z-index: 10;
+	display: none;
+	color: white;
+}
+
+#rightScore
+{
+	position: absolute;
+	left: 80%;
+	top: 0%;
+	z-index: 10;
+	display: none;
+	color: white;
+}
+
+#testBut
+{
+	z-index: 10;
+    display: block;
+    top: 20%;
+    left: 50%;
+    position: absolute;
+    font-size: 2rem;
+	opacity: 100%;
+}
+#test2But
+{
+	z-index: 10;
+    display: block;
+    top: 20%;
+    left: 30%;
+    position: absolute;
+    font-size: 2rem;
+	opacity: 100%;
 }

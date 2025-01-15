@@ -7,8 +7,6 @@ import { Bot } from './ai.js'; // Import the class
 import { FontLoader } from 'FontLoader';
 import * as MENU from './MenuStuff.js'; // Import the class
 import * as THREE from 'three';
-import { ray } from './CursorDetect.js'; // Import the class
-import { mouse } from './CursorDetect.js'; // Import the class
 import { TextGeometry } from 'TextGeo';
 import { EXRLoader  } from 'ExrLoader';
 
@@ -26,21 +24,34 @@ const   select = new MENU.selectMenu();
 const   mode = new MENU.Mode();
 const   optMenu = new MENU.optionsMenu();
 const   tourney = new MENU.tourneyMenu();
-const   raycaster = new ray();
-const   cursor = new mouse(); 
 const   board = new MENU.scoreBoard();
 const   end = new MENU.endScreen();
 const   myMenu = new MENU.mainMenu();
 
-function visibleControl(every ,flag)
+function visibleControl(every ,flag, display)
 {
     const childrenArray = Array.from(every.children);
     
     childrenArray.forEach(child => {
         if (flag)
-            child.style.display = "inline-block";
+            child.style.display = display;
         else
             child.style.display = "none";
+    });
+}
+
+function    sceneTransition(before, after)
+{
+    const beforeArray = Array.from(before.children);
+    const afterArray = Array.from(after.children);
+
+    beforeArray.forEach(child => {
+        disappearBut(child);
+    });
+
+    afterArray.forEach(child => 
+    {
+       appearBut(child); 
     });
 }
 
@@ -51,19 +62,17 @@ function loadMenuElements()
     myMenu.everything = document.getElementById("menu");
     myMenu.startBut.addEventListener("click", function()
     {
-        mode.inMenu = false;
-        mode.inSelect = true;
-        visibleControl(myMenu.everything, false);
-        visibleControl(select.everything, true);
-        renderer.setAnimationLoop(selectLoop);
+        /*visibleControl(myMenu.everything, false, "none");
+        visibleControl(select.everything, true, "block");*/
+        //renderer.setAnimationLoop(selectLoop);
+        visibleControl(select.everything, true, "block");
+        sceneTransition(myMenu.everything, select.everything);
     });
 
     myMenu.settingsBut.addEventListener("click", function()
     {
-        mode.inMenu = false;
-        mode.inOptions = true;
-        visibleControl(myMenu.everything, false);
-        visibleControl(optMenu.everything, true);
+        visibleControl(myMenu.everything, false, "none");
+        visibleControl(optMenu.everything, true, "block");
         renderer.setAnimationLoop(optionsLoop);
     });
 }
@@ -85,22 +94,20 @@ function loadSettingsElements()
 
     optMenu.backBut.addEventListener("click", function()
     {
-        mode.inOptions = false;
-        mode.inMenu = true;
+        end.winner.style.display = "none";
         if (mode.isTourney)
         {
             mode.isTourney = false;
-            end.winner.style.display = "none";
             end.champ.style.display = "none";
             end.nextBut.style.display = "none";
-            end.winner.style.display = "none";
             tourney.playerArray = [];
             tourney.MatchArray = [];
+            tourney.inPlayers.innerHTML = `Players:<br>`    ;
             p1.name = "P1";
             p2.name = "P2";
         }
-        visibleControl(myMenu.everything, 1);
-        visibleControl(optMenu.everything, 0);
+        visibleControl(myMenu.everything, 1, "block");
+        visibleControl(optMenu.everything, 0, "none");
         renderer.setAnimationLoop(menuLoop);
     });
 
@@ -139,6 +146,7 @@ function loadSettingsElements()
     {
         mode.volume = Math.round(optMenu.volumeSlider.value * 100) / 10000;
         optMenu.volumeLabel.textContent = `Volume: %${Math.floor(mode.volume * 100)}`
+        Aud.volumeChange(mode.volume);
     });
 
     optMenu.darkModeBut.addEventListener('click', function() 
@@ -162,7 +170,7 @@ function loadSelectElements()
     select.twoVsTwoBut = document.getElementById("twoVstwo");
     select.vsimpBut = document.getElementById("pVsimp");
     select.tourneyBut = document.getElementById("tourney");
-    select.backBut = document.getElementById("tourney");
+    select.backBut = document.getElementById("backSelect");
 
     select.oneVsOneBut.addEventListener('click', function() 
     {
@@ -170,7 +178,7 @@ function loadSelectElements()
         modeFour = false;
         mode.inSelect = false;
         mode.inGame = true;
-        visibleControl(select.everything, false);
+        visibleControl(select.everything, false, "none");
         startGame();
     });
 
@@ -180,7 +188,7 @@ function loadSelectElements()
         modeFour = true;
         mode.inSelect = false;
         mode.inGame = true;
-        visibleControl(select.everything, false);
+        visibleControl(select.everything, false, "none");
         startGame();
     });
 
@@ -190,7 +198,7 @@ function loadSelectElements()
         modeFour = false;
         mode.inSelect = false;
         mode.inGame = true;
-        visibleControl(select.everything, false);
+        visibleControl(select.everything, false, "none");
         startGame();
     });
 
@@ -202,57 +210,73 @@ function loadSelectElements()
         mode.inSelect = false;
         tourney.inputBox.style.display = "block";
         tourney.submitButton.style.display = "block";
-        tourney.showButton.style.display = "block";
         tourney.lockBut.style.display = "block";
-        visibleControl(select.everything, false);
+        tourney.backToSelectBut.style.display = "block";
+        visibleControl(select.everything, false, "none");
 
         renderer.setAnimationLoop(tourneyLoop);
+    });
+
+    select.backBut.addEventListener('click', function() 
+    {
+        visibleControl(select.everything, false, "none");
+        visibleControl(myMenu.everything, 1, "block");
+        renderer.setAnimationLoop(menuLoop);
     });
 }
 
 function loadTourneyElements()
 {
+    tourney.everything = document.getElementById("Tourney");
     tourney.lockBut = document.getElementById("lockBut");
     tourney.statusText = document.getElementById("statusTourney");
+    tourney.inPlayers = document.getElementById("inPlayers");
+    tourney.backToSelectBut = document.getElementById("backToSelect");
     tourney.lockBut.addEventListener("click", function()
     {
         tourney.statusText.style.display = "block";
         if (tourney.playerArray.length < 3)
         {
-            tourney.statusText.innerText = `Please submit atleast 3 players.`;
+            tourney.statusText.innerText = `Please submit ${ 3 - tourney.playerArray.length} more players.`;
             return;
         }
         mode.isTourney = true;
         matchMaker();
         tourney.inputBox.style.display = "none";
         tourney.submitButton.style.display = "none";
-        tourney.showButton.style.display = "none";
         tourney.lockBut.style.display = "none";
         tourney.startTourneyBut.style.display = "block";
-        tourney.statusText.innerText = `Next Match: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+        tourney.statusText.innerText = `Match ${tourney.MatchArray[0].id}: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+        if (tourney.MatchArray.length > 1)
+            tourney.inPlayers.innerHTML = `Following Matches: ${announceNextMatches()}`;
+        else
+            tourney.inPlayers.innerHTML = "";
     });
-    tourney.submitButton.addEventListener("click", function() 
+
+    tourney.backToSelectBut.addEventListener("click", function()
     {
-        if (tourney.inputBox.value == "")
-            return;
-        tourney.playerArray.push(tourney.inputBox.value); 
-        tourney.inputBox.value = "";
+        visibleControl(tourney.everything, false, "none");
+        visibleControl(select.everything, true, "block");
+        tourney.playerArray = [];
+        tourney.MatchArray = [];
+        tourney.inPlayers.innerHTML = `Players:<br>`;
+        p1.name = "P1";
+        p2.name = "P2";
+        renderer.setAnimationLoop(selectLoop);
     });
+}
 
-    tourney.showButton.addEventListener("click", function()
+function announceNextMatches()
+{
+    let i = 1;
+    let text = "";
+    while (i < tourney.MatchArray.length )
     {
-        printPlayers();
-    });
-
-
-
-    tourney.startTourneyBut.addEventListener("click", function()
-    {
-        tourney.startTourneyBut.style.display = "none";
-        tourney.lockBut.style.display = "none";
-        tourney.statusText.style.display = "none";
-        playNextMatch();
-    });
+        text += `<br>Match ${tourney.MatchArray[i].id}: ${tourney.MatchArray[i].leftSide} vs ${tourney.MatchArray[i].rightSide}`;
+        i++;
+    }
+    console.log(text);
+    return text;
 }
 
 function loadEndElements()
@@ -266,8 +290,16 @@ function loadEndElements()
         end.nextBut.style.display = "none";
         end.winner.style.display = "none";
         end.champ.style.display = "none";
+        tourney.inPlayers.style.display = "none";
+        optMenu.backBut.style.display = "none";
         playNextMatch();
     });
+}
+
+function loadScoreElements()
+{
+    board.scoreLeft = document.getElementById("leftScore");
+    board.scoreRight = document.getElementById("rightScore");
 }
 
 
@@ -314,29 +346,45 @@ function loadFont() {
     });
 }
 
+const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
-function resizeRenderer() {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const aspect = width / height;
-
-  if (width / height > aspect) {
-    // Wider than 16:9, adjust width
-    renderer.setSize(height * aspect, height);
-  } else {
-    // Taller than 16:9, adjust height
-    renderer.setSize(width, width / aspect);
-  }
-
-  // Center canvas
-  renderer.domElement.style.position = "absolute";
-  renderer.domElement.style.top = `${(window.innerHeight - renderer.domElement.height) / 2}px`;
-  renderer.domElement.style.left = `${(window.innerWidth - renderer.domElement.width) / 2}px`;
-
-  // Update camera aspect ratio
-  cam.camera.aspect = aspect;
-  cam.camera.updateProjectionMatrix();
+function resizeRenderer() 
+{
+    const targetAspect = 16 / 9; 
+    const windowAspect = window.innerWidth / window.innerHeight;
+  
+    // Calculate the new size of the renderer
+    let width, height;
+    if (windowAspect > targetAspect) {
+      // Screen is wider than the target aspect
+      width = window.innerHeight * targetAspect;
+      height = window.innerHeight;
+    } else {
+      // Screen is taller than the target aspect
+      width = window.innerWidth;
+      height = window.innerWidth / targetAspect;
+    }
+  
+    // Resize the renderer to fill the screen
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  
+    // Adjust the camera's aspect ratio and frustum
+    cam.camera.aspect = targetAspect;
+    cam.camera.updateProjectionMatrix();
+  
+    // Scale the scene to fit the visible area
+    const scaleX = window.innerWidth / width;
+    const scaleY = window.innerHeight / height;
+    const scale = Math.max(scaleX, scaleY); // Use the larger scale to cover the canvas fully
+  
+    // Apply scaling to the scene
+    cam.camera.position.z = originalZPosition * scale; // Adjust Z based on scale
+  
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = "0px";
+    renderer.domElement.style.left = "0px";
 }
+  
 
 // Initial resize and on window resize
 
@@ -346,7 +394,6 @@ window.addEventListener("resize", resizeRenderer);
 let modeFour = false; 
 let modeSingle = false;
 
-//camera.position.z = 50;
 
 cam.camera.position.y = 100;
 cam.camera.lookAt(0,0,0);
@@ -354,11 +401,7 @@ cam.camera.lookAt(0,0,0);
 renderer.setAnimationLoop(menuLoop);  // Start the animation loop
 resizeRenderer();
 //loadEXREnvironment();
-//initiateStartBut();
-//initiateOpt();
-//initiateSelect();
 initiateTourney();
-initWinScreen();
 
 let lastTime = 0; // Tracks the last time the loop   ran
 
@@ -403,131 +446,34 @@ function loadEXREnvironment() {
     );
 }
 
-async function initiateStartBut()
-{
-    if (!loadedFont)
-        await loadFont(); // Wait for the font to load
-    mainMenu.add(start.cube);
-    mainMenu.add(opt.cube);
-    start.startText = createText("Play", 10, start.cube.position.x - 12, 1, 5, mainMenu);
-    opt.optText = createText("Options", 10, opt.cube.position.x - 24, 1, 5, mainMenu);
-    start.cube.updateMatrixWorld();
-    opt.cube.updateMatrixWorld();
-}
-
-async function initiateOpt()
-{
-    if (!loadedFont)
-        await loadFont(); // Wait for the font to load
-
-    optMenu.volumeUpBut = new MENU.myButton('green', 10, 0, 10);
-    optMenu.volumeDownBut = new MENU.myButton('red', 10, 0, 10);
-    optMenu.backBut = new MENU.myButton('blue', 20, 0, 10);
-    optMenu.ballTextureBut = new MENU.myButton('yellow', 10, 0, 10);
-    optMenu.darkModeBut = new MENU.myButton('orange', 10, 0, 10);
-
-    optMenu.volumeUpBut.cube.position.x = 40;
-    optMenu.volumeUpBut.cube.position.z = -37;
-    optMenu.volumeDownBut.cube.position.x = 20;
-    optMenu.volumeDownBut.cube.position.z = -37;
-    optMenu.ballTextureBut.cube.position.x = 20;
-    optMenu.ballTextureBut.cube.position.z = -22;
-    optMenu.darkModeBut.cube.position.x = 20;
-    optMenu.volumeUpBut.text = createText("+", 5, optMenu.volumeUpBut.cube.position.x - 2.2, 1, optMenu.volumeUpBut.cube.position.z + 2, optionsMenu);
-    optMenu.volumeDownBut.text = createText("-", 5, optMenu.volumeDownBut.cube.position.x - 1, 1, optMenu.volumeDownBut.cube.position.z + 2, optionsMenu);
-    optMenu.soccerText = createText("SoccerBall", 5, optMenu.ballTextureBut.cube.position.x - 45, 0, optMenu.ballTextureBut.cube.position.z + 2, optionsMenu);
-    optMenu.basketText = createText("BasketBall", 5, optMenu.ballTextureBut.cube.position.x - 45, 0, optMenu.ballTextureBut.cube.position.z + 2, optionsMenu);
-    optMenu.onText = createText("On", 5, optMenu.darkModeBut.cube.position.x - 35, 0, optMenu.darkModeBut.cube.position.z + 2, optionsMenu);
-    optMenu.offText = createText("Off", 5, optMenu.darkModeBut.cube.position.x - 35, 0, optMenu.darkModeBut.cube.position.z + 2, optionsMenu);
-    optMenu.basketText.visible = false;
-    optMenu.onText.visible = false;
-    optMenu.backBut.cube.position.x = -110;
-    optMenu.backBut.cube.position.z = -60;
-    createText("Volume:", 5, -55, 0, -35, optionsMenu);
-    createText("Ball Skin:", 5 , -55, 0, -20, optionsMenu);
-    createText("Options", 5, -7, 0, -55, optionsMenu);
-    createText("Dark Mode:", 5, -55, 0, 2, optionsMenu);
-    createText("Back", 5, -117, 0, -57, optionsMenu);
-    optMenu.volumeText = createText(mode.volume.toString(), 5, -27, 0, -34.5, optionsMenu);
-    optionsMenu.add(optMenu.volumeUpBut.cube);
-    optionsMenu.add(optMenu.volumeDownBut.cube);
-    optionsMenu.add(optMenu.backBut.cube);
-    optionsMenu.add(optMenu.ballTextureBut.cube);
-    optionsMenu.add(optMenu.darkModeBut.cube);
-}
-
-async function initiateSelect()
-{
-    if (!loadedFont) 
-        await loadFont(); // Wait for the font to load
-
-    //initiate Buttons
-    select.oneVsOneBut = new MENU.myButton('grey', 30, 0, 30);
-    select.twoVsTwoBut = new MENU.myButton('grey', 30, 0, 30);
-    select.vsimpBut = new MENU.myButton('grey', 30, 0, 30);
-    select.tourneyBut = new MENU.myButton('grey', 30, 0, 30);
-    select.backBut = new MENU.myButton('blue', 20, 0, 10);
-
-    //Position Buttons
-    select.oneVsOneBut.cube.position.x = -90;
-    select.twoVsTwoBut.cube.position.x = -30;
-    select.vsimpBut.cube.position.x = 29;
-    select.tourneyBut.cube.position.x = 89;
-    select.oneVsOneBut.cube.position.z = 40;
-    select.twoVsTwoBut.cube.position.z = 40;
-    select.vsimpBut.cube.position.z = 40;
-    select.tourneyBut.cube.position.z = 40;
-    select.backBut.cube.position.x = -110;
-    select.backBut.cube.position.z = -60;
-
-    //Create Text
-    select.oneVsOneBut.text = createText("1v1", 5, select.oneVsOneBut.cube.position.x - 5.5, 1, select.oneVsOneBut.cube.position.z + 2, selectMenu);
-    select.twoVsTwoBut.text = createText("2v2", 5, select.twoVsTwoBut.cube.position.x - 5.5, 1, select.twoVsTwoBut.cube.position.z + 2, selectMenu);
-    select.vsimpBut.text = createText("vsAI", 5, select.vsimpBut.cube.position.x - 7, 1, select.vsimpBut.cube.position.z + 2, selectMenu);
-    select.tourneyBut.text = createText("Tournament", 3, select.tourneyBut.cube.position.x - 12, 1, select.tourneyBut.cube.position.z + 1.5, selectMenu);
-    createText("Back", 5, -117, 0, -57, selectMenu);
-    
-    //Add objects to scene
-    selectMenu.add(select.oneVsOneBut.cube);
-    selectMenu.add(select.twoVsTwoBut.cube);
-    selectMenu.add(select.vsimpBut.cube);
-    selectMenu.add(select.tourneyBut.cube);
-    selectMenu.add(select.backBut.cube);
-}
-
 function initiateTourney()
 {
     tourney.inputBox = document.getElementById("userInput");
     tourney.submitButton = document.getElementById("submitBut");
-    tourney.showButton = document.getElementById("showBut");
     tourney.startTourneyBut = document.getElementById("startTourneyBut");
-}
-
-async function initWinScreen()
-{
-    if (!loadedFont)
-        await loadFont(); // Wait for the font to load
-
-    //end.backBut = new MENU.myButton('blue', 20, 0, 10);
-    //end.backBut.cube.position.x = -123;
-    //end.backBut.cube.position.z = -60;
-    //end.backBut.text = createText("Back", 5, -130, 0, -57, gameEnd);
-    //createText("Wins!", 10, 0, 0, 0, gameEnd);
-    //gameEnd.add(end.backBut.cube);
 }
 
 function winScreen()
 {
+    let tmpWinner = "";
+
     if (p1.score == 3)
+    {
         end.winner.innerText = p1.name + " Wins!";
+        tmpWinner = p1.name;
+    }
     else
+    {
         end.winner.innerText = p2.name + " Wins!";
-    
+        tmpWinner = p2.name;   
+    }
     end.winner.style.display = "block";
     optMenu.backBut.style.display = "block";
+    board.scoreLeft.style.display = "none";
+    board.scoreRight.style.display = "none";
     if (mode.isTourney)
     {
-        tourney.playerArray.push(end.winner.innerText);
+        tourney.playerArray.push(tmpWinner);
         end.nextBut.style.display = "block";
         end.champ.style.display = "block";
         if (tourney.MatchArray.length < 1)
@@ -537,7 +483,14 @@ function winScreen()
         }
         if (tourney.MatchArray.length > 0)
         {
-            end.champ.innerText = `Next Match: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+            end.champ.innerText = `Match ${tourney.MatchArray[0].id}: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
+            if (tourney.MatchArray.length > 1)
+            {
+                tourney.inPlayers.style.display = "block";
+                tourney.inPlayers.innerHTML = `Following Matches: ${announceNextMatches()}`;
+            }
+            else
+                tourney.inPlayers.style.display = "none";
         }
         if (tourney.MatchArray.length < 1 && tourney.playerArray.length <= 1)
         {
@@ -602,10 +555,6 @@ function cleanGameObj()
     if (p4.geometry)
         disposer(p4.pad, scene);
     disposer(ball.sphere, scene);
-    disposer(board.scoreLeft, scene);
-    disposer(board.scoreRight, scene);
-    disposer(board.nickLeft, scene);
-    disposer(board.nickRight, scene);
     p1.score = 2;
     p2.score = 2;
 }
@@ -636,9 +585,6 @@ function initiateP1(canvas)
     }
     scene.add( p1.pad );
 }
-//p1.pad.position.x = -190; >> -180 >> -175
-//p2.pad.position.x = 189; >>  179 >> 174
-//p1.Width = 10;
 
 function initiateP2(canvas)
 {
@@ -756,12 +702,17 @@ function initiateBall(canvas)
     console.log(ball.sphere.position.x);
 }
 
+function updateScores()
+{
+    board.scoreLeft.innerText = `${p1.name}: ${p1.score}`;
+    board.scoreRight.innerText = `${p2.name}: ${p2.score}`;
+}
+
 function initiateScoreBoard()
 {
-    board.scoreLeft = createText(p1.score.toString(), 10, -125, 1, -150, scene);
-    board.scoreRight = createText(p2.score.toString(), 10, 175, 1, -150, scene);
-    board.nickLeft = createText(p1.name, 10, -150, 1, -150, scene);
-    board.nickRight = createText(p2.name, 10, 149, 1, -150, scene);
+    updateScores();
+    board.scoreLeft.style.display = "block";
+    board.scoreRight.style.display = "block";
 }
 
 function makeWall()
@@ -886,19 +837,14 @@ function checkBallColl()
     }
     else if (ball.sphere.position.x + ball.Radius / 2 > 20 && ball.dirX == 1)
     {
-        //console.log("ballx", ball.sphere.position.x + ball.Radius / 2);
-        //console.log("padx", p2.pad.position.x - p2.Width / 2)
         if (ball.sphere.position.x + ball.Radius / 2 >= p2.pad.position.x - p2.Width / 2 && ball.flag)
         {
-            //console.log("Missed: ", ball.sphere.position.z);
             ball.flag = false;
         }
         if (collideP2() || (modeFour && collideP4()))
         {
             ball.dirX = -1;
             Aud.ping2.play();
-            //console.log ("actual hit, ballx:", ball.sphere.position.x);
-            //console.log("Pad hit: ", ball.sphere.position.z);
 		}
     }
     
@@ -917,15 +863,10 @@ function checkBallColl()
     if (ball.sphere.position.x + ball.Radius / 2 <= ball.minX || ball.sphere.position.x >= ball.maxX)
     {
         if (ball.sphere.position.x > 0)
-        {
             p1.score++;
-            board.scoreLeft = changeText(p1.score.toString(), board.scoreLeft, board.scoreTextSize);
-        }
         else
-        {
             p2.score++;
-            board.scoreRight = changeText(p2.score.toString(), board.scoreRight, board.scoreTextSize);
-        }
+        updateScores();
         Aud.lose.play();
         if (Math.random() <= 0.5)
             ball.dirX = 1;
@@ -938,12 +879,10 @@ function checkBallColl()
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 3 || p2.score == 3)
+        if (p1.score == 33 || p2.score == 33)
         {
             cam.camera.position.y = 100;
             winScreen();
-            mode.inEnd = true;
-            mode.inGame = false;
             renderer.setAnimationLoop(endLoop);
         }
         else
@@ -964,7 +903,6 @@ function ballUpdate(deltaTime)
         }
         return;
     }
-    //console.log("BALLZ: ", ball.sphere.position.z);
     ball.sphere.rotation.x += 0.001 * deltaTime;
     ball.sphere.rotation.y += 0.001 * deltaTime;
     ball.sphere.position.x += ball.dirX * ball.speed * deltaTime;
@@ -1053,8 +991,6 @@ function movementCam(deltaTime)
         cam.camera.getWorldDirection(forward);
         cam.camera.position.y += -forward.x * cam.speed * deltaTime
         cam.camera.position.x += forward.y * cam.speed * deltaTime;
-        //cam.camera.position.x += forward.z * cam.speed * deltaTime;
-        //cam.camera.position.z += forward.x * cam.speed * deltaTime;
 	}
 	
 	if (cam.movRight)
@@ -1072,17 +1008,8 @@ function solveQuadratic(a, b, c) {
     }
     const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
     const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-    //console.log(root1, root2);
     return root1; // Return both roots
 }
-
-const a = 0.01;
-const b = 100;
-const c = -175;
-
-//const t1 = solveQuadratic(a, b, c);
-
-//console.log("t1 =", t1); // First root
 
 function calculateZ(dist)
 {
@@ -1095,19 +1022,12 @@ function calculateZ(dist)
             {
                 bot.targetZ = -110 + (-dist + (-110 - bot.ballZ) - (219 * bot.bounceCount));
                 bot.dirZ *= -1;
-                //console.log("case1");
             }
             else
-            {
                 bot.targetZ = 109 - (-dist + (-110 - bot.ballZ) - (219 * bot.bounceCount));
-                //console.log("case2");
-            }
         }
         else
-        {
             bot.targetZ = bot.ballZ + dist; 
-            //console.log("case6");
-        }
     }
     else
     {
@@ -1118,19 +1038,12 @@ function calculateZ(dist)
             {
                 bot.targetZ = 109 - (-dist - (109 - bot.ballZ) - (219 * bot.bounceCount));
                 bot.dirZ *= -1;
-                //console.log("case3");
             }
             else
-            {
                 bot.targetZ = -110 + (-dist - (109 - bot.ballZ) - (219 * bot.bounceCount));
-                //console.log("case4");
-            }
         }
         else
-        {
             bot.targetZ = bot.ballZ - dist;
-            //console.log("case5");
-        }
     }
 
     if (bot.targetZ - p2.Width < -110)
@@ -1139,14 +1052,7 @@ function calculateZ(dist)
         bot.targetZ = 109 - p2.Width;
 
     bot.timeMove = Math.abs(bot.padZ - bot.targetZ) / (bot.padSpeed * 1000);
-    //console.log("timeMove: ", bot.timeMove);
     bot.clock2 = 0;
-    /*
-    console.log("ballZ: ", bot.ballZ);
-    console.log("targetZ: ", bot.targetZ);
-    console.log("dist: ", dist);
-    console.log("bounceCount: ", bot.bounceCount);
-    console.log("dirZ: ", bot.dirZ);*/
 }
 
 function updateBot()
@@ -1165,12 +1071,6 @@ function impBot(deltaTime)
     let dist;
     let bounceCount;
     let tempDist;
-    /*
-    bottom 109
-    top -110
-    left -175
-    right 174
-    */
     if (ball.freeze || bot.clock > 0)
     {
         bot.clock = -3000;
@@ -1184,47 +1084,35 @@ function impBot(deltaTime)
     {
         updateBot();
         bot.clock3 = 0;
-        //console.log("update");
     }
-    //console.log("ZBALL: ", ball.sphere.position.z);
-    //console.log("pad: ", p1.pad.position.z);
-    //console.log("clock: ", bot.clock);
     if (bot.calculate)
     {
-        //console.log("Dir: ", bot.dirX);
         if (bot.dirX > 0)
             dist = -(174 - bot.ballX);
         else
             dist = ((-175 - bot.ballX) - 349);
-        //console.log("dist: " ,dist);
         calculateZ(dist);
         bot.timeHit = solveQuadratic(5, (bot.speed * 1000), dist);
         bot.calculate = false;
-        //console.log("hit: ", bot.timeHit);
         bot.dirX = -1; 
     }
 
     if (bot.padZ < bot.targetZ && bot.clock2 < bot.timeMove)
     {
-        p2.movDown = true;
+        document.dispatchEvent(downArrowKeyDown);
     }
     else if (bot.padZ > bot.targetZ && bot.clock2 < bot.timeMove)
     {
-        p2.movUp = true;
+        document.dispatchEvent(upArrowKeyDown);
     }
-    else if (bot.clock2 >= bot.timeMove * 1000 && (p2.movDown || p2.movUp))
+    else if (bot.clock2 >= bot.timeMove * 1000)
     {
-        p2.movDown = false;
-        p2.movUp = false;
-        //console.log("target", bot.targetZ);
-        //console.log("pad pos", bot.targetZ);
+        document.dispatchEvent(upArrowKeyUp);
+        document.dispatchEvent(downArrowKeyUp);
     }
 
     if (bot.clock >= bot.timeHit * 1000)
     {
-        //console.log("should hit", bot.clock / 1000);
-        //console.log("speed", bot.speed);
-        //console.log("ball speed", ball.speed);
         bot.ballX = 174;
         bot.clock = 0;
         bot.clock2 = 0;
@@ -1232,21 +1120,6 @@ function impBot(deltaTime)
         bot.calculate = true;
         bot.padZ = bot.targetZ;
     }
-    //x / v = t 
-    /*
-        if (ball.sphere.position.z - ball.Radius / 2 < ball.minZ)
-    {
-        ball.sphere.position.z = ball.minZ + ball.Radius / 2;
-        ball.dirZ *= -1;
-        Aud.ping3.play();
-    }
-    if (ball.sphere.position.z + ball.Radius / 2 > ball.maxZ)
-    {
-        ball.sphere.position.z = ball.maxZ - ball.Radius / 2 ;
-        ball.dirZ *= -1;
-        Aud.ping4.play();
-    }
-    */
 }
 
 function update(deltaTime) 
@@ -1273,6 +1146,46 @@ function render()
 	renderer.render( scene, cam.camera );
 }
 
+// KEY PRESS MIMIC
+const upArrowKeyDown = new KeyboardEvent("keydown", {
+    key: "ArrowUp",
+    code: "ArrowUp",
+    keyCode: 38,
+    which: 38,
+    bubbles: true,
+    cancelable: true
+});
+
+// Create KeyboardEvent for Up Arrow key (keyup)
+const upArrowKeyUp = new KeyboardEvent("keyup", {
+    key: "ArrowUp",
+    code: "ArrowUp",
+    keyCode: 38,
+    which: 38,
+    bubbles: true,
+    cancelable: true
+});
+
+// Create KeyboardEvent for Down Arrow key (keydown)
+const downArrowKeyDown = new KeyboardEvent("keydown", {
+    key: "ArrowDown",
+    code: "ArrowDown",
+    keyCode: 40,  
+    which: 40,  
+    bubbles: true,
+    cancelable: true
+});
+
+// Create KeyboardEvent for Down Arrow key (keyup)
+const downArrowKeyUp = new KeyboardEvent("keyup", {
+    key: "ArrowDown",
+    code: "ArrowDown",
+    keyCode: 40,  
+    which: 40,  
+    bubbles: true,
+    cancelable: true
+});
+
 function p1KeyDown(event)
 {
     if (event.key === 'w') 
@@ -1282,12 +1195,12 @@ function p1KeyDown(event)
     
     if (event.key === 'a') 
     {
-        p1.movLeft = true;
+        //p1.movLeft = true;
     }
     
     if (event.key === 'd') 
     {
-        p1.movRight = true;
+        //p1.movRight = true;
     }
     
     if (event.key === 's') 
@@ -1305,12 +1218,12 @@ function p2KeyDown(event)
     
     if (event.key === 'ArrowLeft') 
     {
-        p2.movLeft = true;
+        //p2.movLeft = true;
     }
     
     if (event.key === 'ArrowRight') 
     {
-        p2.movRight = true;
+        //p2.movRight = true;
     }
     
     if (event.key === 'ArrowDown') 
@@ -1321,17 +1234,17 @@ function p2KeyDown(event)
 
 function p3KeyDown(event)
 {
-    if (event.key === 'z')
+    if (event.key === 'c')
         p3.movUp = true;
-    if (event.key === 'x')
+    if (event.key === 'v')
         p3.movDown = true;
 }
 
 function p4KeyDown(event)
 {
-    if (event.key === 'z')
+    if (event.key === 'o')
         p4.movUp = true;
-    if (event.key === 'x')
+    if (event.key === 'p')
         p4.movDown = true;    
 }
 
@@ -1380,30 +1293,30 @@ function cameraDown(event)
 	
     if (event.key === 'r')
 	{
-		cam.camera.lookAt(0, 0, 0);
+		fixCam();
 	}
+
     if (event.key === 't')
     {
-        cam.camera.getWorldDirection(forward);
-    	console.log(forward.x);
-    	console.log(forward.y);
-    	console.log(forward.z);
+        console.log("x", cam.camera.position.x);
+        console.log("y", cam.camera.position.y);
+        console.log("z", cam.camera.position.z);
     }
 }
 
 document.addEventListener('keydown', (event) => 
 {
 	//let cam = true;
-	if (event.key === 'c' && mode.inGame)
+	if (event.key === '"')
         cam.enable = !cam.enable;
 	if (cam.enable)
         cameraDown(event);
     else
     {
         p1KeyDown(event);
-        //if (modeSingle)
-        //    return;
         p2KeyDown(event);
+        if (!(modeFour))
+            return;
         p3KeyDown(event);
         p4KeyDown(event);
     }
@@ -1419,12 +1332,12 @@ function p1KeyUp(event)
     
     if (event.key === 'a') 
     {
-        p1.movLeft = false;
+        //p1.movLeft = false;
     }
     
     if (event.key === 'd') 
     {
-        p1.movRight = false;
+        //p1.movRight = false;
     }
     
     if (event.key === 's') 
@@ -1442,12 +1355,12 @@ function p2KeyUp(event)
     
     if (event.key === 'ArrowLeft') 
     {
-        p2.movLeft = false;
+        //p2.movLeft = false;
     }
     
     if (event.key === 'ArrowRight') 
     {
-        p2.movRight = false;
+        //p2.movRight = false;
     }
     
     if (event.key === 'ArrowDown') 
@@ -1458,17 +1371,17 @@ function p2KeyUp(event)
 
 function p3KeyUp(event)
 {
-    if (event.key === 'z')
+    if (event.key === 'c')
         p3.movUp = false;
-    if (event.key === 'x')
+    if (event.key === 'v')
         p3.movDown = false;
 }
 
 function p4KeyUp(event)
 {
-    if (event.key === 'z')
+    if (event.key === 'o')
         p4.movUp = false;
-    if (event.key === 'x')
+    if (event.key === 'p')
         p4.movDown = false;    
 }
 
@@ -1523,9 +1436,9 @@ document.addEventListener('keyup', (event) =>
 {
 	cameraUp(event);
     p1KeyUp(event);
-    //if (modeSingle)
-    //    return;
     p2KeyUp(event);
+    if (!(modeFour))
+        return;
     p3KeyUp(event);
     p4KeyUp(event);
 }
@@ -1572,10 +1485,14 @@ function createText(text, size, x, y, z, place) {
     return textMesh;
 }
 
-document.addEventListener('mousemove', (event) => {
-    cursor.vec.x = (event.clientX / window.innerWidth) * 2 - 1;
-    cursor.vec.y = -(event.clientY / window.innerHeight) * 2 + 1;
-});
+function fixCam()
+{
+    cam.camera.position.x = 0;
+    cam.camera.position.y = 220;
+    cam.camera.position.z = 0;
+    cam.camera.rotation.set(0, 0, 0);
+    cam.camera.lookAt(0,0,0);
+}
 
 function startGame()
 {
@@ -1592,159 +1509,8 @@ function startGame()
     initiateBot();
     makeWall();
     resizeRenderer();
-    cam.camera.lookAt(0,0,0);
+    fixCam();
     //createText("Test", 5, 0, 1, 0, scene);
-}
-  // Function to detect click on the button
-/*function onClick(event) {
-    let intersects
-    raycaster.caster.setFromCamera(cursor.vec, cam.camera);
-
-    if (mode.inEnd)
-    {
-        end.backBut.cube.updateMatrixWorld();
-        intersects = raycaster.caster.intersectObjects(gameEnd.children);
-    }
-    else
-        return;
-
-    if (intersects.length > 0) 
-    {
-        if (mode.inOptions)
-        {
-            if (intersects[intersects.length - 1].object === optMenu.backBut.cube)
-            {
-                mode.inOptions = false;
-                mode.inMenu = true;
-                //console.log("back");
-                renderer.setAnimationLoop(menuLoop);
-            }
-
-            if (intersects[intersects.length - 1].object === optMenu.volumeUpBut.cube)
-            {
-                mode.volume += 0.1;
-                if (mode.volume > 1)
-                    mode.volume = 1;
-                mode.volume = Math.round(mode.volume * 10) / 10;
-                Aud.volumeChange(mode.volume);
-                optMenu.volumeText.geometry.dispose();
-                optMenu.volumeText.material.dispose();
-                optionsMenu.remove(optMenu.volumeText);
-                optMenu.volumeText = createText(mode.volume.toString(), 5, -27, 0, -34.5, optionsMenu);
-            }
-            if (intersects[intersects.length - 1].object === optMenu.volumeDownBut.cube)
-            {
-                mode.volume -= 0.1;
-                if (mode.volume < 0)
-                    mode.volume = 0;
-                mode.volume = Math.round(mode.volume * 10) / 10;
-                Aud.volumeChange(mode.volume);
-                optMenu.volumeText.geometry.dispose();
-                optMenu.volumeText.material.dispose();
-                optionsMenu.remove(optMenu.volumeText);
-                optMenu.volumeText = createText(mode.volume.toString(), 5, -27, 0, -34.5, optionsMenu);
-            }
-            if (intersects[intersects.length - 1].object === optMenu.ballTextureBut.cube)
-            {
-                if (optMenu.basketText.visible)
-                {
-                    optMenu.basketText.visible = false;
-                    optMenu.soccerText.visible = true;
-                    ball.texture = soccerBallTexture;
-                }
-                else
-                {
-                    optMenu.soccerText.visible = false;
-                    optMenu.basketText.visible = true;
-                    ball.texture = basketBallTexture;
-                }
-            }
-            if (intersects[intersects.length - 1].object === optMenu.darkModeBut.cube)
-            {
-                optMenu.onText.visible = !optMenu.onText.visible;
-                optMenu.offText.visible = !optMenu.offText.visible;
-                if (optMenu.onText.visible)
-                    ambientLight.intensity = 0;
-                else
-                    ambientLight.intensity = 0.1;
-            }
-        }
-        if (mode.inSelect)
-        {
-            //console.log("back");
-            if (intersects[intersects.length - 1].object === select.oneVsOneBut.cube)
-            {
-                modeSingle = false;
-                modeFour = false;
-                mode.inSelect = false;
-                mode.inGame = true;
-                startGame();
-            }
-            if (intersects[intersects.length - 1].object === select.twoVsTwoBut.cube)
-            {
-                modeSingle = false;
-                modeFour = true;
-                mode.inSelect = false;
-                mode.inGame = true;
-                startGame();
-            }
-            if (intersects[intersects.length - 1].object === select.vsimpBut.cube)
-            {
-                modeSingle = true;
-                modeFour = false;
-                mode.inSelect = false;
-                mode.inGame = true;
-                startGame();
-            }
-            if (intersects[intersects.length - 1].object === select.tourneyBut.cube)
-            {
-                modeSingle = false;
-                modeFour = false;
-                mode.inTourney = true;
-                mode.inSelect = false;
-                tourney.inputBox.style.display = "block";
-                tourney.submitButton.style.display = "block";
-                tourney.showButton.style.display = "block";
-                tourney.lockBut.style.display = "block";
-                
-                renderer.setAnimationLoop(tourneyLoop);
-            }
-            if (intersects[intersects.length - 1].object === select.backBut.cube)
-            {
-                mode.inSelect = false;
-                mode.inMenu = true;
-                end.champ.style.display = "none";
-                renderer.setAnimationLoop(menuLoop);
-            }
-        }
-        if (mode.inEnd)
-        {
-            if (intersects[intersects.length - 1].object === end.backBut.cube)
-            {
-                mode.isTourney = false;
-                end.winner.style.display = "none";
-                end.champ.style.display = "none";
-                end.nextBut.style.display = "none";
-                tourney.playerArray = [];
-                tourney.MatchArray = [];
-                p1.name = "P1";
-                p2.name = "P2";
-                visibleControl(myMenu.everything, 1);
-                renderer.setAnimationLoop(menuLoop);
-            }
-        }
-    }
-}*/
-
-function printPlayers()
-{
-    let i = 0;
-    
-    while (i < tourney.playerArray.length)
-    {
-        console.log(tourney.playerArray[i]);
-        i++;
-    }
 }
 
 function createMatch(p1, p2)
@@ -1790,8 +1556,104 @@ function matchMaker()
     }
 }
 
-loadMenuElements();
-loadSettingsElements();
-loadSelectElements();
-loadTourneyElements();
-loadEndElements();
+tourney.inputBox.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        tourney.submitButton.click(); // Trigger the button click
+    }
+});
+
+tourney.submitButton.addEventListener("click", function() 
+{
+    if (tourney.inputBox.value == "")
+        return;
+    if (tourney.inputBox.value.length > 12)
+    {
+        tourney.statusText.innerText = "Player name is too long";
+        tourney.statusText.style.display = "block";
+        return;
+    }
+    if (!(/^[\x20-\x7E]*$/.test(tourney.inputBox.value)))
+    {
+        tourney.statusText.innerText = "Unsupported characters found";
+        tourney.statusText.style.display = "block";
+        return;
+    }
+
+    if (tourney.playerArray.length == 8)
+    {
+        tourney.statusText.innerText = "Maximum number of players are 8.";
+        tourney.statusText.style.display = "block";
+        tourney.inputBox.value = "";
+        return;
+    }
+    tourney.playerArray.push(tourney.inputBox.value); 
+    tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>"; 
+    tourney.inPlayers.style.display = "block";
+    tourney.inputBox.value = "";
+});
+
+
+tourney.startTourneyBut.addEventListener("click", function()
+{
+    visibleControl(tourney.everything, false, "none");
+    playNextMatch();
+});
+
+function    appearBut(button)
+{
+    let op = parseFloat(window.getComputedStyle(button).opacity); // Convert opacity to a number
+    let x = parseFloat(window.getComputedStyle(button).left);
+    
+    // Check if opacity is already 0 (in case button is already invisible)
+    if (op === 1) return;
+
+    let interval = setInterval(() => {
+        op += 0.05; // Decrease opacity by a small amount (you can adjust this value)
+        x -= 2; // Decrease opacity by a small amount (you can adjust this value)
+        button.style.left = x + "px";
+        button.style.opacity = op;
+        button.style.pointerEvents = "auto";
+        //console.log(this.style.opacity);
+
+        // Stop the interval when opacity reaches 0
+        if (op >= 1) {
+            clearInterval(interval);
+            button.style.opacity = 1; // Ensure it’s exactly 0
+        }
+    }, 20); // Update every 20 milliseconds (adjust the interval for smoother/slower fading)
+
+}
+
+function    disappearBut(button)
+{
+    console.log("Clicked");
+    let op = parseFloat(window.getComputedStyle(button).opacity); // Convert opacity to a number
+    let x = parseFloat(window.getComputedStyle(button).left);
+    
+    // Check if opacity is already 0 (in case button is already invisible)
+    if (op === 0) return;
+
+    let interval = setInterval(() => {
+        op -= 0.05; // Decrease opacity by a small amount (you can adjust this value)
+        x += 2; // Decrease opacity by a small amount (you can adjust this value)
+        button.style.opacity = op;
+        button.style.left = x + "px";
+        button.style.pointerEvents = "none";
+
+        //console.log(this.style.opacity);
+
+        // Stop the interval when opacity reaches 0
+        if (op <= 0) {
+            clearInterval(interval);
+            button.style.opacity = 0; // Ensure it’s exactly 0
+        }
+    }, 20); // Update every 20 milliseconds (adjust the interval for smoother/slower fading)
+}
+
+//back butonu, +++++++++++++++
+//  isim hala üst üste biniyor,+++++++++++++
+//  show players butonu kalkıcak ++++++++++
+//submite enter atılacak,++++++++
+//  sağ yön tuşlarında ekran harket ediyor o fixlenicek
+//2 v 2 de tek tuşla her iki tarafda hareket ediyor ++++++++
+//paletlerin ileri ve geri hareketleri kaldırılacka++++++++++++++++
