@@ -44,19 +44,23 @@
 		
 		<!-- Tourney-->
 		<div id="Tourney">
+			<button id="backToSelect">Back</button>
 			<button id="lockBut">Lock in</button>
 			<button id="submitBut">Submit</button>
 			<button id="nextMatchBut">Next Match</button>
 			<input type="text" id="userInput" placeholder="Enter player" />
-			<button id="showBut">Show Players</button>
 			<button id="startTourneyBut">Start Tournament</button>
 			<div id="winner">selami</div>
 			<div id="champ">selami</div>
 			<div id="statusTourney">selami</div>
+			<div id="inPlayers">Players:<br></div>
 		</div>
 		
-		<!-- End Screen-->
-		<div id="endScreen"></div>
+		<!-- Game Screen-->
+		<div id="gameScreen">
+			<div id="leftScore"></div>
+			<div id="rightScore"></div>
+		</div>
 
 		<script type="importmap">
 			{
@@ -67,7 +71,7 @@
 				"ExrLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/EXRLoader.js"
 			  }
 			}
-		  </script>
+		</script>
 		<script src="../js/favicon.js"></script>
 		<script type="module" src="../js/script.js"></script>
 		<script type="module" src="../js/ai.js"></script>

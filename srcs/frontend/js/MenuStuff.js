@@ -96,6 +96,7 @@ export class tourneyMenu
 	constructor()
 	{
 		this.submitButton;
+		this.backToSelectBut;
 		this.showButton;
 		this.inputBox;
 		this.lockBut;
@@ -103,6 +104,7 @@ export class tourneyMenu
 		this.statusText;
 		this.playerArray = [];
 		this.MatchArray = [];
+		this.inPlayers;
 		this.everything;
 	}
 }
