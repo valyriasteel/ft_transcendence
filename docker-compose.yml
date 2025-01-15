@@ -3,8 +3,8 @@ services:
     container_name: nginx
     build: ./srcs/frontend
     ports:
-      - 4343:443
-      - 8080:80
+      - 443:443
+      - 80:80
     env_file:
       - .env
     networks:

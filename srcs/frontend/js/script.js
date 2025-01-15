@@ -9,6 +9,8 @@ import * as MENU from './MenuStuff.js'; // Import the class
 import * as THREE from 'three';
 import { TextGeometry } from 'TextGeo';
 import { EXRLoader  } from 'ExrLoader';
+import { OrbitControls } from 'OrbitControl';
+
 
 const   p1 = new Player('P1', 2, 'blue');
 const   p2 = new Player('P2', 2, 'red');
@@ -212,16 +214,12 @@ function loadSelectElements()
         tourney.submitButton.style.display = "block";
         tourney.lockBut.style.display = "block";
         tourney.backToSelectBut.style.display = "block";
-        visibleControl(select.everything, false, "none");
-
-        renderer.setAnimationLoop(tourneyLoop);
+        sceneTransition(select.everything, tourney.everything);
     });
 
     select.backBut.addEventListener('click', function() 
     {
-        visibleControl(select.everything, false, "none");
-        visibleControl(myMenu.everything, 1, "block");
-        renderer.setAnimationLoop(menuLoop);
+        sceneTransition(select.everything, myMenu.everything);
     });
 }
 
@@ -255,14 +253,12 @@ function loadTourneyElements()
 
     tourney.backToSelectBut.addEventListener("click", function()
     {
-        visibleControl(tourney.everything, false, "none");
-        visibleControl(select.everything, true, "block");
         tourney.playerArray = [];
         tourney.MatchArray = [];
         tourney.inPlayers.innerHTML = `Players:<br>`;
         p1.name = "P1";
         p2.name = "P2";
-        renderer.setAnimationLoop(selectLoop);
+        sceneTransition(tourney.everything, select.everything);
     });
 }
 
@@ -334,15 +330,63 @@ const soccerBallTexture = textureLoader.load('../images/ball.jpg')
 const basketBallTexture = textureLoader.load('../images/basketball.png')
 ball.texture = soccerBallTexture;    
 const pointLight = new THREE.PointLight(0xffffff, 1000, 100);  // Color, intensity, distance
-pointLight.position.set(10, 10, 10);  // Position the light in the scene
+pointLight.position.set(0, 10, 0);  // Position the light in the scene
 pointLight.castShadow = true;  // Enable shadow casting
-scene.add(pointLight);
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // White light with intensity 1
+//scene.add(pointLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // White light with intensity 1
 scene.add(ambientLight);
 document.body.appendChild(renderer.domElement);
 let loadedFont;
 const fontLoader = new FontLoader();
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1;
 Aud.volumeChange(mode.volume);
+
+//Spot light
+// Step 1: Create a Spotlight
+const spotLight = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
+spotLight.position.set(0, 150, -100); // Position the light
+spotLight.angle = Math.PI / 2.5; // Cone angle (in radians)
+spotLight.penumbra = 0.2; // Soft edges
+//spotLight.decay = 2; // Light decay
+spotLight.distance = 400; // Maximum range of the light
+
+// Step 2: Enable Shadows
+spotLight.castShadow = true;
+spotLight.shadow.mapSize.width = 4096; // Shadow map resolution
+spotLight.shadow.mapSize.height = 4096;
+spotLight.shadow.camera.near = 0.5;
+spotLight.shadow.camera.far = 400;
+
+// Step 3: Add the Spotlight to the Scene
+scene.add(spotLight);
+
+// Optional: Add a Spotlight Helper
+const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+//scene.add(spotLightHelper);
+
+//Spot light 2
+// Step 1: Create a Spotlight
+const spotLight2 = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
+spotLight2.position.set(0, 150, 100); // Position the light
+spotLight2.angle = Math.PI / 2.5; // Cone angle (in radians)
+spotLight2.penumbra = 0.2; // Soft edges
+//spotLight.decay = 2; // Light decay
+spotLight2.distance = 400; // Maximum range of the light
+
+// Step 2: Enable Shadows
+spotLight2.castShadow = true;
+spotLight2.shadow.mapSize.width = 4096; // Shadow map resolution
+spotLight2.shadow.mapSize.height = 4096;
+spotLight2.shadow.camera.near = 0.5;
+spotLight2.shadow.camera.far = 400;
+
+// Step 3: Add the Spotlight to the Scene
+//scene.add(spotLight2);
+
+// Optional: Add a Spotlight Helper
+const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
+//scene.add(spotLightHelper2);
 
 function loadFont() {
     return new Promise((resolve, reject) => {
@@ -361,42 +405,34 @@ function loadFont() {
 
 const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
-function resizeRenderer() 
-{
-    const targetAspect = 16 / 9; 
-    const windowAspect = window.innerWidth / window.innerHeight;
+function resizeRenderer() {
+    const targetAspect = 16 / 9; // Target aspect ratio (16:9)
   
-    // Calculate the new size of the renderer
-    let width, height;
-    if (windowAspect > targetAspect) {
-      // Screen is wider than the target aspect
-      width = window.innerHeight * targetAspect;
-      height = window.innerHeight;
+    // Determine the maximum size for the renderer while preserving the aspect ratio
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+  
+    if (width / height > targetAspect) {
+      // Window is too wide, adjust width
+      width = height * targetAspect;
     } else {
-      // Screen is taller than the target aspect
-      width = window.innerWidth;
-      height = window.innerWidth / targetAspect;
+      // Window is too tall, adjust height
+      height = width / targetAspect;
     }
   
-    // Resize the renderer to fill the screen
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    // Set the renderer size
+    renderer.setSize(width, height);
   
-    // Adjust the camera's aspect ratio and frustum
+    // Center canvas
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = `${(window.innerHeight - height) / 2}px`;
+    renderer.domElement.style.left = `${(window.innerWidth - width) / 2}px`;
+    
+  
+    // Update camera aspect ratio
     cam.camera.aspect = targetAspect;
     cam.camera.updateProjectionMatrix();
-  
-    // Scale the scene to fit the visible area
-    const scaleX = window.innerWidth / width;
-    const scaleY = window.innerHeight / height;
-    const scale = Math.max(scaleX, scaleY); // Use the larger scale to cover the canvas fully
-  
-    // Apply scaling to the scene
-    cam.camera.position.z = originalZPosition * scale; // Adjust Z based on scale
-  
-    renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.top = "0px";
-    renderer.domElement.style.left = "0px";
-}
+  }
   
 
 // Initial resize and on window resize
@@ -417,6 +453,23 @@ resizeRenderer();
 initiateTourney();
 
 let lastTime = 0; // Tracks the last time the loop   ran
+
+
+const skybox = new THREE.TextureLoader();
+skybox.load(
+    '../images/kloppenheim_02_puresky_4k.png',
+    function (texture) {
+        // Apply the texture as the environment map or background
+        scene.background = texture;
+        scene.environment = texture;
+
+        // You can apply transformations to this PNG texture as needed
+    },
+    undefined, // progress callback
+    function (error) {
+        console.error('Error loading PNG:', error);
+    }
+);
 
 function loadEXREnvironment() {
     const exrLoader = new EXRLoader();
@@ -447,7 +500,48 @@ function loadEXREnvironment() {
             // Clean up
             texture.dispose();
             pmremGenerator.dispose();
+            
+            // Create controls to rotate the environment map
+            const controls = new OrbitControls(cam.camera, renderer.domElement);
+            controls.enableDamping = true; // Smooth rotation
+            controls.dampingFactor = 0.25;
+            controls.screenSpacePanning = false; // Keep the environment in place during zooming
+            controls.maxPolarAngle = Math.PI / 2; // Limit vertical rotation
+            controls.enableZoom = false; // Disable zooming
+
+            // Custom Key Bindings for rotating the skybox
+            const rotationSpeed = 0.1; // Speed at which the environment rotates
+            const keys = {
+                LEFT: 'g',   // Rotate left
+                UP: 'y',     // Rotate up
+                RIGHT: 'j',  // Rotate right
+                BOTTOM: 'h'  // Rotate down
+            }
+
+            let rotation = 0;
+
+            // Event listener for key press
+            window.addEventListener('keydown', (event) => {
+                if (event.key === keys.LEFT) {
+                    rotation += rotationSpeed; // Rotate left
+                } else if (event.key === keys.RIGHT) {
+                    rotation -= rotationSpeed; // Rotate right
+                } else if (event.key === keys.UP) {
+                    rotation += rotationSpeed; // Rotate up (or forward)
+                } else if (event.key === keys.BOTTOM) {
+                    rotation -= rotationSpeed; // Rotate down (or backward)
+                }
+
+                // Apply the updated rotation to the environment map
+                envMap.rotation = rotation;
+
+                // Optional: Update PMREM for better performance
+                const rotatedEnvMap = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.background = rotatedEnvMap;
+                scene.environment = rotatedEnvMap;
+            });
         },
+        
         // Progress callback
         function (progress) {
             console.log('Loading: ', (progress.loaded / progress.total * 100) + '%');
@@ -458,6 +552,8 @@ function loadEXREnvironment() {
         }
     );
 }
+
+
 
 function initiateTourney()
 {
@@ -540,10 +636,18 @@ async function tourneyLoop()
     renderer.render( tournamentMenu, cam.camera );
 }
 
+const clock = new THREE.Clock();
+
 async function gameLoop(currentTime) 
 {
     const deltaTime = currentTime - lastTime; // Time difference between frames
     lastTime = currentTime;
+    const elapsedTime = clock.getElapsedTime();
+  
+    // Change color based on elapsed time
+    p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
+    p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
+  
     
     update(deltaTime); // Update game state
     render();          // Render the game
@@ -581,10 +685,12 @@ function initiateP1(canvas)
     else
         p1.Depth = 50;
     p1.geometry = new THREE.BoxGeometry( p1.Width, p1.Height, p1.Depth );
-    p1.material = new THREE.MeshBasicMaterial( { color: p1.color})
+    p1.material = new THREE.MeshStandardMaterial( { color: p1.color})
     p1.pad = new THREE.Mesh( p1.geometry, p1.material );
 	p1.pad.position.x = -190;
-	p1.pad.position.y = -4;
+	p1.pad.position.y = 20;
+    p1.pad.castShadow = true;
+    p1.pad.receiveShadow = true;
     p1.maxX = -40;
     if (modeFour)
     {
@@ -597,6 +703,7 @@ function initiateP1(canvas)
         p1.maxZ = 115;
     }
     scene.add( p1.pad );
+    p1.pad.material.color.setHSL(0, 1, 0.5);
 }
 
 function initiateP2(canvas)
@@ -610,10 +717,12 @@ function initiateP2(canvas)
     if (modeSingle)
         p2.name = "Bot";
     p2.geometry = new THREE.BoxGeometry( p2.Width, p2.Height, p2.Depth );
-    p2.material = new THREE.MeshBasicMaterial( { color: p2.color})
+    p2.material = new THREE.MeshStandardMaterial( { color: p2.color})
     p2.pad = new THREE.Mesh( p2.geometry, p2.material );
 	p2.pad.position.x = 189;
-	p2.pad.position.y = -4;
+	p2.pad.position.y = 20;
+    p2.pad.castShadow = true;
+    p2.pad.receiveShadow = true;
     p2.minX = 39;
     if (modeFour)
     {
@@ -627,6 +736,7 @@ function initiateP2(canvas)
     }
 
     scene.add( p2.pad );
+    p2.pad.material.color.setHSL(235, 1, 0.5);
 }
 
 function initiatePlane(canvas)
@@ -638,6 +748,9 @@ function initiatePlane(canvas)
 	geo = new THREE.BoxGeometry(410, 1, 229);
 	mat = new THREE.MeshStandardMaterial ( { color: 0x00ff00});
 	plane = new THREE.Mesh( geo, mat);
+    plane.material.transparent = true;
+    plane.material.opacity = 0.4;
+    plane.material.color.setHSL(60, 1, 0.5);
 	plane.position.x = -1;
 	plane.position.z = 0;
     plane.receiveShadow = true;
@@ -652,10 +765,12 @@ function initiateP3(canvas)
     p3.Height = 10;
     p3.Depth = 30;
     p3.geometry = new THREE.BoxGeometry( p3.Width, p3.Height, p3.Depth );
-    p3.material = new THREE.MeshBasicMaterial( { color: p3.color})
+    p3.material = new THREE.MeshStandardMaterial( { color: p3.color})
     p3.pad = new THREE.Mesh( p3.geometry, p3.material );
-	p3.pad.position.x = -190;
-	p3.pad.position.y = -4;
+    p3.pad.castShadow = true;
+    p3.pad.receiveShadow = true;
+    p3.pad.position.x = -190;
+	p3.pad.position.y = 20;
 	p3.pad.position.z = 44;
     p3.maxX = -40;
     p3.minZ = 0;
@@ -670,11 +785,13 @@ function initiateP4(canvas)
     p4.Height = 10;
     p4.Depth = 30;
     p4.geometry = new THREE.BoxGeometry( p4.Width, p4.Height, p4.Depth );
-    p4.material = new THREE.MeshBasicMaterial( { color: p4.color})
+    p4.material = new THREE.MeshStandardMaterial( { color: p4.color})
     p4.pad = new THREE.Mesh( p4.geometry, p4.material );
     p4.minX = 39;
+    p4.pad.castShadow = true;
+    p4.pad.receiveShadow = true;
 	p4.pad.position.x = 189;
-	p4.pad.position.y = -4;
+	p4.pad.position.y = 20;
 	p4.pad.position.z = 44;
     p4.minZ = 0;
     scene.add( p4.pad );
@@ -709,6 +826,7 @@ function initiateBall(canvas)
     ball.sphere =  new THREE.Mesh( ball.geometry, ball.material );
     ball.sphere.position.z = Math.floor(Math.random() * 230) - 115;
     ball.sphere.position.x = 0;
+    ball.sphere.position.y = 20;
     ball.sphere.castShadow = true;
     ball.sphere.receiveShadow = true;
     scene.add(ball.sphere);
@@ -730,9 +848,9 @@ function initiateScoreBoard()
 
 function makeWall()
 {
-    let material = new THREE.MeshBasicMaterial( { color: 0x8A2BE2})
-    let vertGeo = new THREE.BoxGeometry( 10, 40, 250 );
-    let horiGeo = new THREE.BoxGeometry(415, 40, 10);
+    let material = new THREE.MeshStandardMaterial( { color: 0x8A2BE2})
+    let vertGeo = new THREE.BoxGeometry( 10, 50, 250 );
+    let horiGeo = new THREE.BoxGeometry(415, 50, 10);
     let leftWall = new THREE.Mesh( vertGeo, material );
     let rightWall = new THREE.Mesh( vertGeo, material );
     let topWall = new THREE.Mesh( horiGeo, material );
@@ -742,6 +860,14 @@ function makeWall()
     rightWall.position.x = 209;
     topWall.position.z = -120;
     bottomWall.position.z = 119;
+    topWall.castShadow = true;
+    topWall.receiveShadow = true;
+    leftWall.castShadow = true;
+    leftWall.receiveShadow = true;
+    rightWall.castShadow = true;
+    rightWall.receiveShadow = true;
+    bottomWall.castShadow = true;
+    bottomWall.receiveShadow = true;
     scene.add(leftWall);
     scene.add(rightWall);
     scene.add(topWall);
