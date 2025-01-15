@@ -17,6 +17,7 @@ from .serializers import Verify2FASerializer
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db import IntegrityError
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -81,7 +82,7 @@ class CallbackIntra42View(APIView):
             profile, profile_created = UserCreateProfile.objects.get_or_create(
                 user=user,
                 defaults={
-                    'avatar': user_data.get('image_url'),
+                    'avatar': user_data.get('image').get('versions').get('large'),
                     'username': username,
                     'name': user_data.get('first_name'),
                     'surname': user_data.get('last_name'),
@@ -94,7 +95,13 @@ class CallbackIntra42View(APIView):
         # Send 2FA code to email
         self.send_2fa_code(profile)
 
-        return redirect('/accounts/verify-2fa/')
+        # Kullanıcıyı doğrulama sayfasına yönlendir (Dinamik URL)
+        scheme = request.scheme
+        host = request.get_host()
+        frontend_url = f"{scheme}://{host}/"
+        response = redirect(frontend_url)
+        response.set_cookie('callback_complete', 'true', max_age=20)  # 20 saniyelik geçici cookie
+        return response
 
     def send_2fa_code(self, profile):
         # Generate a 6-digit code for 2FA
@@ -125,10 +132,6 @@ class CallbackIntra42View(APIView):
 
 class Verify2FAView(APIView):
     throttle_classes = [Verify2FAThrottle]
-
-    def get(self, request):
-        # 2FA doğrulama sayfasını döndürür
-        return render(request, 'verify-2fa.html')
 
     def post(self, request):
         serializer = Verify2FASerializer(data=request.data)

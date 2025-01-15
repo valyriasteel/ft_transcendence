@@ -262,6 +262,13 @@ function loadTourneyElements()
     });
 }
 
+loadMenuElements();
+loadSettingsElements();
+loadSelectElements();
+loadTourneyElements();
+loadEndElements();
+loadScoreElements();
+
 function announceNextMatches()
 {
     let i = 1;
@@ -299,20 +306,7 @@ function loadScoreElements()
 }
 
 
-window.onload = function() 
-{
-    loadMenuElements();
 
-    loadSettingsElements();
-
-    loadSelectElements();
-
-    loadTourneyElements();
-
-    loadEndElements();
-
-    loadScoreElements();
-}
 
 
 // Create scene, camera, and renderer
