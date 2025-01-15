@@ -266,6 +266,13 @@ function loadTourneyElements()
     });
 }
 
+loadMenuElements();
+loadSettingsElements();
+loadSelectElements();
+loadTourneyElements();
+loadEndElements();
+loadScoreElements();
+
 function announceNextMatches()
 {
     let i = 1;
