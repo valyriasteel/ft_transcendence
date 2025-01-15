@@ -268,6 +268,7 @@ loadTourneyElements();
 loadEndElements();
 loadScoreElements();
 
+
 function announceNextMatches()
 {
     let i = 1;
@@ -304,9 +305,66 @@ function loadScoreElements()
     board.scoreRight = document.getElementById("rightScore");
 }
 
+const logoutButton = document.getElementById("logoutBut");
+logoutButton.addEventListener("click", handleLogout);
 
+async function handleLogout() {
+    // Refresh token'ı ve access token'ı localStorage'dan alıyoruz
+    const refreshToken = localStorage.getItem('refresh_token');
+    const accessToken = localStorage.getItem('access_token');
+    const csrfToken = getCookie('csrftoken');  // CSRF token'ı alıyoruz
 
+    console.log("girdim");
+    // Refresh token ve access token'ın varlığını kontrol ediyoruz
+    if (!refreshToken || !accessToken) {
+        alert('Tokenlar bulunamadı, çıkış işlemi gerçekleştirilemez!');
+        return;
+    }
 
+    try {
+        // Çıkış işlemi için API isteği gönderiyoruz
+        const response = await fetch('/accounts/logout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,  // CSRF token'ı
+                'Authorization': `Bearer ${accessToken}`  // JWT access token'ı
+            },
+            body: JSON.stringify({ refresh_token: refreshToken })  // Refresh token'ı gönderiyoruz
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Backend çıkışı başarılı yaptıysa, frontend'den tokenları siliyoruz
+            localStorage.removeItem('access_token');  // Access token'ı sil
+            localStorage.removeItem('refresh_token');  // Refresh token'ı sil
+        } else {
+            // Backend hata dönerse daha iyi bir hata mesajı
+            alert(data.error || 'Çıkış yaparken bir hata oluştu!');
+        }
+    } catch (error) {
+        console.error('Çıkış sırasında hata:', error);
+        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+    }
+    renderer.setAnimationLoop(null); // This stops the rendering loop
+    renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
+    renderer.clear(); // Clear the canvas
+    renderer.domElement.remove();
+    window.loadIndexPage();
+
+}
+
+function getCookie(name) {
+    const cookieArray = document.cookie.split(';');
+    for (const cookie of cookieArray) {
+        const trimmedCookie = cookie.trim();
+        if (trimmedCookie.startsWith(name + '=')) {
+            return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+        }
+    }
+    return null;
+}
 
 // Create scene, camera, and renderer
 const   scene = new THREE.Scene();

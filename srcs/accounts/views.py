@@ -13,11 +13,12 @@ from datetime import timedelta
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import logout
-from .serializers import Verify2FASerializer
+from .serializers import Verify2FASerializer, UserCreateProfileSerializer
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import IntegrityError
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -217,3 +218,36 @@ class LogoutAPIView(APIView):
         response.delete_cookie('refresh_token')
 
         return response
+class getProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        try:
+            # Token kontrolü
+            if not request.auth:
+                return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+
+            user_profile = UserCreateProfile.objects.get(user=request.user)
+            serializer = UserCreateProfileSerializer(user_profile)
+            
+            return Response({
+                'status': 'success',
+                'message': 'Authentication successful',
+                'user': serializer.data
+            })
+        except UserCreateProfile.DoesNotExist:
+            return Response({
+                'error': 'User profile not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TokenCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    def get(self, request):
+        return Response("basarili22222")
+ 
