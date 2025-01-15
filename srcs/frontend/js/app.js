@@ -2,26 +2,68 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("app");
     const style = document.getElementById("test");
 
+
     // Giriş başlatma işlemi
     document.getElementById("startLogin").addEventListener("click", async () => {
-        try {
-            // Giriş API'sine istek gönder
-            const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
-            const response = await fetch(loginApi);
-
-            if (!response.ok) {
-                throw new Error("Login request failed!");
+        const token = localStorage.getItem("access_token");
+        if (token) {
+            try {
+                // Game sayfasına istek at ve kullanıcı verilerini al
+                const gameResponse = await fetch('/accounts/check_index/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+    
+                const data = await gameResponse.json();
+                console.log('Token:', token);
+                console.log('Game Response:', data);
+                console.log('User Data:', data.user);
+                console.log('Username:', data.user?.username);
+                console.log('Email:', data.user?.email);
+                console.log('Avatar:', data.user?.avatar);
+                console.log('Name:', data.user?.name);
+                console.log('Surname:', data.user?.surname);
+    
+                if (gameResponse.ok) {
+                    window.loadGamePage();
+                } else {
+                    throw new Error('Game sayfası yüklenemedi');
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                // Token ile ilgili bir sorun varsa token'ları temizle
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                // 42 login'e yönlendir
+                const loginResponse = await fetch('/accounts/loginintra42/');
+                const loginData = await loginResponse.json();
+                window.location.href = loginData.url;
             }
-
-            // API'den dönen URL'ye yönlendirme
-            const data = await response.json();
-            if (data.url) {
-                window.location.href = data.url; // 42'nin login sayfasına yönlendir
-            }
-        } catch (error) {
-            console.error("Login error:", error);
         }
-    });
+        else
+        {
+            try {
+                // Giriş API'sine istek gönder
+                const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
+                const response = await fetch(loginApi);
+                
+                if (!response.ok) {
+                    throw new Error("Login request failed!");
+                }
+                
+                // API'den dönen URL'ye yönlendirme
+                const data = await response.json();
+                if (data.url) {
+                    window.location.href = data.url; // 42'nin login sayfasına yönlendir
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+            }
+        }
+        });
 
     // Doğrulama sayfasını yükle
     async function loadVerificationPage() {
@@ -77,9 +119,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
             if (response.ok) {
                 // Başarılı yanıt
+                localStorage.setItem('access_token', result.access);  // Store the access token
+                localStorage.setItem('refresh_token', result.refresh);  // Store the refresh token
                 messageDiv.innerHTML = `<p style="color: green;">Verification successful! Access token: ${result.access || 'No access token provided.'}</p>`;
                 form.reset(); // Formu temizle
-                loadGamePage(); // Oyun sayfasını yükle
+                window.loadGamePage(); // Oyun sayfasını yükle
             } else {
                 // Backend'den gelen hata mesajını göster
                 const errorMessage = result.error || "An unexpected error occurred.";
@@ -120,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sayfa yüklendiğinde callback kontrolü
     checkCallback();
 
-    async function loadGamePage() {
+    window.loadGamePage = async function loadGamePage() {
         try {
             style.remove();
             // 1. Önce game2.html içeriğini yükle
@@ -176,7 +220,135 @@ document.addEventListener("DOMContentLoaded", () => {
             '../js/Camera.js',
             '../js/CursorDetect.js',
             '../js/MenuStuff.js',
-            '../js/Player.js'
+            '../js/Player.js',
+            '../js/logout.js'
+        ];
+    
+        return Promise.all(modules.map(src => {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = src;
+            return new Promise((resolve, reject) => {
+                script.onload = () => {
+                    console.log(`${src} loaded`);
+                    resolve();
+                };
+                script.onerror = () => reject(new Error(`Module load error: ${src}`));
+                document.body.appendChild(script);
+            });
+        }));
+    }
+    
+    function loadCSS() {
+        return new Promise((resolve) => {
+            if (!document.querySelector('link[href="../css/game.css"]')) {
+                const cssLink = document.createElement("link");
+                cssLink.rel = "stylesheet";
+                cssLink.href = "../css/game.css";
+                cssLink.onload = () => resolve();
+                document.head.appendChild(cssLink);
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    function loadIndexCSS() {
+        return new Promise((resolve) => {
+            if (!document.querySelector('link[href="../css/style.css"]')) {
+                const cssLink = document.createElement("link");
+                cssLink.rel = "stylesheet";
+                cssLink.href = "../css/style.css";
+                cssLink.onload = () => resolve();
+                document.head.appendChild(cssLink);
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    window.loadIndexPage = async function loadIndexPage() {
+        try {
+            // 1. Önce game2.html içeriğini yükle
+            const response = await fetch("../html/index.html");
+            if (!response.ok) {
+                throw new Error("Failed to load game page.");
+            }
+    
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const indexHtml = doc.body.innerHTML;
+    
+            // 6. Info div'ini ekle
+            const infoDiv = document.createElement('div');
+            infoDiv.id = 'info';
+            infoDiv.textContent = 'Description';
+            document.body.appendChild(infoDiv);
+    
+            // game2.html içeriğini app elementine ekle
+            app.innerHTML = indexHtml;
+            // 3. CSS yükle
+            await loadIndexCSS();
+            // 5. Diğer script'leri yükle
+            await loadIndexModules();
+        } catch (error) {
+            console.error("Error loading game page:", error);
+        }
+        document.getElementById("startLogin").addEventListener("click", async () => {
+            try {
+                // Giriş API'sine istek gönder
+                const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
+                const response = await fetch(loginApi);
+    
+                if (!response.ok) {
+                    throw new Error("Login request failed!");
+                }
+    
+                // API'den dönen URL'ye yönlendirme
+                const data = await response.json();
+                if (data.url) {
+                    window.location.href = data.url; // 42'nin login sayfasına yönlendir
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+            }
+        });
+    }
+    
+    // Modül script'lerini yükleme fonksiyonu
+    function loadModules() {
+        const modules = [
+            '../js/script.js',
+            '../js/ai.js',
+            '../js/AudioMan.js',
+            '../js/Ball.js',
+            '../js/Camera.js',
+            '../js/CursorDetect.js',
+            '../js/MenuStuff.js',
+            '../js/Player.js',
+            '../js/logout.js'
+        ];
+    
+        return Promise.all(modules.map(src => {
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = src;
+            return new Promise((resolve, reject) => {
+                script.onload = () => {
+                    console.log(`${src} loaded`);
+                    resolve();
+                };
+                script.onerror = () => reject(new Error(`Module load error: ${src}`));
+                document.body.appendChild(script);
+            });
+        }));
+    }
+
+    function loadIndexModules()
+    {
+        const modules = [
+            '../js/app.js'
         ];
     
         return Promise.all(modules.map(src => {
@@ -208,3 +380,5 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+ 
