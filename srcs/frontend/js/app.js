@@ -2,36 +2,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("app");
     const style = document.getElementById("test");
 
-    // Giriş başlatma işlemi
+    // Giriş başlatma işlemi !!!!!Buralara bakilacak
     document.getElementById("startLogin").addEventListener("click", async () => {
-        
-            
             try {
                 // Game sayfasına istek at ve kullanıcı verilerini al
-                const gameResponse = await fetch('/accounts/get_profil/', {
+                const tokenResponse = await fetch('/accounts/tokencheck/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     credentials: 'include'
                 });
-    
-                const data = await gameResponse.json();
-                console.log('Game Response:', data);
-                console.log('User Data:', data.user);
-                console.log('Username:', data.user?.username);
-                console.log('Email:', data.user?.email);
-                console.log('Avatar:', data.user?.avatar);
-                console.log('Name:', data.user?.name);
-                console.log('Surname:', data.user?.surname);
-    
-                if (gameResponse.ok) {
+                const index_data = await tokenResponse.json();
+                if (tokenResponse.ok) {
+                    console.log(index_data);
                     window.loadGamePage();
                 } else {
                     throw new Error('Game sayfası yüklenemedi');
                 }
             } catch (error) {
-                console.error('Hata:', error);
+                console.error('Hata:', error.message || error);
                 // Token ile ilgili bir sorun varsa token'ları temizle
                 // 42 login'e yönlendir
                 const loginResponse = await fetch('/accounts/loginintra42/');
@@ -214,7 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
             '../js/CursorDetect.js',
             '../js/MenuStuff.js',
             '../js/Player.js',
-            '../js/logout.js'
         ];
     
         return Promise.all(modules.map(src => {
@@ -308,35 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-    
-    // Modül script'lerini yükleme fonksiyonu
-    function loadModules() {
-        const modules = [
-            '../js/script.js',
-            '../js/ai.js',
-            '../js/AudioMan.js',
-            '../js/Ball.js',
-            '../js/Camera.js',
-            '../js/CursorDetect.js',
-            '../js/MenuStuff.js',
-            '../js/Player.js',
-            '../js/logout.js'
-        ];
-    
-        return Promise.all(modules.map(src => {
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = src;
-            return new Promise((resolve, reject) => {
-                script.onload = () => {
-                    console.log(`${src} loaded`);
-                    resolve();
-                };
-                script.onerror = () => reject(new Error(`Module load error: ${src}`));
-                document.body.appendChild(script);
-            });
-        }));
-    }
+
 
     function loadIndexModules()
     {
