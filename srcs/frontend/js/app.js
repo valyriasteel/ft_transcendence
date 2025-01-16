@@ -8,11 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
             
             try {
                 // Game sayfasına istek at ve kullanıcı verilerini al
-                const gameResponse = await fetch('/accounts/check_index/', {
+                const gameResponse = await fetch('/accounts/get_profil/', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        
                     },
                     credentials: 'include'
                 });
@@ -35,9 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error('Hata:', error);
                 // Token ile ilgili bir sorun varsa token'ları temizle
                 // 42 login'e yönlendir
-                //const loginResponse = await fetch('/accounts/loginintra42/');
-                //const loginData = await loginResponse.json();
-                //window.location.href = loginData.url;
+                const loginResponse = await fetch('/accounts/loginintra42/');
+                const loginData = await loginResponse.json();
+                window.location.href = loginData.url;
             }
         
 
