@@ -252,14 +252,14 @@ class LogoutAPIView(APIView):
         return response
 
 
-class getProfileView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = [JWTAuthentication]
+class GamePageView(APIView):
+    permission_classes = [IsAuthenticated]
+    
 
     def get(self, request):
         try:
             # Token kontrolü
-            if not request.auth:
+            if not request.user.is_authenticated:
                 return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
 
             user_profile = UserCreateProfile.objects.get(user=request.user)
