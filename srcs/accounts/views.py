@@ -251,8 +251,31 @@ class LogoutAPIView(APIView):
         print("Çıkış işlemi başarılı")  # Debug: Çıkış mesajı
         return response
 
+class TokenCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+    
 
-class GamePageView(APIView):
+    def get(self, request):
+        try:
+            # Token kontrolü
+            if not request.user.is_authenticated:
+                return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    
+            return Response({
+                'status': 'success',
+                'message': 'Authentication successful',
+            })
+        except UserCreateProfile.DoesNotExist:
+            return Response({
+                'error': 'User profile not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetProfileView(APIView):
     permission_classes = [IsAuthenticated]
     
 
@@ -278,13 +301,8 @@ class GamePageView(APIView):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
 
-class TokenCheckView(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-    def get(self, request):
-        return Response("basarili22222")
-    
 from rest_framework.exceptions import AuthenticationFailed
 
 class TestApiView(APIView):

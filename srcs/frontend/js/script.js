@@ -276,6 +276,9 @@ function loadScoreElements() {
     board.scoreRight = document.getElementById("rightScore");
 }
 
+//--------------------------------------------------------------------------------------------//
+//---------------------BACKEND----------------------------------------------------------------//
+
 
 const logoutButton = document.getElementById("logoutBut");
 logoutButton.addEventListener("click", handleLogout);
@@ -325,6 +328,42 @@ function getCookie(name) {
     }
     return null;
 }
+
+try {
+    console.log("1");
+
+const gameResponse = await fetch('/accounts/get_profile/', {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+});
+    console.log("2");
+if (gameResponse.ok) {
+    const data = await gameResponse.json();
+    console.log("3");
+
+    // Kullanıcı bilgilerini göster
+    if (data.user) {
+        document.getElementById('username').textContent = data.user.username || 'N/A';
+        document.getElementById('userEmail').textContent = data.user.email || 'N/A';
+        document.getElementById('userName').textContent = `${data.user.name || ''} ${data.user.surname || ''}`;
+        if (data.user.avatar) {
+            document.getElementById('userAvatar').src = "https://" + data.user.avatar.slice(10);
+        }
+    }
+} else {
+    throw new Error('Failed to fetch user data');
+}
+} catch (error) {
+console.error('Error fetching user data:', error);
+//window.location.href = '/'; //buraya ne olacağı yazılacak
+}
+
+//--------------------------------------------------------------------------------------------//
+//---------------------BACKEND----------------------------------------------------------------//
+
 
 // Create scene, camera, and renderer
 const scene = new THREE.Scene();

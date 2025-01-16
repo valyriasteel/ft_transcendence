@@ -351,3 +351,84 @@ body
     font-size: 2rem;
 	opacity: 100%;
 }
+
+/* Profil kutusunun genel stili */
+.user-profile {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease; /* Profildeki büyüme animasyonu */
+}
+
+/* Profil bilgileri düzeni */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.3s ease; /* Profil bilgileri büyümesi */
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-details {
+    color: #333;
+}
+
+.user-details h3 {
+    margin: 0;
+    font-size: 1.4em;
+    color: #2c3e50;
+}
+
+.user-details p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #7f8c8d;
+}
+
+/* Butonlar */
+.profile-buttons {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3498db;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+/* Buton üzerine gelindiğinde büyür ve renk değişir */
+.profile-btn:hover {
+    background-color: #2980b9;
+    transform: scale(1.05); /* Butona hover efekti */
+}
+
+/* Profil kutusu ve içeriği üzerine gelindiğinde büyür */
+.user-profile:hover {
+    transform: scale(1.05); /* Profil kutusunun büyümesi */
+}
+
+.profile-info:hover {
+    transform: scale(1.05); /* Profil bilgileri kısmının büyümesi */
+}
+
