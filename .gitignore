@@ -5,3 +5,4 @@ srcs/accounts/migrations/__pycache__
 srcs/accounts/migrations/0001_initial.py
 srcs/frontend/static
 srcs/pong_game/__pycache__
+*:Zone.Identifier
