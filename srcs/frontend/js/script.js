@@ -236,7 +236,7 @@ function loadTourneyElements() {
         sceneTransition(tourney.everything, select.everything);
     });
 }
-
+    
 loadMenuElements();
 loadSettingsElements();
 loadSelectElements();
