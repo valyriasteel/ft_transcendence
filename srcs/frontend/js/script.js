@@ -8,31 +8,30 @@ import { FontLoader } from 'FontLoader';
 import * as MENU from './MenuStuff.js'; // Import the class
 import * as THREE from 'three';
 import { TextGeometry } from 'TextGeo';
-import { EXRLoader  } from 'ExrLoader';
+import { EXRLoader } from 'ExrLoader';
 
 
-const   p1 = new Player('P1', 2, 'blue');
-const   p2 = new Player('P2', 2, 'red');
-const   p3 = new Player('Blank', 0, 'purple');
-const   p4 = new Player('Khonvoum', 0, 'yellow');
-const   bot = new Bot();
-const   ball = new Ball('orange');
-const   Aud = new AuMan();
-const   cam = new Camera();
-const   start = new MENU.startBut();
-const   opt = new MENU.optionsBut();
-const   select = new MENU.selectMenu();
-const   mode = new MENU.Mode();
-const   optMenu = new MENU.optionsMenu();
-const   tourney = new MENU.tourneyMenu();
-const   board = new MENU.scoreBoard();
-const   end = new MENU.endScreen();
-const   myMenu = new MENU.mainMenu();
+const p1 = new Player('P1', 2, 'blue');
+const p2 = new Player('P2', 2, 'red');
+const p3 = new Player('Blank', 0, 'purple');
+const p4 = new Player('Khonvoum', 0, 'yellow');
+const bot = new Bot();
+const ball = new Ball('orange');
+const Aud = new AuMan();
+const cam = new Camera();
+const start = new MENU.startBut();
+const opt = new MENU.optionsBut();
+const select = new MENU.selectMenu();
+const mode = new MENU.Mode();
+const optMenu = new MENU.optionsMenu();
+const tourney = new MENU.tourneyMenu();
+const board = new MENU.scoreBoard();
+const end = new MENU.endScreen();
+const myMenu = new MENU.mainMenu();
 
-function visibleControl(every ,flag, display)
-{
+function visibleControl(every, flag, display) {
     const childrenArray = Array.from(every.children);
-    
+
     childrenArray.forEach(child => {
         if (flag)
             child.style.display = display;
@@ -41,8 +40,7 @@ function visibleControl(every ,flag, display)
     });
 }
 
-function    sceneTransition(before, after)
-{
+function sceneTransition(before, after) {
     const beforeArray = Array.from(before.children);
     const afterArray = Array.from(after.children);
 
@@ -50,19 +48,16 @@ function    sceneTransition(before, after)
         disappearBut(child);
     });
 
-    afterArray.forEach(child => 
-    {
-       appearBut(child); 
+    afterArray.forEach(child => {
+        appearBut(child);
     });
 }
 
-function loadMenuElements()
-{
+function loadMenuElements() {
     myMenu.startBut = document.getElementById("startBut");
     myMenu.settingsBut = document.getElementById("settingsBut");
     myMenu.everything = document.getElementById("menu");
-    myMenu.startBut.addEventListener("click", function()
-    {
+    myMenu.startBut.addEventListener("click", function () {
         /*visibleControl(myMenu.everything, false, "none");
         visibleControl(select.everything, true, "block");*/
         //renderer.setAnimationLoop(selectLoop);
@@ -70,16 +65,14 @@ function loadMenuElements()
         sceneTransition(myMenu.everything, select.everything);
     });
 
-    myMenu.settingsBut.addEventListener("click", function()
-    {
+    myMenu.settingsBut.addEventListener("click", function () {
         visibleControl(myMenu.everything, false, "none");
         visibleControl(optMenu.everything, true, "block");
         renderer.setAnimationLoop(optionsLoop);
     });
 }
 
-function loadSettingsElements()
-{
+function loadSettingsElements() {
     optMenu.everything = document.getElementById("settings");
     optMenu.volumeUpBut = document.getElementById("volumeUp");
     optMenu.volumeDownBut = document.getElementById("volumeDown");
@@ -93,17 +86,15 @@ function loadSettingsElements()
     optMenu.backBut = document.getElementById("backBut");
     optMenu.ballSelection = document.getElementById("ballSelection");
 
-    optMenu.backBut.addEventListener("click", function()
-    {
+    optMenu.backBut.addEventListener("click", function () {
         end.winner.style.display = "none";
-        if (mode.isTourney)
-        {
+        if (mode.isTourney) {
             mode.isTourney = false;
             end.champ.style.display = "none";
             end.nextBut.style.display = "none";
             tourney.playerArray = [];
             tourney.MatchArray = [];
-            tourney.inPlayers.innerHTML = `Players:<br>`    ;
+            tourney.inPlayers.innerHTML = `Players:<br>`;
             p1.name = "P1";
             p2.name = "P2";
         }
@@ -112,8 +103,7 @@ function loadSettingsElements()
         renderer.setAnimationLoop(menuLoop);
     });
 
-    optMenu.volumeUpBut.addEventListener("click", function()
-    {
+    optMenu.volumeUpBut.addEventListener("click", function () {
         mode.volume += 0.1;
         if (mode.volume > 1)
             mode.volume = 1;
@@ -123,8 +113,7 @@ function loadSettingsElements()
         optMenu.volumeSlider.value = mode.volume * 100;
     });
 
-    optMenu.volumeDownBut.addEventListener("click", function()
-    {
+    optMenu.volumeDownBut.addEventListener("click", function () {
         mode.volume -= 0.1;
         if (mode.volume < 0)
             mode.volume = 0;
@@ -134,8 +123,7 @@ function loadSettingsElements()
         optMenu.volumeSlider.value = mode.volume * 100;
     });
 
-    optMenu.ballSelection.addEventListener('change', function() 
-    {
+    optMenu.ballSelection.addEventListener('change', function () {
         const selectedValue = ballSelection.value;
         if (selectedValue === "football")
             ball.texture = soccerBallTexture;
@@ -143,15 +131,13 @@ function loadSettingsElements()
             ball.texture = basketBallTexture;
     });
 
-    optMenu.volumeSlider.addEventListener('input', function() 
-    {
+    optMenu.volumeSlider.addEventListener('input', function () {
         mode.volume = Math.round(optMenu.volumeSlider.value * 100) / 10000;
         optMenu.volumeLabel.textContent = `Volume: %${Math.floor(mode.volume * 100)}`
         Aud.volumeChange(mode.volume);
     });
 
-    optMenu.darkModeBut.addEventListener('click', function() 
-    {
+    optMenu.darkModeBut.addEventListener('click', function () {
         mode.darkMode = !mode.darkMode;
         if (mode.darkMode)
             optMenu.darkModeText.textContent = "Dark mode: on";
@@ -164,8 +150,7 @@ function loadSettingsElements()
     });
 }
 
-function loadSelectElements()
-{
+function loadSelectElements() {
     select.everything = document.getElementById("select");
     select.oneVsOneBut = document.getElementById("oneVsone");
     select.twoVsTwoBut = document.getElementById("twoVstwo");
@@ -173,8 +158,7 @@ function loadSelectElements()
     select.tourneyBut = document.getElementById("tourney");
     select.backBut = document.getElementById("backSelect");
 
-    select.oneVsOneBut.addEventListener('click', function() 
-    {
+    select.oneVsOneBut.addEventListener('click', function () {
         modeSingle = false;
         modeFour = false;
         mode.inSelect = false;
@@ -183,8 +167,7 @@ function loadSelectElements()
         startGame();
     });
 
-    select.twoVsTwoBut.addEventListener('click', function() 
-    {
+    select.twoVsTwoBut.addEventListener('click', function () {
         modeSingle = false;
         modeFour = true;
         mode.inSelect = false;
@@ -193,8 +176,7 @@ function loadSelectElements()
         startGame();
     });
 
-    select.vsimpBut.addEventListener('click', function() 
-    {
+    select.vsimpBut.addEventListener('click', function () {
         modeSingle = true;
         modeFour = false;
         mode.inSelect = false;
@@ -203,8 +185,7 @@ function loadSelectElements()
         startGame();
     });
 
-    select.tourneyBut.addEventListener('click', function() 
-    {
+    select.tourneyBut.addEventListener('click', function () {
         modeSingle = false;
         modeFour = false;
         mode.inTourney = true;
@@ -216,25 +197,21 @@ function loadSelectElements()
         sceneTransition(select.everything, tourney.everything);
     });
 
-    select.backBut.addEventListener('click', function() 
-    {
+    select.backBut.addEventListener('click', function () {
         sceneTransition(select.everything, myMenu.everything);
     });
 }
 
-function loadTourneyElements()
-{
+function loadTourneyElements() {
     tourney.everything = document.getElementById("Tourney");
     tourney.lockBut = document.getElementById("lockBut");
     tourney.statusText = document.getElementById("statusTourney");
     tourney.inPlayers = document.getElementById("inPlayers");
     tourney.backToSelectBut = document.getElementById("backToSelect");
-    tourney.lockBut.addEventListener("click", function()
-    {
+    tourney.lockBut.addEventListener("click", function () {
         tourney.statusText.style.display = "block";
-        if (tourney.playerArray.length < 3)
-        {
-            tourney.statusText.innerText = `Please submit ${ 3 - tourney.playerArray.length} more players.`;
+        if (tourney.playerArray.length < 3) {
+            tourney.statusText.innerText = `Please submit ${3 - tourney.playerArray.length} more players.`;
             return;
         }
         mode.isTourney = true;
@@ -250,8 +227,7 @@ function loadTourneyElements()
             tourney.inPlayers.innerHTML = "";
     });
 
-    tourney.backToSelectBut.addEventListener("click", function()
-    {
+    tourney.backToSelectBut.addEventListener("click", function () {
         tourney.playerArray = [];
         tourney.MatchArray = [];
         tourney.inPlayers.innerHTML = `Players:<br>`;
@@ -269,12 +245,10 @@ loadEndElements();
 loadScoreElements();
 
 
-function announceNextMatches()
-{
+function announceNextMatches() {
     let i = 1;
     let text = "";
-    while (i < tourney.MatchArray.length )
-    {
+    while (i < tourney.MatchArray.length) {
         text += `<br>Match ${tourney.MatchArray[i].id}: ${tourney.MatchArray[i].leftSide} vs ${tourney.MatchArray[i].rightSide}`;
         i++;
     }
@@ -282,14 +256,12 @@ function announceNextMatches()
     return text;
 }
 
-function loadEndElements()
-{
+function loadEndElements() {
     end.winner = document.getElementById("winner");
     end.nextBut = document.getElementById("nextMatchBut");
     end.champ = document.getElementById("champ");
 
-    end.nextBut.addEventListener("click", function()
-    {
+    end.nextBut.addEventListener("click", function () {
         end.nextBut.style.display = "none";
         end.winner.style.display = "none";
         end.champ.style.display = "none";
@@ -299,27 +271,17 @@ function loadEndElements()
     });
 }
 
-function loadScoreElements()
-{
+function loadScoreElements() {
     board.scoreLeft = document.getElementById("leftScore");
     board.scoreRight = document.getElementById("rightScore");
 }
+
 
 const logoutButton = document.getElementById("logoutBut");
 logoutButton.addEventListener("click", handleLogout);
 
 async function handleLogout() {
-    // Refresh token'ı ve access token'ı localStorage'dan alıyoruz
-    const refreshToken = localStorage.getItem('refresh_token');
-    const accessToken = localStorage.getItem('access_token');
     const csrfToken = getCookie('csrftoken');  // CSRF token'ı alıyoruz
-
-    console.log("girdim");
-    // Refresh token ve access token'ın varlığını kontrol ediyoruz
-    if (!refreshToken || !accessToken) {
-        alert('Tokenlar bulunamadı, çıkış işlemi gerçekleştirilemez!');
-        return;
-    }
 
     try {
         // Çıkış işlemi için API isteği gönderiyoruz
@@ -327,31 +289,29 @@ async function handleLogout() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,  // CSRF token'ı
-                'Authorization': `Bearer ${accessToken}`  // JWT access token'ı
+                'X-CSRFToken': csrfToken  // CSRF token'ı
             },
-            body: JSON.stringify({ refresh_token: refreshToken })  // Refresh token'ı gönderiyoruz
-        });
+            credentials: 'include'  // Cookie'lerin gönderilmesini sağlamak için
+        });        
 
         const data = await response.json();
 
-        if (response.ok) {
-            // Backend çıkışı başarılı yaptıysa, frontend'den tokenları siliyoruz
-            localStorage.removeItem('access_token');  // Access token'ı sil
-            localStorage.removeItem('refresh_token');  // Refresh token'ı sil
-        } else {
-            // Backend hata dönerse daha iyi bir hata mesajı
+        if (response.ok)
+            {
+                console.log("logoutagirdim");
+                renderer.setAnimationLoop(null); // This stops the rendering loop
+                renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
+                renderer.clear(); // Clear the canvas
+                renderer.domElement.remove();
+                window.loadIndexPage();
+            } 
+        else
             alert(data.error || 'Çıkış yaparken bir hata oluştu!');
-        }
     } catch (error) {
         console.error('Çıkış sırasında hata:', error);
         alert('Bir hata oluştu, lütfen tekrar deneyin.');
     }
-    renderer.setAnimationLoop(null); // This stops the rendering loop
-    renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
-    renderer.clear(); // Clear the canvas
-    renderer.domElement.remove();
-    window.loadIndexPage();
+
 
 }
 
@@ -367,19 +327,19 @@ function getCookie(name) {
 }
 
 // Create scene, camera, and renderer
-const   scene = new THREE.Scene();
-const   mainMenu = new THREE.Scene();
-const   optionsMenu = new THREE.Scene();
-const   selectMenu = new THREE.Scene();
-const   gameEnd = new THREE.Scene();
-const   tournamentMenu = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({antialias: true});
+const scene = new THREE.Scene();
+const mainMenu = new THREE.Scene();
+const optionsMenu = new THREE.Scene();
+const selectMenu = new THREE.Scene();
+const gameEnd = new THREE.Scene();
+const tournamentMenu = new THREE.Scene();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.autoClear = true; // Ensures the canvas is cleared before rendering
 renderer.shadowMap.enabled = true;
 const textureLoader = new THREE.TextureLoader();
 const soccerBallTexture = textureLoader.load('../images/ball.jpg')
 const basketBallTexture = textureLoader.load('../images/basketball.png')
-ball.texture = soccerBallTexture;    
+ball.texture = soccerBallTexture;
 const pointLight = new THREE.PointLight(0xffffff, 1000, 100);  // Color, intensity, distance
 pointLight.position.set(0, 10, 0);  // Position the light in the scene
 pointLight.castShadow = true;  // Enable shadow casting
@@ -458,45 +418,45 @@ const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
 function resizeRenderer() {
     const targetAspect = 16 / 9; // Target aspect ratio (16:9)
-  
+
     // Determine the maximum size for the renderer while preserving the aspect ratio
     let width = window.innerWidth;
     let height = window.innerHeight;
-  
+
     if (width / height > targetAspect) {
-      // Window is too wide, adjust width
-      width = height * targetAspect;
+        // Window is too wide, adjust width
+        width = height * targetAspect;
     } else {
-      // Window is too tall, adjust height
-      height = width / targetAspect;
+        // Window is too tall, adjust height
+        height = width / targetAspect;
     }
-  
+
     // Set the renderer size
     renderer.setSize(width, height);
-  
+
     // Center canvas
     renderer.domElement.style.position = "absolute";
     renderer.domElement.style.top = `${(window.innerHeight - height) / 2}px`;
     renderer.domElement.style.left = `${(window.innerWidth - width) / 2}px`;
-    
-  
+
+
     // Update camera aspect ratio
     cam.camera.aspect = targetAspect;
     cam.camera.updateProjectionMatrix();
-  }
-  
+}
+
 
 // Initial resize and on window resize
 
 window.addEventListener("resize", resizeRenderer);
 
 
-let modeFour = false; 
+let modeFour = false;
 let modeSingle = false;
 
 
 cam.camera.position.y = 100;
-cam.camera.lookAt(0,0,0);
+cam.camera.lookAt(0, 0, 0);
 
 renderer.setAnimationLoop(menuLoop);  // Start the animation loop
 resizeRenderer();
@@ -529,29 +489,29 @@ function loadEXREnvironment() {
         '../images/kloppenheim_02_puresky_4k.exr',
         function (texture) {
             texture.mapping = THREE.EquirectangularReflectionMapping;
-            
+
             // Set the environment map
             mainMenu.environment = texture;
-            
+
             // If you want to use it as background too
             mainMenu.background = texture;
-            
+
             // Optional: create a PMREMGenerator for better performance
             const pmremGenerator = new THREE.PMREMGenerator(renderer);
             pmremGenerator.compileEquirectangularShader();
-            
+
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             mainMenu.environment = envMap;
             scene.environment = envMap;
-            
+
             // If you want the background too
             mainMenu.background = envMap;
             scene.background = envMap;
-            
+
             // Clean up
             texture.dispose();
             pmremGenerator.dispose();
-            
+
             // Create controls to rotate the environment map
             const controls = new OrbitControls(cam.camera, renderer.domElement);
             controls.enableDamping = true; // Smooth rotation
@@ -592,7 +552,7 @@ function loadEXREnvironment() {
                 scene.environment = rotatedEnvMap;
             });
         },
-        
+
         // Progress callback
         function (progress) {
             console.log('Loading: ', (progress.loaded / progress.total * 100) + '%');
@@ -606,54 +566,45 @@ function loadEXREnvironment() {
 
 
 
-function initiateTourney()
-{
+function initiateTourney() {
     tourney.inputBox = document.getElementById("userInput");
     tourney.submitButton = document.getElementById("submitBut");
     tourney.startTourneyBut = document.getElementById("startTourneyBut");
 }
 
-function winScreen()
-{
+function winScreen() {
     let tmpWinner = "";
 
-    if (p1.score == 3)
-    {
+    if (p1.score == 3) {
         end.winner.innerText = p1.name + " Wins!";
         tmpWinner = p1.name;
     }
-    else
-    {
+    else {
         end.winner.innerText = p2.name + " Wins!";
-        tmpWinner = p2.name;   
+        tmpWinner = p2.name;
     }
     end.winner.style.display = "block";
     optMenu.backBut.style.display = "block";
     board.scoreLeft.style.display = "none";
     board.scoreRight.style.display = "none";
-    if (mode.isTourney)
-    {
+    if (mode.isTourney) {
         tourney.playerArray.push(tmpWinner);
         end.nextBut.style.display = "block";
         end.champ.style.display = "block";
-        if (tourney.MatchArray.length < 1)
-        {
+        if (tourney.MatchArray.length < 1) {
             if (tourney.playerArray.length >= 2)
-            matchMaker();
+                matchMaker();
         }
-        if (tourney.MatchArray.length > 0)
-        {
+        if (tourney.MatchArray.length > 0) {
             end.champ.innerText = `Match ${tourney.MatchArray[0].id}: ${tourney.MatchArray[0].leftSide} vs ${tourney.MatchArray[0].rightSide}`;
-            if (tourney.MatchArray.length > 1)
-            {
+            if (tourney.MatchArray.length > 1) {
                 tourney.inPlayers.style.display = "block";
                 tourney.inPlayers.innerHTML = `Following Matches: ${announceNextMatches()}`;
             }
             else
                 tourney.inPlayers.style.display = "none";
         }
-        if (tourney.MatchArray.length < 1 && tourney.playerArray.length <= 1)
-        {
+        if (tourney.MatchArray.length < 1 && tourney.playerArray.length <= 1) {
             end.champ.style.display = "block";
             end.champ.innerText = "Tourney is over!";
             end.nextBut.style.display = "none";
@@ -662,50 +613,43 @@ function winScreen()
     cleanGameObj();
 }
 
-async function menuLoop()
-{
-    renderer.render( mainMenu, cam.camera );
+async function menuLoop() {
+    renderer.render(mainMenu, cam.camera);
 }
 
-async function optionsLoop()
-{
-    renderer.render( optionsMenu, cam.camera );
+async function optionsLoop() {
+    renderer.render(optionsMenu, cam.camera);
 }
 
-async function selectLoop()
-{
-    renderer.render( selectMenu, cam.camera );
+async function selectLoop() {
+    renderer.render(selectMenu, cam.camera);
 }
 
-async function endLoop()
-{
-    renderer.render( gameEnd, cam.camera );
+async function endLoop() {
+    renderer.render(gameEnd, cam.camera);
 }
 
-async function tourneyLoop()
-{
-    renderer.render( tournamentMenu, cam.camera );
+async function tourneyLoop() {
+    renderer.render(tournamentMenu, cam.camera);
 }
 
 const clock = new THREE.Clock();
 
-async function gameLoop(currentTime) 
-{
+async function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime; // Time difference between frames
     lastTime = currentTime;
     const elapsedTime = clock.getElapsedTime();
-  
+
     // Change color based on elapsed time
     p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
     p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
-  
-    
+
+
     update(deltaTime); // Update game state
     render();          // Render the game
 }
 
-function disposer(obj, scene)
-{
+function disposer(obj, scene) {
     if (obj.geometry)
         obj.geometry.dispose();
     if (obj.material)
@@ -714,11 +658,10 @@ function disposer(obj, scene)
     scene.remove(obj);
 }
 
-function cleanGameObj()
-{
+function cleanGameObj() {
     disposer(p1.pad, scene);
     disposer(p2.pad, scene);
-    if (p3.geometry)    
+    if (p3.geometry)
         disposer(p3.pad, scene);
     if (p4.geometry)
         disposer(p4.pad, scene);
@@ -727,38 +670,34 @@ function cleanGameObj()
     p2.score = 2;
 }
 
-function initiateP1(canvas)
-{
+function initiateP1(canvas) {
     p1.Width = 10;
     p1.Height = 10;
     if (modeFour)
         p1.Depth = 30;
     else
         p1.Depth = 50;
-    p1.geometry = new THREE.BoxGeometry( p1.Width, p1.Height, p1.Depth );
-    p1.material = new THREE.MeshStandardMaterial( { color: p1.color})
-    p1.pad = new THREE.Mesh( p1.geometry, p1.material );
-	p1.pad.position.x = -190;
-	p1.pad.position.y = 20;
+    p1.geometry = new THREE.BoxGeometry(p1.Width, p1.Height, p1.Depth);
+    p1.material = new THREE.MeshStandardMaterial({ color: p1.color })
+    p1.pad = new THREE.Mesh(p1.geometry, p1.material);
+    p1.pad.position.x = -190;
+    p1.pad.position.y = 20;
     p1.pad.castShadow = true;
     p1.pad.receiveShadow = true;
     p1.maxX = -40;
-    if (modeFour)
-    {
+    if (modeFour) {
         p1.pad.position.z = -45
         p1.maxZ = 0;
     }
-    else
-    {
+    else {
         p1.pad.position.z = 0;
         p1.maxZ = 115;
     }
-    scene.add( p1.pad );
+    scene.add(p1.pad);
     p1.pad.material.color.setHSL(0, 1, 0.5);
 }
 
-function initiateP2(canvas)
-{
+function initiateP2(canvas) {
     p2.Width = 10;
     p2.Height = 10;
     if (modeFour)
@@ -767,89 +706,83 @@ function initiateP2(canvas)
         p2.Depth = 50;
     if (modeSingle)
         p2.name = "Bot";
-    p2.geometry = new THREE.BoxGeometry( p2.Width, p2.Height, p2.Depth );
-    p2.material = new THREE.MeshStandardMaterial( { color: p2.color})
-    p2.pad = new THREE.Mesh( p2.geometry, p2.material );
-	p2.pad.position.x = 189;
-	p2.pad.position.y = 20;
+    p2.geometry = new THREE.BoxGeometry(p2.Width, p2.Height, p2.Depth);
+    p2.material = new THREE.MeshStandardMaterial({ color: p2.color })
+    p2.pad = new THREE.Mesh(p2.geometry, p2.material);
+    p2.pad.position.x = 189;
+    p2.pad.position.y = 20;
     p2.pad.castShadow = true;
     p2.pad.receiveShadow = true;
     p2.minX = 39;
-    if (modeFour)
-    {
+    if (modeFour) {
         p2.pad.position.z = -45;
         p2.maxZ = 0;
     }
-    else
-    {
+    else {
         p2.pad.position.z = 0;
         p2.maxZ = 115;
     }
 
-    scene.add( p2.pad );
+    scene.add(p2.pad);
     p2.pad.material.color.setHSL(235, 1, 0.5);
 }
 
-function initiatePlane(canvas)
-{
-	let geo;
-	let mat;
-	let plane;
+function initiatePlane(canvas) {
+    let geo;
+    let mat;
+    let plane;
 
-	geo = new THREE.BoxGeometry(410, 1, 229);
-	mat = new THREE.MeshStandardMaterial ( { color: 0x00ff00});
-	plane = new THREE.Mesh( geo, mat);
+    geo = new THREE.BoxGeometry(410, 1, 229);
+    mat = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    plane = new THREE.Mesh(geo, mat);
     plane.material.transparent = true;
     plane.material.opacity = 0.4;
     plane.material.color.setHSL(60, 1, 0.5);
-	plane.position.x = -1;
-	plane.position.z = 0;
+    plane.position.x = -1;
+    plane.position.z = 0;
     plane.receiveShadow = true;
-	scene.add(plane);
+    scene.add(plane);
 }
 
-function initiateP3(canvas)
-{
+function initiateP3(canvas) {
     if (!modeFour)
         return;
     p3.Width = 10;
     p3.Height = 10;
     p3.Depth = 30;
-    p3.geometry = new THREE.BoxGeometry( p3.Width, p3.Height, p3.Depth );
-    p3.material = new THREE.MeshStandardMaterial( { color: p3.color})
-    p3.pad = new THREE.Mesh( p3.geometry, p3.material );
+    p3.geometry = new THREE.BoxGeometry(p3.Width, p3.Height, p3.Depth);
+    p3.material = new THREE.MeshStandardMaterial({ color: p3.color })
+    p3.pad = new THREE.Mesh(p3.geometry, p3.material);
     p3.pad.castShadow = true;
     p3.pad.receiveShadow = true;
     p3.pad.position.x = -190;
-	p3.pad.position.y = 20;
-	p3.pad.position.z = 44;
+    p3.pad.position.y = 20;
+    p3.pad.position.z = 44;
     p3.maxX = -40;
     p3.minZ = 0;
-    scene.add( p3.pad );
+    scene.add(p3.pad);
 }
 
-function initiateP4(canvas)
-{
+function initiateP4(canvas) {
     if (!modeFour)
         return;
     p4.Width = 10;
     p4.Height = 10;
     p4.Depth = 30;
-    p4.geometry = new THREE.BoxGeometry( p4.Width, p4.Height, p4.Depth );
-    p4.material = new THREE.MeshStandardMaterial( { color: p4.color})
-    p4.pad = new THREE.Mesh( p4.geometry, p4.material );
+    p4.geometry = new THREE.BoxGeometry(p4.Width, p4.Height, p4.Depth);
+    p4.material = new THREE.MeshStandardMaterial({ color: p4.color })
+    p4.pad = new THREE.Mesh(p4.geometry, p4.material);
     p4.minX = 39;
     p4.pad.castShadow = true;
     p4.pad.receiveShadow = true;
-	p4.pad.position.x = 189;
-	p4.pad.position.y = 20;
-	p4.pad.position.z = 44;
+    p4.pad.position.x = 189;
+    p4.pad.position.y = 20;
+    p4.pad.position.z = 44;
     p4.minZ = 0;
-    scene.add( p4.pad );
+    scene.add(p4.pad);
 }
 
-function initiateBot()
-{
+function initiateBot() {
     if (!modeSingle)
         return;
     bot.dirX = ball.dirX;
@@ -858,10 +791,9 @@ function initiateBot()
     bot.ballZ = ball.sphere.position.z;
     bot.padZ = p2.pad.position.z;
     bot.padSpeed = p2.speed;
-}   
+}
 
-function initiateBall(canvas)
-{
+function initiateBall(canvas) {
 
     if (Math.random() <= 0.5)
         ball.dirX = 1;
@@ -872,9 +804,9 @@ function initiateBall(canvas)
     else
         ball.dirZ = -1;
 
-    ball.geometry = new THREE.SphereGeometry( ball.Radius, ball.widthSegments, ball.heightSegments );
-    ball.material = new THREE.MeshStandardMaterial( { map:ball.texture } );
-    ball.sphere =  new THREE.Mesh( ball.geometry, ball.material );
+    ball.geometry = new THREE.SphereGeometry(ball.Radius, ball.widthSegments, ball.heightSegments);
+    ball.material = new THREE.MeshStandardMaterial({ map: ball.texture });
+    ball.sphere = new THREE.Mesh(ball.geometry, ball.material);
     ball.sphere.position.z = Math.floor(Math.random() * 230) - 115;
     ball.sphere.position.x = 0;
     ball.sphere.position.y = 20;
@@ -884,28 +816,25 @@ function initiateBall(canvas)
     console.log(ball.sphere.position.x);
 }
 
-function updateScores()
-{
+function updateScores() {
     board.scoreLeft.innerText = `${p1.name}: ${p1.score}`;
     board.scoreRight.innerText = `${p2.name}: ${p2.score}`;
 }
 
-function initiateScoreBoard()
-{
+function initiateScoreBoard() {
     updateScores();
     board.scoreLeft.style.display = "block";
     board.scoreRight.style.display = "block";
 }
 
-function makeWall()
-{
-    let material = new THREE.MeshStandardMaterial( { color: 0x8A2BE2})
-    let vertGeo = new THREE.BoxGeometry( 10, 50, 250 );
+function makeWall() {
+    let material = new THREE.MeshStandardMaterial({ color: 0x8A2BE2 })
+    let vertGeo = new THREE.BoxGeometry(10, 50, 250);
     let horiGeo = new THREE.BoxGeometry(415, 50, 10);
-    let leftWall = new THREE.Mesh( vertGeo, material );
-    let rightWall = new THREE.Mesh( vertGeo, material );
-    let topWall = new THREE.Mesh( horiGeo, material );
-    let bottomWall = new THREE.Mesh( horiGeo, material );
+    let leftWall = new THREE.Mesh(vertGeo, material);
+    let rightWall = new THREE.Mesh(vertGeo, material);
+    let topWall = new THREE.Mesh(horiGeo, material);
+    let bottomWall = new THREE.Mesh(horiGeo, material);
 
     leftWall.position.x = -211;
     rightWall.position.x = 209;
@@ -925,8 +854,7 @@ function makeWall()
     scene.add(bottomWall);
 }
 
-function checkCollision()
-{
+function checkCollision() {
     //P1
     if (p1.pad.position.x - p1.Width / 2 < p1.minX)
         p1.pad.position.x = p1.minX + p1.Width / 2;
@@ -979,79 +907,64 @@ function checkCollision()
         p4.pad.position.z = p4.maxZ - p4.Depth / 2;
 }
 
-function collideP1()
-{
-    if (ball.sphere.position.x - ball.Radius / 2 <= p1.pad.position.x + p1.Width && p1.pad.position.x + p1.Width / 2 <= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p1.pad.position.z - p1.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p1.pad.position.z + p1.Depth / 2)
-    {
+function collideP1() {
+    if (ball.sphere.position.x - ball.Radius / 2 <= p1.pad.position.x + p1.Width && p1.pad.position.x + p1.Width / 2 <= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p1.pad.position.z - p1.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p1.pad.position.z + p1.Depth / 2) {
         return true;
     }
     else
         return false;
 }
 
-function collideP3()
-{
-    if (ball.sphere.position.x - ball.Radius / 2 <= p3.pad.position.x + p3.Width && p3.pad.position.x + p3.Width / 2 <= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p3.pad.position.z - p3.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p3.pad.position.z + p3.Depth / 2)
-    {
+function collideP3() {
+    if (ball.sphere.position.x - ball.Radius / 2 <= p3.pad.position.x + p3.Width && p3.pad.position.x + p3.Width / 2 <= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p3.pad.position.z - p3.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p3.pad.position.z + p3.Depth / 2) {
         return true;
     }
     else
         return false;
 }
 
-function collideP2()
-{
+function collideP2() {
     if (ball.sphere.position.x + ball.Radius / 2 >= p2.pad.position.x - p2.Width && p2.pad.position.x - p2.Width / 2 >= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p2.pad.position.z - p2.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p2.pad.position.z + p2.Depth / 2)
         return true;
     else
         return false;
 }
 
-function collideP4()
-{
+function collideP4() {
     if (ball.sphere.position.x + ball.Radius / 2 >= p4.pad.position.x - p4.Width && p4.pad.position.x - p4.Width / 2 >= ball.sphere.position.x && ball.sphere.position.z + ball.Radius / 2 >= p4.pad.position.z - p4.Depth / 2 && ball.sphere.position.z - ball.Radius / 2 <= p4.pad.position.z + p4.Depth / 2)
         return true;
     else
         return false;
 }
 
-function checkBallColl()
-{
-    if (ball.sphere.position.x + ball.Radius / 2 < -20 && ball.dirX == -1)
-    {
-        if (collideP1() || modeFour && collideP3())
-        {
+function checkBallColl() {
+    if (ball.sphere.position.x + ball.Radius / 2 < -20 && ball.dirX == -1) {
+        if (collideP1() || modeFour && collideP3()) {
             ball.dirX = 1;
             Aud.ping2.play();
         }
     }
-    else if (ball.sphere.position.x + ball.Radius / 2 > 20 && ball.dirX == 1)
-    {
-        if (ball.sphere.position.x + ball.Radius / 2 >= p2.pad.position.x - p2.Width / 2 && ball.flag)
-        {
+    else if (ball.sphere.position.x + ball.Radius / 2 > 20 && ball.dirX == 1) {
+        if (ball.sphere.position.x + ball.Radius / 2 >= p2.pad.position.x - p2.Width / 2 && ball.flag) {
             ball.flag = false;
         }
-        if (collideP2() || (modeFour && collideP4()))
-        {
+        if (collideP2() || (modeFour && collideP4())) {
             ball.dirX = -1;
             Aud.ping2.play();
-		}
+        }
     }
-    
-    if (ball.sphere.position.z - ball.Radius / 2 < ball.minZ)
-    {
+
+    if (ball.sphere.position.z - ball.Radius / 2 < ball.minZ) {
         ball.sphere.position.z = ball.minZ + ball.Radius / 2;
         ball.dirZ *= -1;
         Aud.ping3.play();
     }
-    if (ball.sphere.position.z + ball.Radius / 2 > ball.maxZ)
-    {
-        ball.sphere.position.z = ball.maxZ - ball.Radius / 2 ;
+    if (ball.sphere.position.z + ball.Radius / 2 > ball.maxZ) {
+        ball.sphere.position.z = ball.maxZ - ball.Radius / 2;
         ball.dirZ *= -1;
         Aud.ping4.play();
     }
-    if (ball.sphere.position.x + ball.Radius / 2 <= ball.minX || ball.sphere.position.x >= ball.maxX)
-    {
+    if (ball.sphere.position.x + ball.Radius / 2 <= ball.minX || ball.sphere.position.x >= ball.maxX) {
         if (ball.sphere.position.x > 0)
             p1.score++;
         else
@@ -1069,8 +982,7 @@ function checkBallColl()
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 33 || p2.score == 33)
-        {
+        if (p1.score == 33 || p2.score == 33) {
             cam.camera.position.y = 100;
             winScreen();
             renderer.setAnimationLoop(endLoop);
@@ -1080,13 +992,10 @@ function checkBallColl()
     }
 }
 
-function ballUpdate(deltaTime)
-{
-    if (ball.freeze)
-    {
+function ballUpdate(deltaTime) {
+    if (ball.freeze) {
         ball.counter += deltaTime;
-        if (ball.counter > 3000)
-        {
+        if (ball.counter > 3000) {
             ball.freeze = false;
             ball.speed = 0.1;
             ball.counter = 0;
@@ -1102,93 +1011,76 @@ function ballUpdate(deltaTime)
 }
 //0.1
 
-function movementUpdate(deltaTime, player)
-{
+function movementUpdate(deltaTime, player) {
 
-    if (player.movUp) 
-    {
+    if (player.movUp) {
         player.pad.position.z -= player.speed * deltaTime;
     }
-    
-    if (player.movLeft) 
-    {
+
+    if (player.movLeft) {
         player.pad.position.x -= player.speed * deltaTime;
     }
-    
-    if (player.movRight) 
-    {
+
+    if (player.movRight) {
         player.pad.position.x += player.speed * deltaTime;
     }
-    
-    if (player.movDown) 
-    {
+
+    if (player.movDown) {
         player.pad.position.z += player.speed * deltaTime;
     }
 }
 
-const temp = (function () 
-{
+const temp = (function () {
     let test = 0; // Persistent variable inside the closure
-    return function (deltaTime) 
-    {
+    return function (deltaTime) {
         test += deltaTime;
-        if (test > 1) 
-        {
+        if (test > 1) {
             ballUpdate(deltaTime);
         }
     };
 })();
 
 
-function movementCam(deltaTime)
-{
+function movementCam(deltaTime) {
     const forward = new THREE.Vector3();
-	if (cam.lookUp)
-	{
-		cam.camera.rotateX(0.001 * deltaTime);
-	}
-	if (cam.lookDown)
-	{
-		cam.camera.rotateX(-0.001 * deltaTime);
-	}
-	if (cam.lookLeft)
-	{
-		cam.camera.rotateY(0.001 * deltaTime);
-	}
-	if (cam.lookRight)
-	{
-		cam.camera.rotateY(-0.001 * deltaTime);
-	}
+    if (cam.lookUp) {
+        cam.camera.rotateX(0.001 * deltaTime);
+    }
+    if (cam.lookDown) {
+        cam.camera.rotateX(-0.001 * deltaTime);
+    }
+    if (cam.lookLeft) {
+        cam.camera.rotateY(0.001 * deltaTime);
+    }
+    if (cam.lookRight) {
+        cam.camera.rotateY(-0.001 * deltaTime);
+    }
 
-	if (cam.movUp)
-	{
+    if (cam.movUp) {
         cam.camera.getWorldDirection(forward);
         cam.camera.position.x += forward.x * cam.speed * deltaTime; // Move forward
         cam.camera.position.y += forward.y * cam.speed * deltaTime; // Adjust if needed for vertical movement
         cam.camera.position.z += forward.z * cam.speed * deltaTime;
-	}
-	
-	if (cam.movDown)
-	{
+    }
+
+    if (cam.movDown) {
         cam.camera.getWorldDirection(forward);
         cam.camera.position.x -= forward.x * cam.speed * deltaTime; // Move forward
         cam.camera.position.y -= forward.y * cam.speed * deltaTime; // Adjust if needed for vertical movement
         cam.camera.position.z -= forward.z * cam.speed * deltaTime;
-	}
-	
-	if (cam.movLeft)
-	{
+    }
+
+    if (cam.movLeft) {
         cam.camera.getWorldDirection(forward);
         cam.camera.position.y += -forward.x * cam.speed * deltaTime
         cam.camera.position.x += forward.y * cam.speed * deltaTime;
-	}
-	
-	if (cam.movRight)
-	{
+    }
+
+    if (cam.movRight) {
         cam.camera.getWorldDirection(forward);
         cam.camera.position.y -= -forward.x * cam.speed * deltaTime
         cam.camera.position.x -= forward.y * cam.speed * deltaTime;
-	}
+    }
 }
 
 function solveQuadratic(a, b, c) {
@@ -1201,15 +1093,11 @@ function solveQuadratic(a, b, c) {
     return root1; // Return both roots
 }
 
-function calculateZ(dist)
-{
-    if (bot.dirZ < 0)
-    {
-        if (bot.ballZ + dist < -110)
-        {
+function calculateZ(dist) {
+    if (bot.dirZ < 0) {
+        if (bot.ballZ + dist < -110) {
             bot.bounceCount = Math.floor(((-dist) + (-110 - bot.ballZ)) / 219);
-            if (bot.bounceCount % 2 == 0)
-            {
+            if (bot.bounceCount % 2 == 0) {
                 bot.targetZ = -110 + (-dist + (-110 - bot.ballZ) - (219 * bot.bounceCount));
                 bot.dirZ *= -1;
             }
@@ -1217,15 +1105,12 @@ function calculateZ(dist)
                 bot.targetZ = 109 - (-dist + (-110 - bot.ballZ) - (219 * bot.bounceCount));
         }
         else
-            bot.targetZ = bot.ballZ + dist; 
+            bot.targetZ = bot.ballZ + dist;
     }
-    else
-    {
-        if (bot.ballZ - dist > 109)
-        {
+    else {
+        if (bot.ballZ - dist > 109) {
             bot.bounceCount = Math.floor(((-dist) - (109 - bot.ballZ)) / 219);
-            if (bot.bounceCount % 2 == 0)
-            {
+            if (bot.bounceCount % 2 == 0) {
                 bot.targetZ = 109 - (-dist - (109 - bot.ballZ) - (219 * bot.bounceCount));
                 bot.dirZ *= -1;
             }
@@ -1245,24 +1130,21 @@ function calculateZ(dist)
     bot.clock2 = 0;
 }
 
-function updateBot()
-{
+function updateBot() {
     bot.ballX = ball.sphere.position.x;
     bot.ballZ = ball.sphere.position.z;
     bot.dirX = ball.dirX;
     bot.dirZ = ball.dirZ;
     bot.speed = ball.speed;
     bot.padZ = p2.pad.position.z;
-    bot.calculate = true; 
+    bot.calculate = true;
 }
 
-function impBot(deltaTime)
-{
+function impBot(deltaTime) {
     let dist;
     let bounceCount;
     let tempDist;
-    if (ball.freeze || bot.clock > 0)
-    {
+    if (ball.freeze || bot.clock > 0) {
         bot.clock = -3000;
         return;
     }
@@ -1270,13 +1152,11 @@ function impBot(deltaTime)
     bot.clock2 += deltaTime;
     bot.clock3 += deltaTime;
     bot.speed += 0.00001 * deltaTime;
-    if (bot.clock3 > 1000)
-    {
+    if (bot.clock3 > 1000) {
         updateBot();
         bot.clock3 = 0;
     }
-    if (bot.calculate)
-    {
+    if (bot.calculate) {
         if (bot.dirX > 0)
             dist = -(174 - bot.ballX);
         else
@@ -1284,25 +1164,21 @@ function impBot(deltaTime)
         calculateZ(dist);
         bot.timeHit = solveQuadratic(5, (bot.speed * 1000), dist);
         bot.calculate = false;
-        bot.dirX = -1; 
+        bot.dirX = -1;
     }
 
-    if (bot.padZ < bot.targetZ && bot.clock2 < bot.timeMove)
-    {
+    if (bot.padZ < bot.targetZ && bot.clock2 < bot.timeMove) {
         document.dispatchEvent(downArrowKeyDown);
     }
-    else if (bot.padZ > bot.targetZ && bot.clock2 < bot.timeMove)
-    {
+    else if (bot.padZ > bot.targetZ && bot.clock2 < bot.timeMove) {
         document.dispatchEvent(upArrowKeyDown);
     }
-    else if (bot.clock2 >= bot.timeMove * 1000)
-    {
+    else if (bot.clock2 >= bot.timeMove * 1000) {
         document.dispatchEvent(upArrowKeyUp);
         document.dispatchEvent(downArrowKeyUp);
     }
 
-    if (bot.clock >= bot.timeHit * 1000)
-    {
+    if (bot.clock >= bot.timeHit * 1000) {
         bot.ballX = 174;
         bot.clock = 0;
         bot.clock2 = 0;
@@ -1312,17 +1188,14 @@ function impBot(deltaTime)
     }
 }
 
-function update(deltaTime) 
-{
-	movementCam(deltaTime);
+function update(deltaTime) {
+    movementCam(deltaTime);
     movementUpdate(deltaTime, p1);
-    if (modeSingle)
-    {
+    if (modeSingle) {
         impBot(deltaTime);
     }
     movementUpdate(deltaTime, p2);
-    if (modeFour == true)
-    {
+    if (modeFour == true) {
         movementUpdate(deltaTime, p3);
         movementUpdate(deltaTime, p4);
     }
@@ -1331,9 +1204,8 @@ function update(deltaTime)
 }
 
 // Render the game
-function render() 
-{
-	renderer.render( scene, cam.camera );
+function render() {
+    renderer.render(scene, cam.camera);
 }
 
 // KEY PRESS MIMIC
@@ -1360,8 +1232,8 @@ const upArrowKeyUp = new KeyboardEvent("keyup", {
 const downArrowKeyDown = new KeyboardEvent("keydown", {
     key: "ArrowDown",
     code: "ArrowDown",
-    keyCode: 40,  
-    which: 40,  
+    keyCode: 40,
+    which: 40,
     bubbles: true,
     cancelable: true
 });
@@ -1370,139 +1242,114 @@ const downArrowKeyDown = new KeyboardEvent("keydown", {
 const downArrowKeyUp = new KeyboardEvent("keyup", {
     key: "ArrowDown",
     code: "ArrowDown",
-    keyCode: 40,  
-    which: 40,  
+    keyCode: 40,
+    which: 40,
     bubbles: true,
     cancelable: true
 });
 
-function p1KeyDown(event)
-{
-    if (event.key === 'w') 
-    {
+function p1KeyDown(event) {
+    if (event.key === 'w') {
         p1.movUp = true;
     }
-    
-    if (event.key === 'a') 
-    {
+
+    if (event.key === 'a') {
         //p1.movLeft = true;
     }
-    
-    if (event.key === 'd') 
-    {
+
+    if (event.key === 'd') {
         //p1.movRight = true;
     }
-    
-    if (event.key === 's') 
-    {
+
+    if (event.key === 's') {
         p1.movDown = true;
     }
 }
 
-function p2KeyDown(event)
-{
-    if (event.key === 'ArrowUp') 
-    {
+function p2KeyDown(event) {
+    if (event.key === 'ArrowUp') {
         p2.movUp = true;
     }
-    
-    if (event.key === 'ArrowLeft') 
-    {
+
+    if (event.key === 'ArrowLeft') {
         //p2.movLeft = true;
     }
-    
-    if (event.key === 'ArrowRight') 
-    {
+
+    if (event.key === 'ArrowRight') {
         //p2.movRight = true;
     }
-    
-    if (event.key === 'ArrowDown') 
-    {
+
+    if (event.key === 'ArrowDown') {
         p2.movDown = true;
-    }    
+    }
 }
 
-function p3KeyDown(event)
-{
+function p3KeyDown(event) {
     if (event.key === 'c')
         p3.movUp = true;
     if (event.key === 'v')
         p3.movDown = true;
 }
 
-function p4KeyDown(event)
-{
+function p4KeyDown(event) {
     if (event.key === 'o')
         p4.movUp = true;
     if (event.key === 'p')
-        p4.movDown = true;    
+        p4.movDown = true;
 }
 
-function cameraDown(event)
-{
+function cameraDown(event) {
     const forward = new THREE.Vector3();
-    if (event.key === 'ArrowUp') 
-	{
-		cam.lookUp = true;
-	}
-	
-	if (event.key === 'ArrowLeft') 
-	{
-		cam.lookLeft = true;
-	}
-	
-	if (event.key === 'ArrowRight') 
-	{
-		cam.lookRight = true;
-	}
-	
-	if (event.key === 'ArrowDown') 
-	{
-		cam.lookDown = true;
-	}
+    if (event.key === 'ArrowUp') {
+        cam.lookUp = true;
+    }
 
-	if (event.key === 'w') 
-	{
-		cam.movUp = true;
-	}
-	
-	if (event.key === 'a') 
-	{
-		cam.movLeft = true;
-	}
-	
-	if (event.key === 'd') 
-	{
-		cam.movRight = true;
-	}
-	
-	if (event.key === 's') 
-	{
-		cam.movDown = true;
-	}
-	
-    if (event.key === 'r')
-	{
-		fixCam();
-	}
+    if (event.key === 'ArrowLeft') {
+        cam.lookLeft = true;
+    }
 
-    if (event.key === 't')
-    {
+    if (event.key === 'ArrowRight') {
+        cam.lookRight = true;
+    }
+
+    if (event.key === 'ArrowDown') {
+        cam.lookDown = true;
+    }
+
+    if (event.key === 'w') {
+        cam.movUp = true;
+    }
+
+    if (event.key === 'a') {
+        cam.movLeft = true;
+    }
+
+    if (event.key === 'd') {
+        cam.movRight = true;
+    }
+
+    if (event.key === 's') {
+        cam.movDown = true;
+    }
+
+    if (event.key === 'r') {
+        fixCam();
+    }
+
+    if (event.key === 't') {
         console.log("x", cam.camera.position.x);
         console.log("y", cam.camera.position.y);
         console.log("z", cam.camera.position.z);
     }
 }
 
-document.addEventListener('keydown', (event) => 
-{
-	//let cam = true;
-	if (event.key === '"')
+document.addEventListener('keydown', (event) => {
+    //let cam = true;
+    if (event.key === '"')
         cam.enable = !cam.enable;
-	if (cam.enable)
+    if (cam.enable)
         cameraDown(event);
-    else
-    {
+    else {
         p1KeyDown(event);
         p2KeyDown(event);
         if (!(modeFour))
@@ -1513,118 +1360,96 @@ document.addEventListener('keydown', (event) =>
 }
 );
 
-function p1KeyUp(event)
-{
-    if (event.key === 'w') 
-    {
+function p1KeyUp(event) {
+    if (event.key === 'w') {
         p1.movUp = false;
     }
-    
-    if (event.key === 'a') 
-    {
+
+    if (event.key === 'a') {
         //p1.movLeft = false;
     }
-    
-    if (event.key === 'd') 
-    {
+
+    if (event.key === 'd') {
         //p1.movRight = false;
     }
-    
-    if (event.key === 's') 
-    {
+
+    if (event.key === 's') {
         p1.movDown = false;
     }
 }
 
-function p2KeyUp(event)
-{
-    if (event.key === 'ArrowUp') 
-    {
+function p2KeyUp(event) {
+    if (event.key === 'ArrowUp') {
         p2.movUp = false;
     }
-    
-    if (event.key === 'ArrowLeft') 
-    {
+
+    if (event.key === 'ArrowLeft') {
         //p2.movLeft = false;
     }
-    
-    if (event.key === 'ArrowRight') 
-    {
+
+    if (event.key === 'ArrowRight') {
         //p2.movRight = false;
     }
-    
-    if (event.key === 'ArrowDown') 
-    {
+
+    if (event.key === 'ArrowDown') {
         p2.movDown = false;
-    }    
+    }
 }
 
-function p3KeyUp(event)
-{
+function p3KeyUp(event) {
     if (event.key === 'c')
         p3.movUp = false;
     if (event.key === 'v')
         p3.movDown = false;
 }
 
-function p4KeyUp(event)
-{
+function p4KeyUp(event) {
     if (event.key === 'o')
         p4.movUp = false;
     if (event.key === 'p')
-        p4.movDown = false;    
+        p4.movDown = false;
 }
 
-function cameraUp(event)
-{
-    if (event.key === 'ArrowUp') 
-		{
-			cam.lookUp = false;
-			cam.moving = false;
-		}
-		
-		if (event.key === 'ArrowLeft') 
-		{
-			cam.lookLeft = false;
-			cam.moving = false;
-		}
-		
-		if (event.key === 'ArrowRight') 
-		{
-			cam.lookRight = false;
-			cam.moving = false;
-		}
-		
-		if (event.key === 'ArrowDown') 
-		{
-			cam.lookDown = false;
-			cam.moving = false;
-		}
-	
-		if (event.key === 'w') 
-		{
-			cam.movUp = false;
-		}
-		
-		if (event.key === 'a') 
-		{
-			cam.movLeft = false;
-		}
-		
-		if (event.key === 'd') 
-		{
-			cam.movRight = false;
-		}
-		
-		if (event.key === 's') 
-		{
-			cam.movDown = false;
-		}
+function cameraUp(event) {
+    if (event.key === 'ArrowUp') {
+        cam.lookUp = false;
+        cam.moving = false;
+    }
+
+    if (event.key === 'ArrowLeft') {
+        cam.lookLeft = false;
+        cam.moving = false;
+    }
+
+    if (event.key === 'ArrowRight') {
+        cam.lookRight = false;
+        cam.moving = false;
+    }
+
+    if (event.key === 'ArrowDown') {
+        cam.lookDown = false;
+        cam.moving = false;
+    }
+
+    if (event.key === 'w') {
+        cam.movUp = false;
+    }
+
+    if (event.key === 'a') {
+        cam.movLeft = false;
+    }
+
+    if (event.key === 'd') {
+        cam.movRight = false;
+    }
+
+    if (event.key === 's') {
+        cam.movDown = false;
+    }
 }
 
-document.addEventListener('keyup', (event) => 
-{
-	cameraUp(event);
+document.addEventListener('keyup', (event) => {
+    cameraUp(event);
     p1KeyUp(event);
     p2KeyUp(event);
     if (!(modeFour))
@@ -1634,8 +1459,7 @@ document.addEventListener('keyup', (event) =>
 }
 );
 
-function changeText(text, mesh, size)
-{
+function changeText(text, mesh, size) {
     let x = mesh.position.x;
     let y = mesh.position.y;
     let z = mesh.position.z;
@@ -1649,8 +1473,7 @@ function changeText(text, mesh, size)
 }
 
 function createText(text, size, x, y, z, place) {
-    if (!loadedFont)
-    {
+    if (!loadedFont) {
         //console.log("Font not loaded");
         return;
     }
@@ -1675,17 +1498,15 @@ function createText(text, size, x, y, z, place) {
     return textMesh;
 }
 
-function fixCam()
-{
+function fixCam() {
     cam.camera.position.x = 0;
     cam.camera.position.y = 220;
     cam.camera.position.z = 0;
     cam.camera.rotation.set(0, 0, 0);
-    cam.camera.lookAt(0,0,0);
+    cam.camera.lookAt(0, 0, 0);
 }
 
-function startGame()
-{
+function startGame() {
     cam.camera.position.y = 220;
     lastTime = performance.now();
     renderer.setAnimationLoop(gameLoop);  // Start the animation loop
@@ -1703,8 +1524,7 @@ function startGame()
     //createText("Test", 5, 0, 1, 0, scene);
 }
 
-function createMatch(p1, p2)
-{
+function createMatch(p1, p2) {
     let match = new MENU.Match();
 
     match.leftSide = p1;
@@ -1714,10 +1534,8 @@ function createMatch(p1, p2)
     console.log(match.leftSide, "vs", match.rightSide);
 }
 
-function playNextMatch()
-{
-    if (tourney.MatchArray.length > 0)
-    {
+function playNextMatch() {
+    if (tourney.MatchArray.length > 0) {
         p1.name = tourney.MatchArray[0].leftSide;
         p2.name = tourney.MatchArray[0].rightSide;
         startGame();
@@ -1725,15 +1543,13 @@ function playNextMatch()
     }
 }
 
-function matchMaker()
-{
+function matchMaker() {
     let first;
     let second;
     let leftSide;
     let rightSide;
 
-    while (tourney.playerArray.length > 1)
-    {
+    while (tourney.playerArray.length > 1) {
         first = Math.floor(Math.random() * tourney.playerArray.length);
         leftSide = tourney.playerArray[first];
         //console.log("first: ", first);
@@ -1741,59 +1557,53 @@ function matchMaker()
         second = Math.floor(Math.random() * tourney.playerArray.length);
         //console.log("second: ", second);
         rightSide = tourney.playerArray[second];
-        tourney.playerArray.splice(second, 1); 
+        tourney.playerArray.splice(second, 1);
         createMatch(leftSide, rightSide);
     }
 }
 
-tourney.inputBox.addEventListener("keydown", function(event) {
+tourney.inputBox.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         tourney.submitButton.click(); // Trigger the button click
     }
 });
 
-tourney.submitButton.addEventListener("click", function() 
-{
+tourney.submitButton.addEventListener("click", function () {
     if (tourney.inputBox.value == "")
         return;
-    if (tourney.inputBox.value.length > 12)
-    {
+    if (tourney.inputBox.value.length > 12) {
         tourney.statusText.innerText = "Player name is too long";
         tourney.statusText.style.display = "block";
         return;
     }
-    if (!(/^[\x20-\x7E]*$/.test(tourney.inputBox.value)))
-    {
+    if (!(/^[\x20-\x7E]*$/.test(tourney.inputBox.value))) {
         tourney.statusText.innerText = "Unsupported characters found";
         tourney.statusText.style.display = "block";
         return;
     }
 
-    if (tourney.playerArray.length == 8)
-    {
+    if (tourney.playerArray.length == 8) {
         tourney.statusText.innerText = "Maximum number of players are 8.";
         tourney.statusText.style.display = "block";
         tourney.inputBox.value = "";
         return;
     }
-    tourney.playerArray.push(tourney.inputBox.value); 
-    tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>"; 
+    tourney.playerArray.push(tourney.inputBox.value);
+    tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>";
     tourney.inPlayers.style.display = "block";
     tourney.inputBox.value = "";
 });
 
 
-tourney.startTourneyBut.addEventListener("click", function()
-{
+tourney.startTourneyBut.addEventListener("click", function () {
     visibleControl(tourney.everything, false, "none");
     playNextMatch();
 });
 
-function    appearBut(button)
-{
+function appearBut(button) {
     let op = parseFloat(window.getComputedStyle(button).opacity); // Convert opacity to a number
     let x = parseFloat(window.getComputedStyle(button).left);
-    
+
     // Check if opacity is already 0 (in case button is already invisible)
     if (op === 1) return;
 
@@ -1814,12 +1624,11 @@ function    appearBut(button)
 
 }
 
-function    disappearBut(button)
-{
+function disappearBut(button) {
     console.log("Clicked");
     let op = parseFloat(window.getComputedStyle(button).opacity); // Convert opacity to a number
     let x = parseFloat(window.getComputedStyle(button).left);
-    
+
     // Check if opacity is already 0 (in case button is already invisible)
     if (op === 0) return;
 

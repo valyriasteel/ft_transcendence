@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.throttling import UserRateThrottle
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import logout
 from .serializers import Verify2FASerializer, UserCreateProfileSerializer
 from django.contrib.auth.models import User
@@ -19,6 +19,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import IntegrityError
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.views import View
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+import jwt
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -26,12 +30,14 @@ class Verify2FAThrottle(UserRateThrottle):
 
 
 class LoginIntra42View(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         url = f"{settings.OAUTH_AUTHORIZE}?client_id={settings.SOCIAL_AUTH_42_KEY}&redirect_uri={settings.REDIRECT_URI}&response_type=code"
         return Response({'url': url})
 
 
 class CallbackIntra42View(APIView):
+    permission_classes = [AllowAny]
     def get(self, request):
         code = request.GET.get('code')
         if not code:
@@ -133,6 +139,7 @@ class CallbackIntra42View(APIView):
 
 class Verify2FAView(APIView):
     throttle_classes = [Verify2FAThrottle]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = Verify2FASerializer(data=request.data)
@@ -167,19 +174,43 @@ class Verify2FAView(APIView):
 
             # Generate JWT tokens for the user
             refresh = RefreshToken.for_user(user)  # Use the actual User instance here
-            return Response({
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
+
+            myToken = str(refresh.access_token)
+            myRefreshToken = str(refresh)
+
+            table = Response({
+                'access': myToken,
+                'refresh': myRefreshToken
             })
+            table.set_cookie(
+                "accessToken", myToken,  # Insert the actual token here
+                httponly=True,  # Prevent JavaScript access
+                secure=True,  # Use HTTPS in production
+                samesite="Strict",  # Restrict cross-site sharing
+            )
+            table.set_cookie(
+                "refreshToken", myRefreshToken,  # Insert the actual refresh token here
+                httponly=True,  # Prevent JavaScript access
+                secure=True,  # Use HTTPS in production
+                samesite="Strict",  # Restrict cross-site sharing
+            )
+
+            return table
 
         return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutAPIView(APIView):
+    print("buraya girdim")
     permission_classes = [IsAuthenticated]
-
+    
     def post(self, request):
-        refresh_token = request.data.get('refresh_token')
+        refresh_token = request.COOKIES.get('refreshToken')
+        print("Received refresh token:", refresh_token)  # Debug: Check the value of refresh token
+
+        # Refresh token'ı HTTP-only cookie'den alıyoruz
+        refresh_token = request.COOKIES.get('refreshToken')
+        
         if not refresh_token:
             return Response(
                 {'error': 'Refresh token is required.'},
@@ -187,39 +218,42 @@ class LogoutAPIView(APIView):
             )
 
         try:
-            # Blacklist the refresh token
+            # Refresh token'ı blackliste etme işlemi
             token = RefreshToken(refresh_token)
             token.blacklist()
-        except TokenError:
+            print("Token blacklist edildi")  # Debug: Token'ın blacklist işlemi
+        except TokenError as e:
+            print("TokenError:", e)  # Debug: Token hatasını yazdır
             return Response(
                 {'error': 'Invalid or expired refresh token.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
+            print("Unexpected error:", e)  # Debug: Diğer hatalar
             return Response(
                 {'error': 'An unexpected error occurred.', 'details': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Logout the user
+        # Logout işlemi
         logout(request)
         request.session.flush()
 
-        # Clear cookies
-        for cookie in ['sessionid', 'access_token', 'refresh_token']:
-            request.COOKIES.pop(cookie, None)
-
+        # Cookie'leri silme
         response = Response(
             {'message': 'Successfully logged out.'},
             status=status.HTTP_200_OK
         )
-        response.delete_cookie('sessionid')
-        response.delete_cookie('access_token')
-        response.delete_cookie('refresh_token')
-
+        
+        # Cookie'lerin silindiğinden emin olalım
+        response.delete_cookie('accessToken')
+        response.delete_cookie('refreshToken')
+        print("Çıkış işlemi başarılı")  # Debug: Çıkış mesajı
         return response
+
+
 class getProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
@@ -250,4 +284,20 @@ class TokenCheckView(APIView):
     authentication_classes = [JWTAuthentication]
     def get(self, request):
         return Response("basarili22222")
- 
+    
+from rest_framework.exceptions import AuthenticationFailed
+
+class TestApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Eğer token doğrulaması başarısızsa, burada özel hata mesajı dönebilirsiniz.
+        if not request.user.is_authenticated:
+            raise AuthenticationFailed('Token geçersiz veya süresi dolmuş.')
+        
+        return Response("Token var")
+
+class IndexRender(View):
+    def get(self, request):  # Use the appropriate HTTP method (GET)
+        return render(request, 'index.html')
+    
