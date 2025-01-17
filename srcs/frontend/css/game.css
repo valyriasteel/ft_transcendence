@@ -109,8 +109,8 @@ body
 {
 	position: absolute;
 	top: 45vh;
-	left: 18%;
-	z-index: 100;
+	left: 75%;
+	z-index: 10;
 	font-size: 5rem;
 	display: block;
 }
@@ -118,9 +118,9 @@ body
 #settingsBut
 {
 	position: absolute;
-	top: 45vh;
-	left: 60%;
-	z-index: 100;
+	top: 55vh;
+	left: 75%;
+	z-index: 10;
 	font-size: 5rem;
 	display: block;
 }
@@ -130,6 +130,16 @@ body
     display: none;
     top: 6%;
     left: 5%;
+    position: absolute;
+    font-size: 2rem;
+}
+
+#logoutBut
+{
+	z-index: 10;
+    display: block;
+    top: 6%;
+    left: 85%;
     position: absolute;
     font-size: 2rem;
 }

@@ -236,7 +236,7 @@ function loadTourneyElements() {
         sceneTransition(tourney.everything, select.everything);
     });
 }
-    
+
 loadMenuElements();
 loadSettingsElements();
 loadSelectElements();
@@ -416,7 +416,7 @@ function loadFont() {
 
 const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
-function resizeRenderer() {
+/*function resizeRenderer() {
     const targetAspect = 16 / 9; // Target aspect ratio (16:9)
 
     // Determine the maximum size for the renderer while preserving the aspect ratio
@@ -443,6 +443,41 @@ function resizeRenderer() {
     // Update camera aspect ratio
     cam.camera.aspect = targetAspect;
     cam.camera.updateProjectionMatrix();
+}*/
+
+/*const baseFOV = 75; // Default FOV
+const adjustFOV = () => {
+  const aspect = window.innerWidth / window.innerHeight;
+  cam.camera.fov = baseFOV / aspect; // Adjust FOV proportionally
+  console.log(cam.camera.fov);
+  cam.camera.updateProjectionMatrix();
+};
+
+function resizeRenderer()
+{
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.left = "0%";
+    renderer.domElement.style.top = "0%";
+    adjustFOV();
+}*/
+
+ function resizeRenderer()
+{
+      // Update canvas dimensions
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+
+  console.log("width", width, "height", height);
+  renderer.domElement.style.position = "absolute";
+  renderer.domElement.style.left = "0%";
+  renderer.domElement.style.top = "0%";
+  // Update renderer
+  renderer.setSize(width, height);
+
+  // Update camera aspect ratio and projection matrix
+  cam.camera.aspect = width / height;
+  cam.camera.updateProjectionMatrix();
 }
 
 
@@ -1352,10 +1387,80 @@ document.addEventListener('keydown', (event) => {
     else {
         p1KeyDown(event);
         p2KeyDown(event);
-        if (!(modeFour))
-            return;
+        //if (!(modeFour))
+          //  return;
         p3KeyDown(event);
         p4KeyDown(event);
+    }
+    if (event.key === '+')
+    {
+        const size = renderer.getSize(new THREE.Vector2());
+              // Update canvas dimensions
+        let width = size.width + 10;
+        let height = size.height;
+
+        renderer.domElement.style.position = "absolute";
+        renderer.domElement.style.left = "0%";
+        renderer.domElement.style.top = "0%";
+        // Update renderer
+        renderer.setSize(width, height);
+
+        // Update camera aspect ratio and projection matrix
+        cam.camera.aspect = width / height;
+        cam.camera.updateProjectionMatrix();
+    }
+    if (event.key === '-')
+    {
+        const size = renderer.getSize(new THREE.Vector2());
+              // Update canvas dimensions
+        let width = size.width - 10;
+        let height = size.height;
+    
+       renderer.domElement.style.position = "absolute";
+        renderer.domElement.style.left = "0%";
+        renderer.domElement.style.top = "0%";
+        // Update renderer
+        renderer.setSize(width, height);
+    
+       // Update camera aspect ratio and projection matrix
+        cam.camera.aspect = width / height;
+        cam.camera.updateProjectionMatrix();    
+    }
+
+    if (event.key === 'q')
+    {
+        const size = renderer.getSize(new THREE.Vector2());
+              // Update canvas dimensions
+        let width = size.width;
+        let height = size.height + 10;
+    
+       renderer.domElement.style.position = "absolute";
+        renderer.domElement.style.left = "0%";
+        renderer.domElement.style.top = "0%";
+        // Update renderer
+        renderer.setSize(width, height);
+    
+       // Update camera aspect ratio and projection matrix
+        cam.camera.aspect = width / height;
+        cam.camera.updateProjectionMatrix();    
+    }
+  
+    if (event.key === 'e')
+    {
+        const size = renderer.getSize(new THREE.Vector2());
+              // Update canvas dimensions
+        let width = size.width;
+        let height = size.height - 10;
+    
+       renderer.domElement.style.position = "absolute";
+        renderer.domElement.style.left = "0%";
+        renderer.domElement.style.top = "0%";
+        // Update renderer
+        renderer.setSize(width, height);
+    
+       // Update camera aspect ratio and projection matrix
+        cam.camera.aspect = width / height;
+        cam.camera.updateProjectionMatrix();    
     }
 }
 );
