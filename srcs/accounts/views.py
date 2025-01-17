@@ -320,36 +320,38 @@ class TestApiView(APIView):
         access_token = request.COOKIES.get('accessToken')
         refresh_token = request.COOKIES.get('refreshToken')
 
-        # Log tokens (for debugging)
-        logger.info(f"Access Token: {access_token}")
-        logger.info(f"Refresh Token: {refresh_token}")
-        
         if not refresh_token:
-            
             logger.warning("No refresh token provided.")
-            return Response({"error": "Refresh token is missing.", 
-                            "flag": 'no_refresh'}, status=401)
+            response = Response({"error": "Refresh token is missing.", "flag": 'no_refresh'}, status=401)
+            response.delete_cookie('accessToken')
+            return response
+        try:
+            refresh = RefreshToken(refresh_token)
+        except TokenError as e:
+            logger.error(f"Token validation failed: {str(e)}")
+            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response.delete_cookie('refreshToken')
+            response.delete_cookie('accessToken')
+            return response
         
         # Handle missing tokens
         if not access_token:
             logger.warning("No access token provided.")
-            refresh = RefreshToken(refresh_token)
             new_access_token = str(refresh.access_token)
             response = Response({
-                    'message': 'Token is generating...',
-                    'access': new_access_token,
-                    'flag': 'new_token',
-                })
-
+                'message': 'Token is generating...',
+                'access': new_access_token,
+                'flag': 'new_token',
+            })
             response.set_cookie(
-                    "accessToken", new_access_token,
-                    httponly=True,
-                    secure=True,
-                    samesite="Strict"
-                )
+                "accessToken", new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="Strict"
+            )
+            logger.info("Generating access token...")
             return response
         
-        logger.info("buraya girdim invalid token")
         try:
             # Verify access token
             auth = JWTAuthentication()
@@ -360,7 +362,7 @@ class TestApiView(APIView):
 
             logger.info(f"User {user.username} authenticated successfully.")
 
-                # Return new access token in the response
+            # Return new access token in the response
             response = Response({
                 'message': 'Token is valid!',
                 'flag': 'all_ok',
@@ -369,44 +371,42 @@ class TestApiView(APIView):
 
         except InvalidToken as e:
             logger.info(str(e).lower())
-
-            
             if 'accesstoken' in str(e).lower():
-                refresh = RefreshToken(refresh_token)
                 new_access_token = str(refresh.access_token)
                 response = Response({
-                    'message': 'Token is generating...',
+                    'message': 'Token is expired, generating new token...',
                     'access': new_access_token,
                     'flag': 'new_token',
                 })
                 response.set_cookie(
-                        "accessToken", new_access_token,
-                        httponly=True,
-                        secure=True,
-                        samesite="Strict"
-                    )
-                return response
-        except TokenError as e:
-            logger.info("buraya girdim invalid token")
-            refresh = RefreshToken(refresh_token)
-            new_access_token = str(refresh.access_token)
-            response = Response({
-                    'message': 'Token is generating...',
-                    'access': new_access_token,
-                    'flag': 'new_token',
-                })
-
-            response.set_cookie(
                     "accessToken", new_access_token,
                     httponly=True,
                     secure=True,
                     samesite="Strict"
                 )
+                return response
+        except TokenError as e:
+            logger.info("buraya girdim invalid token")
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                'message': 'Token values is invalid, generating new token...',
+                'access': new_access_token,
+                'flag': 'new_token',
+            })
+            response.set_cookie(
+                "accessToken", new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="Strict"
+            )
             return response
 
         except Exception as e:
             logger.error(f"Unexpected error: {str(e)}")
-            return Response({"error": "An unexpected error occurred."}, status=500)
+            response = Response({"error": "An unexpected error occurred."}, status=500)
+            response.delete_cookie('accessToken')
+            response.delete_cookie('refreshToken')
+            return response
 
 class IndexRender(View):
     def get(self, request):  # Use the appropriate HTTP method (GET)
