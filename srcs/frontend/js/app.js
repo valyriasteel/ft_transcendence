@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("start-button").addEventListener("click", async () => {
         try {
             // Game sayfasına istek at ve kullanıcı verilerini al
-            const tokenResponse = await fetch('/accounts/tokencheck/', {
+            const tokenResponse = await fetch('/accounts/test/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
