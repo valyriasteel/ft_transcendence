@@ -1,17 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Pong Game</title>
-		<link id="dynamic-favicon" rel="icon" href="../ico/favicon-1.png" type="image/png">
-		<link rel="stylesheet" href="../css/game.css">
-	</head>
-	<body>
 		<!-- Main Menu-->
 		<div id="menu">
 			<button id="startBut">Play</button>
 			<button id="settingsBut">Settings</button>
+			<button id="logoutBut">Logout</button>
+		</div>
+
+		<!-- User Profile -->
+		<div id="userProfile" class="user-profile">
+			<div class="profile-info">
+				<img id="userAvatar" class="avatar" src="" alt="User Avatar">
+				<div class="user-details">
+					<h3 id="username"></h3>
+					<p id="userName"></p>
+					<p id="userEmail"></p>
+				</div>
+			</div>
 		</div>
 
 		<!-- Settings-->
@@ -61,27 +64,3 @@
 			<div id="leftScore"></div>
 			<div id="rightScore"></div>
 		</div>
-
-		<script type="importmap">
-			{
-			  "imports": {
-				"three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
-				"FontLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/FontLoader.js",
-				"TextGeo": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/geometries/TextGeometry.js",
-				"ExrLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/EXRLoader.js",
-				"OrbitControl": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/controls/OrbitControls.js"
-			  }
-			}
-		</script>
-		<script src="../js/favicon.js"></script>
-		<script type="module" src="../js/script.js"></script>
-		<script type="module" src="../js/ai.js"></script>
-		<script type="module" src="../js/AudioMan.js"></script>
-		<script type="module" src="../js/Ball.js"></script>
-		<script type="module" src="../js/Camera.js"></script>
-		<script type="module" src="../js/CursorDetect.js"></script>
-		<script type="module" src="../js/MenuStuff.js"></script>
-		<script type="module" src="../js/Player.js"></script>
-	</body>
-	<div id="info">Description</div>
-</html>
