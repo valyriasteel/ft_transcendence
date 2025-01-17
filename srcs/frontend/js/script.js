@@ -330,8 +330,6 @@ function getCookie(name) {
 }
 
 try {
-    console.log("1");
-
 const gameResponse = await fetch('/accounts/get_profile/', {
     method: 'GET',
     headers: {
@@ -339,10 +337,8 @@ const gameResponse = await fetch('/accounts/get_profile/', {
     },
     credentials: 'include'
 });
-    console.log("2");
 if (gameResponse.ok) {
     const data = await gameResponse.json();
-    console.log("3");
 
     // Kullanıcı bilgilerini göster
     if (data.user) {
