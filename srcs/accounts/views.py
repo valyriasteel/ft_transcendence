@@ -22,7 +22,15 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.views import View
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+import logging
+
+logging.basicConfig(
+    filename='app.log',  # Specify the log file name
+    level=logging.DEBUG,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
+)
+logging.basicConfig(level=logging.INFO)
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -301,19 +309,104 @@ class GetProfileView(APIView):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
 
-from rest_framework.exceptions import AuthenticationFailed
+logger = logging.getLogger(__name__)
 
 class TestApiView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        # Eğer token doğrulaması başarısızsa, burada özel hata mesajı dönebilirsiniz.
-        if not request.user.is_authenticated:
-            raise AuthenticationFailed('Token geçersiz veya süresi dolmuş.')
+        # Get tokens from cookies
+        access_token = request.COOKIES.get('accessToken')
+        refresh_token = request.COOKIES.get('refreshToken')
+
+        # Log tokens (for debugging)
+        logger.info(f"Access Token: {access_token}")
+        logger.info(f"Refresh Token: {refresh_token}")
         
-        return Response("Token var")
+        if not refresh_token:
+            
+            logger.warning("No refresh token provided.")
+            return Response({"error": "Refresh token is missing.", 
+                            "flag": 'no_refresh'}, status=401)
+        
+        # Handle missing tokens
+        if not access_token:
+            logger.warning("No access token provided.")
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                    'message': 'Token is generating...',
+                    'access': new_access_token,
+                    'flag': 'new_token',
+                })
+
+            response.set_cookie(
+                    "accessToken", new_access_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Strict"
+                )
+            return response
+        
+        logger.info("buraya girdim invalid token")
+        try:
+            # Verify access token
+            auth = JWTAuthentication()
+            validated_token = auth.get_validated_token(access_token)  # This will raise if invalid or expired
+
+            # Optionally, retrieve user associated with token
+            user = auth.get_user(validated_token)
+
+            logger.info(f"User {user.username} authenticated successfully.")
+
+                # Return new access token in the response
+            response = Response({
+                'message': 'Token is valid!',
+                'flag': 'all_ok',
+            })
+            return response
+
+        except InvalidToken as e:
+            logger.info(str(e).lower())
+
+            
+            if 'accesstoken' in str(e).lower():
+                refresh = RefreshToken(refresh_token)
+                new_access_token = str(refresh.access_token)
+                response = Response({
+                    'message': 'Token is generating...',
+                    'access': new_access_token,
+                    'flag': 'new_token',
+                })
+                response.set_cookie(
+                        "accessToken", new_access_token,
+                        httponly=True,
+                        secure=True,
+                        samesite="Strict"
+                    )
+                return response
+        except TokenError as e:
+            logger.info("buraya girdim invalid token")
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                    'message': 'Token is generating...',
+                    'access': new_access_token,
+                    'flag': 'new_token',
+                })
+
+            response.set_cookie(
+                    "accessToken", new_access_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Strict"
+                )
+            return response
+
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            return Response({"error": "An unexpected error occurred."}, status=500)
 
 class IndexRender(View):
     def get(self, request):  # Use the appropriate HTTP method (GET)
