@@ -1,10 +1,12 @@
-FROM nginx:alpine
+FROM nginx:1.27.3-alpine
 
 RUN apk update && apk upgrade && \
-    apk add openssl && rm -rf /var/cache/apk/*
+    apk add openssl && \
+    rm -rf /var/cache/apk/* && \
+    apk cache clean
 
 COPY nginx_certs.sh /tmp
-COPY ./www/ /usr/share/nginx/html
+COPY . /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
 
 RUN chmod +x /tmp/nginx_certs.sh

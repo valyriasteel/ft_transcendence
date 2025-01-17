@@ -1,0 +1,138 @@
+/* Reset and Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', sans-serif;
+    background: #000000;
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Animated Dark Gradient Background */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 20%, #1a237e, #000000, #311b92);
+    background-size: 200% 200%;
+    z-index: -2;
+    animation: darkNeonBG 5s infinite alternate;
+}
+
+@keyframes darkNeonBG {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 50% 50%; }
+    100% { background-position: 0% 100%; }
+}
+
+/* CRT Scanline Effect */
+body::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.03),
+        rgba(255, 255, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+    );
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Pong Ball */
+.pong-ball {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #00e5ff, 0 0 40px #00e5ff;
+    z-index: 2;
+}
+
+/* Central Glow Effect */
+.central-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.1), transparent);
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    animation: glowPulse 6s infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.5; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Welcome Heading with Gradient Animation */
+.welcome-heading {
+    font-size: 3.5rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #ff7eb3, #ff758c, #ffde7b, #7bdff2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: gradientShift 5s infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Animated Button */
+.start-button {
+    font-size: 1.5rem;
+    color: white;
+    background-color: #ff5722;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ff5722, 0 0 20px #ff5722;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+.start-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px #ffab91, 0 0 40px #ffab91;
+    background-color: #ffab91;
+}
+
+/* Spacing */
+.spacing {
+    margin-bottom: 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    body {
+        background-size: 300% 300%;
+    }
+
+    h1 {
+        font-size: 6vw;
+    }
+
+    .pong-ball {
+        width: 5vw;
+        height: 5vw;
+    }
+}
