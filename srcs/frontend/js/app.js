@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // 2. ImportMap'i ekle
             const importMap = document.createElement('script');
             importMap.type = 'importmap';
+            importMap.id = 'map';
             importMap.textContent = JSON.stringify({
                 imports: {
                     "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
@@ -190,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.loadIndexPage = async function loadIndexPage() {
         try {
             removeCSSById('css');
-            const importmap = document.getElementById('Description');
+            const importmap = document.getElementById('map');
             if (importmap) {
                 importmap.remove(); // DOM'dan kaldırır
             }
@@ -208,15 +209,16 @@ document.addEventListener("DOMContentLoaded", () => {
             removeScript('../js/MenuStuff.js');
             removeScript('../js/Player.js');
             addCSSById('css', '../css/background.css');
-            loadScript('../js/background.js');
+            revertIndexScript('../js/background.js');
             // 1. Önce index.html içeriğini yükle
-            const response = await fetch("../html/index.html");
+            const response = await fetch("../html/index2.html");
             if (!response.ok) {
                 throw new Error("Failed to load game page.");
             }
-
             const html = await response.text();
+            const app = document.getElementById('app');
             app.innerHTML = html;
+            ball();
 
 
         } catch (error) {
@@ -272,6 +274,12 @@ document.addEventListener("DOMContentLoaded", () => {
     
         // Yeni link öğesini head kısmına ekliyoruz
         document.head.appendChild(newLink);
+    }
+
+    function revertIndexScript(scriptPath) {
+        const script = document.createElement("script");
+        script.src = scriptPath;
+        document.body.appendChild(script);
     }
 });
 

@@ -1,0 +1,118 @@
+2025-01-17 18:20:44,524 - WARNING - No refresh token provided.
+2025-01-17 18:20:44,526 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 18:20:53,572 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:20:54,063 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 18:20:54,065 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:20:54,899 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 18:24:51,627 - INFO - User bbosnak authenticated successfully.
+2025-01-17 18:30:54,098 - WARNING - No refresh token provided.
+2025-01-17 18:30:54,099 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 18:30:55,019 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:30:55,572 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 18:30:55,651 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:30:56,438 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 18:34:01,110 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:34:01,561 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 18:34:01,563 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:34:02,215 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 18:42:39,568 - WARNING - No refresh token provided.
+2025-01-17 18:42:39,570 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 18:42:40,084 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:42:40,554 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 18:42:40,556 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:42:41,230 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 18:44:00,425 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:44:00,804 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 18:44:00,883 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 18:44:01,531 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:00:25,427 - WARNING - No refresh token provided.
+2025-01-17 19:00:25,430 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:00:25,915 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:00:26,339 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:00:26,417 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:00:27,134 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:02:11,228 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:02:11,612 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:02:11,691 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:02:12,256 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:03:55,237 - WARNING - No refresh token provided.
+2025-01-17 19:03:55,238 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:03:55,412 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:03:55,778 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:03:55,860 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:03:56,497 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:05:13,930 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:05:14,341 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:05:14,419 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:05:15,069 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:14:26,246 - WARNING - No refresh token provided.
+2025-01-17 19:14:26,249 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:14:26,727 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:14:27,196 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:14:27,199 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:14:27,926 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:17:44,587 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:17:44,959 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:17:44,961 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:17:45,617 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:19:09,957 - WARNING - No refresh token provided.
+2025-01-17 19:19:09,958 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:19:10,127 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:19:10,508 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:19:10,510 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:19:11,095 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:19:27,336 - WARNING - Bad Request: /accounts/verify-2fa/
+2025-01-17 19:20:46,595 - WARNING - No refresh token provided.
+2025-01-17 19:20:46,596 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:20:46,781 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:20:47,230 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:20:47,313 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:20:47,951 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:26:13,977 - WARNING - No refresh token provided.
+2025-01-17 19:26:13,978 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:26:14,193 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:26:14,565 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:26:14,644 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:26:15,297 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:32:49,175 - WARNING - No refresh token provided.
+2025-01-17 19:32:49,177 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:32:49,407 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:32:49,817 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:32:49,902 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:32:50,541 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:40:46,404 - WARNING - No refresh token provided.
+2025-01-17 19:40:46,405 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:40:46,928 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:40:47,342 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:40:47,344 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:40:48,006 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:41:31,094 - WARNING - No refresh token provided.
+2025-01-17 19:41:31,095 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:41:31,284 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:41:31,652 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:41:31,729 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:41:32,388 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:43:12,148 - WARNING - No refresh token provided.
+2025-01-17 19:43:12,149 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:43:12,353 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:43:12,721 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:43:12,726 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:43:13,356 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:43:52,885 - WARNING - No refresh token provided.
+2025-01-17 19:43:52,885 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:43:53,064 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:43:53,453 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:43:53,534 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:43:54,179 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:44:38,132 - WARNING - No refresh token provided.
+2025-01-17 19:44:38,133 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:44:38,340 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:44:38,735 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:44:38,812 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:44:39,441 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:45:11,632 - WARNING - No refresh token provided.
+2025-01-17 19:45:11,634 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:45:11,827 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:45:12,280 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:45:12,282 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:45:12,980 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
