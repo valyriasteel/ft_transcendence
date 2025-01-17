@@ -219,30 +219,6 @@ class LogoutAPIView(APIView):
         # Refresh token'ı HTTP-only cookie'den alıyoruz
         refresh_token = request.COOKIES.get('refreshToken')
         
-        if not refresh_token:
-            return Response(
-                {'error': 'Refresh token is required.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            # Refresh token'ı blackliste etme işlemi
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            print("Token blacklist edildi")  # Debug: Token'ın blacklist işlemi
-        except TokenError as e:
-            print("TokenError:", e)  # Debug: Token hatasını yazdır
-            return Response(
-                {'error': 'Invalid or expired refresh token.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            print("Unexpected error:", e)  # Debug: Diğer hatalar
-            return Response(
-                {'error': 'An unexpected error occurred.', 'details': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         # Logout işlemi
         logout(request)
         request.session.flush()
