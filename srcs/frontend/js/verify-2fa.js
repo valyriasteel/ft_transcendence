@@ -1,4 +1,4 @@
-document.getElementById('2fa-form').addEventListener('submit', async (event) => {
+document.getElementById('verifyForm').addEventListener('submit', async (event) => {
     event.preventDefault(); // Prevent default form submission
 
     // Get the form data

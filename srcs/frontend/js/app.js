@@ -1,32 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("app");
-    const style = document.getElementById("test");
-
-    document.getElementById("testBut").addEventListener("click", async () => {
-        try {
-            const creatResponse = await fetch('/accounts/test/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include'
-            });
-            const data = await creatResponse.json();
-            if (creatResponse.ok) {
-                console.log("Response OK");
-                const data = await creatResponse.json();  // Yanıtı JSON'a dönüştür
-                console.log(data);
-            }
-        } catch (error) {
-            console.error('Request failed', error);
-            alert('An error occurred: ' + error.message);
-        }
-    });
-    
-
 
     // Giriş başlatma işlemi !!!!!Buralara bakilacak
-    document.getElementById("startLogin").addEventListener("click", async () => {
+    document.getElementById("start-button").addEventListener("click", async () => {
         try {
             // Game sayfasına istek at ve kullanıcı verilerini al
             const tokenResponse = await fetch('/accounts/tokencheck/', {
@@ -51,33 +27,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const loginData = await loginResponse.json();
             window.location.href = loginData.url;
         }
-
-
-            //try {
-            //    // Giriş API'sine istek gönder
-            //    const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
-            //    const response = await fetch(loginApi);
-            //    
-            //    if (!response.ok) {
-            //        throw new Error("Login request failed!");
-            //    }
-            //    
-            //    // API'den dönen URL'ye yönlendirme
-            //    const data = await response.json();
-            //    if (data.url) {
-            //        window.location.href = data.url; // 42'nin login sayfasına yönlendir
-            //    }
-            //} catch (error) {
-            //    console.error("Login error:", error);
-            //}
-
         });
 
     // Doğrulama sayfasını yükle
     async function loadVerificationPage() {
         try {
+            removeCSSById('css');
+            removeScript('../js/background.js');
+            addCSSById('css', '../css/verify-2fa.css');
             // verify2-fa.html içeriğini yükle
-            const response = await fetch("../html/verify2fa.html");
+            const response = await fetch("../html/verify-2fa.html");
             if (!response.ok) {
                 throw new Error("Failed to load verification page!");
             }
@@ -85,6 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const html = await response.text();
             app.innerHTML = html;
 
+            // Sayfa başlığını değiştir
+            document.title = "2FA Verification - Pong Game";
             // Doğrulama formunu dinle
             const form = document.getElementById("verifyForm");
             form.addEventListener("submit", handleVerification);
@@ -115,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ code, email }),
+                body: JSON.stringify({ email, code }),
             });
 
             // Yanıtı işle
@@ -127,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (response.ok) {
                 // Başarılı yanıt
-                messageDiv.innerHTML = `<p style="color: green;">Verification successful! Access token: ${result.access || 'No access token provided.'}</p>`;
+                messageDiv.innerHTML = `<p style="color: green;">Verification successful! Redirect to the game page...</p>`;
                 form.reset(); // Formu temizle
                 window.loadGamePage(); // Oyun sayfasını yükle
             } else {
@@ -172,9 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.loadGamePage = async function loadGamePage() {
         try {
-            style.remove();
-            // 1. Önce game2.html içeriğini yükle
-            const response = await fetch("../html/game2.html");
+            removeCSSById('css');
+            // 1. Önce game.html içeriğini yükle
+            const response = await fetch("../html/game.html");
             if (!response.ok) {
                 throw new Error("Failed to load game page.");
             }
@@ -182,7 +143,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const game2Html = doc.body.innerHTML;
+            const gameHtml = doc.body.innerHTML;
+
+            document.body.classList.remove('d-flex', 'flex-column', 'justify-content-center', 'align-items-center', 'vh-100');
+
+            document.title = "Pong Game"; // Sayfa başlığını değiştir
 
             // 2. ImportMap'i ekle
             const importMap = document.createElement('script');
@@ -192,12 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
                     "FontLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/FontLoader.js",
                     "TextGeo": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/geometries/TextGeometry.js",
-                    "ExrLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/EXRLoader.js"
+                    "ExrLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/EXRLoader.js",
+                    "OrbitControl": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/controls/OrbitControls.js"
                 }
             });
             document.head.appendChild(importMap);
-
-
 
             // 6. Info div'ini ekle
             const infoDiv = document.createElement('div');
@@ -206,101 +170,59 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.appendChild(infoDiv);
 
             // game2.html içeriğini app elementine ekle
-            app.innerHTML = game2Html;
+            app.innerHTML = gameHtml;
             // 3. CSS yükle
-            await loadCSS()
+            addCSSById('css', '../css/game.css');
             // 5. Diğer script'leri yükle
-            await loadModules();
+            loadScript('../js/script.js');
+            loadScript('../js/ai.js');
+            loadScript('../js/AudioMan.js');
+            loadScript('../js/Ball.js');
+            loadScript('../js/Camera.js');
+            loadScript('../js/CursorDetect.js');
+            loadScript('../js/MenuStuff.js');
+            loadScript('../js/Player.js');
         } catch (error) {
             console.error("Error loading game page:", error);
         }
     }
 
-    // Modül script'lerini yükleme fonksiyonu
-    function loadModules() {
-        const modules = [
-            '../js/script.js',
-            '../js/ai.js',
-            '../js/AudioMan.js',
-            '../js/Ball.js',
-            '../js/Camera.js',
-            '../js/CursorDetect.js',
-            '../js/MenuStuff.js',
-            '../js/Player.js',
-        ];
-
-        return Promise.all(modules.map(src => {
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = src;
-            return new Promise((resolve, reject) => {
-                script.onload = () => {
-                    console.log(`${src} loaded`);
-                    resolve();
-                };
-                script.onerror = () => reject(new Error(`Module load error: ${src}`));
-                document.body.appendChild(script);
-            });
-        }));
-    }
-
-    function loadCSS() {
-        return new Promise((resolve) => {
-            if (!document.querySelector('link[href="../css/game.css"]')) {
-                const cssLink = document.createElement("link");
-                cssLink.rel = "stylesheet";
-                cssLink.href = "../css/game.css";
-                cssLink.onload = () => resolve();
-                document.head.appendChild(cssLink);
-            } else {
-                resolve();
-            }
-        });
-    }
-
-    function loadIndexCSS() {
-        return new Promise((resolve) => {
-            if (!document.querySelector('link[href="../css/style.css"]')) {
-                const cssLink = document.createElement("link");
-                cssLink.rel = "stylesheet";
-                cssLink.href = "../css/style.css";
-                cssLink.onload = () => resolve();
-                document.head.appendChild(cssLink);
-            } else {
-                resolve();
-            }
-        });
-    }
-
     window.loadIndexPage = async function loadIndexPage() {
         try {
-            // 1. Önce game2.html içeriğini yükle
+            removeCSSById('css');
+            const importmap = document.getElementById('Description');
+            if (importmap) {
+                importmap.remove(); // DOM'dan kaldırır
+            }
+            const infoDiv = document.getElementById('info');
+            if (infoDiv) {
+                infoDiv.remove(); // DOM'dan kaldırır
+            }
+            document.body.classList.add('d-flex', 'flex-column', 'justify-content-center', 'align-items-center', 'vh-100');
+            removeScript('../js/script.js');
+            removeScript('../js/ai.js');
+            removeScript('../js/AudioMan.js');
+            removeScript('../js/Ball.js');
+            removeScript('../js/Camera.js');
+            removeScript('../js/CursorDetect.js');
+            removeScript('../js/MenuStuff.js');
+            removeScript('../js/Player.js');
+            addCSSById('css', '../css/background.css');
+            loadScript('../js/background.js');
+            // 1. Önce index.html içeriğini yükle
             const response = await fetch("../html/index.html");
             if (!response.ok) {
                 throw new Error("Failed to load game page.");
             }
 
             const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const indexHtml = doc.body.innerHTML;
+            app.innerHTML = html;
 
-            // 6. Info div'ini ekle
-            const infoDiv = document.createElement('div');
-            infoDiv.id = 'info';
-            infoDiv.textContent = 'Description';
-            document.body.appendChild(infoDiv);
 
-            // game2.html içeriğini app elementine ekle
-            app.innerHTML = indexHtml;
-            // 3. CSS yükle
-            await loadIndexCSS();
-            // 5. Diğer script'leri yükle
-            await loadIndexModules();
         } catch (error) {
             console.error("Error loading game page:", error);
         }
-        document.getElementById("startLogin").addEventListener("click", async () => {
+        document.getElementById("start-button").addEventListener("click", async () => {
             try {
                 // Giriş API'sine istek gönder
                 const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
@@ -321,39 +243,35 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
-    function loadIndexModules() {
-        const modules = [
-            '../js/app.js'
-        ];
-
-        return Promise.all(modules.map(src => {
-            const script = document.createElement('script');
-            script.type = 'module';
-            script.src = src;
-            return new Promise((resolve, reject) => {
-                script.onload = () => {
-                    console.log(`${src} loaded`);
-                    resolve();
-                };
-                script.onerror = () => reject(new Error(`Module load error: ${src}`));
-                document.body.appendChild(script);
-            });
-        }));
+    function removeCSSById(id) {
+        const linkElement = document.getElementById(id);
+        if (linkElement) {
+            linkElement.parentNode.removeChild(linkElement);
+        }
     }
-
-    function loadCSS() {
-        return new Promise((resolve) => {
-            if (!document.querySelector('link[href="../css/game.css"]')) {
-                const cssLink = document.createElement("link");
-                cssLink.rel = "stylesheet";
-                cssLink.href = "../css/game.css";
-                cssLink.onload = () => resolve();
-                document.head.appendChild(cssLink);
-            } else {
-                resolve();
-            }
-        });
+    
+    function loadScript(scriptPath) {
+        const script = document.createElement("script");
+        script.src = scriptPath;
+        script.type = "module";
+        script.defer = true;
+        document.body.appendChild(script);
+    }
+    
+    function removeScript(scriptPath) {
+        const scripts = document.querySelectorAll(`script[src="${scriptPath}"]`);
+        scripts.forEach(script => script.parentNode.removeChild(script));
+    }
+    
+    function addCSSById(id, href) {
+        // Aynı id ile yeni bir link öğesi oluşturuyoruz
+        const newLink = document.createElement('link');
+        newLink.id = id;  // id'yi tekrar tanımlıyoruz
+        newLink.rel = 'stylesheet';
+        newLink.href = href;
+    
+        // Yeni link öğesini head kısmına ekliyoruz
+        document.head.appendChild(newLink);
     }
 });
 
