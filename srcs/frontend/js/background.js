@@ -2,15 +2,18 @@ document.addEventListener("DOMContentLoaded", () => {
     ball();
 });
 
-function ball()
-{
+function ball() {
     const ball = document.querySelector('.pong-ball');
     if (ball) {
-        const ballStyle = window.getComputedStyle(ball);
+        // Get ball dimensions
+        const ballWidth = ball.offsetWidth;
+        const ballHeight = ball.offsetHeight;
 
-        // Initialize ball position
-        let ballX = window.innerWidth / 2 - parseFloat(ballStyle.width) / 2;
-        let ballY = window.innerHeight / 2 - parseFloat(ballStyle.height) / 2;
+        // Generate random start positions for the ball
+        let ballX = Math.random() * (window.innerWidth - ballWidth);
+        let ballY = Math.random() * (window.innerHeight - ballHeight);
+
+        // Ball speed
         let ballSpeedX = 4;
         let ballSpeedY = 3;
 
@@ -19,17 +22,17 @@ function ball()
             ballY += ballSpeedY;
 
             // Bounce on sides
-            if (ballX <= 0 || ballX >= window.innerWidth - ball.offsetWidth) ballSpeedX *= -1;
+            if (ballX <= 0 || ballX >= window.innerWidth - ballWidth) ballSpeedX *= -1;
             // Bounce on top/bottom
-            if (ballY <= 0 || ballY >= window.innerHeight - ball.offsetHeight) ballSpeedY *= -1;
+            if (ballY <= 0 || ballY >= window.innerHeight - ballHeight) ballSpeedY *= -1;
 
             ball.style.left = `${ballX}px`;
             ball.style.top = `${ballY}px`;
         }
 
         function handleResize() {
-            ballX = Math.min(ballX, window.innerWidth - ball.offsetWidth);
-            ballY = Math.min(ballY, window.innerHeight - ball.offsetHeight);
+            ballX = Math.min(ballX, window.innerWidth - ballWidth);
+            ballY = Math.min(ballY, window.innerHeight - ballHeight);
         }
 
         window.addEventListener('resize', handleResize);
@@ -39,7 +42,7 @@ function ball()
             requestAnimationFrame(gameLoop);
         }
 
-        // Initialize ball position in DOM
+        // Set the initial random position for the ball
         ball.style.position = 'absolute';
         ball.style.left = `${ballX}px`;
         ball.style.top = `${ballY}px`;
