@@ -85,35 +85,146 @@ body::after {
 .welcome-heading {
     font-size: 3.5rem;
     font-weight: bold;
-    background: linear-gradient(90deg, #ff7eb3, #ff758c, #ffde7b, #7bdff2);
+    background: linear-gradient(90deg, #00e5ff, #00c4ff, #1779ff, #00e5ff);
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
-    animation: gradientShift 5s infinite;
+    animation: gradientShift 5s infinite, slideMotion 2s infinite ease-in-out;
 }
 
+/* Gradient Animation */
 @keyframes gradientShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-/* Animated Button */
-.start-button {
-    font-size: 1.5rem;
-    color: white;
-    background-color: #ff5722;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #ff5722, 0 0 20px #ff5722;
-    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+/* Sliding Motion Animation */
+@keyframes slideMotion {
+    0% { transform: translateX(-20px); }
+    50% { transform: translateX(20px); }
+    100% { transform: translateX(-20px); }
 }
 
-.start-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 20px #ffab91, 0 0 40px #ffab91;
-    background-color: #ffab91;
+
+/* Animated Button */
+a {
+    position: relative; /* Changed to relative so it adjusts with content flow */
+    display: inline-block;
+    margin-top: 2rem; /* Space between the text and button */
+    padding: 15px 30px; /* Reduced size of the button */
+    color: #1670f0;
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: 5px;
+    font-size: 20px; /* Reduced font size */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    text-align: center;
+    cursor: pointer; /* Added this line for hand cursor on hover */
+}
+
+a::before
+{
+  content:"";
+  position:absolute;
+  top:2px;
+  left:2px;
+  bottom:2px;
+  width:50%;
+  background:rgba(255,255,255,0.05);
+  
+}
+a span:nth-child(1)
+{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:linear-gradient(to right, #0c002b ,#1779ff);
+  animation: animate1 2s linear infinite;
+  animation-delay:1s;
+  
+}
+@keyframes animate1
+{
+  0%
+  {
+    transform:translateX(-100%);
+}
+  100%
+  {
+    transform:translateX(100%);
+  }
+}
+a span:nth-child(2)
+{
+  position:absolute;
+  top:0;
+  right:0;
+  width:2px;
+  height:100%;
+  background:linear-gradient(to bottom, #0c002b ,#1779ff);
+  animation: animate2 2s linear infinite;
+  animation-delay:2s;
+}
+@keyframes animate2
+{
+  0%
+  {
+    transform:translateY(-100%);
+}
+  100%
+  {
+    transform:translateY(100%);
+  }
+}
+a span:nth-child(3)
+{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:2px;
+  background:linear-gradient(to left, #0c002b ,#1779ff);
+   animation: animate3 2s linear infinite;
+  animation-delay:1s;
+  
+}
+@keyframes animate3
+{
+  0%
+  {
+    transform:translateX(100%);
+}
+  100%
+  {
+    transform:translateX(-100%);
+  }
+}
+a span:nth-child(4)
+{
+  position:absolute;
+  top:0;
+  left:0;
+  width:2px;
+  height:100%;
+  background:linear-gradient(to top, #0c002b ,#1779ff);
+   animation: animate4 2s linear infinite;
+  animation-delay:2s;
+  
+}
+@keyframes animate4
+{
+  0%
+  {
+    transform:translateY(100%);
+}
+  100%
+  {
+    transform:translateY(-100%);
+  }
 }
 
 /* Spacing */
