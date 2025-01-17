@@ -14,12 +14,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await creatResponse.json();
             if (creatResponse.ok) {
                 console.log("Response OK");
-                const data = await creatResponse.json();  // Yanıtı JSON'a dönüştür
                 console.log(data);
+            }
+            else{
+                console.log(data)
             }
         } catch (error) {
             console.error('Request failed', error);
-            alert('An error occurred: ' + error.message);
         }
     });
     
@@ -29,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("startLogin").addEventListener("click", async () => {
         try {
             // Game sayfasına istek at ve kullanıcı verilerini al
-            const tokenResponse = await fetch('/accounts/tokencheck/', {
+            const tokenResponse = await fetch('/accounts/test/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
