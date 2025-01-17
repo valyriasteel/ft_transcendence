@@ -22,7 +22,15 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.views import View
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+import logging
+
+logging.basicConfig(
+    filename='app.log',  # Specify the log file name
+    level=logging.DEBUG,  # Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
+)
+logging.basicConfig(level=logging.INFO)
 
 # Throttle for 2FA verification
 class Verify2FAThrottle(UserRateThrottle):
@@ -211,30 +219,6 @@ class LogoutAPIView(APIView):
         # Refresh token'ı HTTP-only cookie'den alıyoruz
         refresh_token = request.COOKIES.get('refreshToken')
         
-        if not refresh_token:
-            return Response(
-                {'error': 'Refresh token is required.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        try:
-            # Refresh token'ı blackliste etme işlemi
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            print("Token blacklist edildi")  # Debug: Token'ın blacklist işlemi
-        except TokenError as e:
-            print("TokenError:", e)  # Debug: Token hatasını yazdır
-            return Response(
-                {'error': 'Invalid or expired refresh token.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            print("Unexpected error:", e)  # Debug: Diğer hatalar
-            return Response(
-                {'error': 'An unexpected error occurred.', 'details': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         # Logout işlemi
         logout(request)
         request.session.flush()
@@ -251,8 +235,31 @@ class LogoutAPIView(APIView):
         print("Çıkış işlemi başarılı")  # Debug: Çıkış mesajı
         return response
 
+class TokenCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+    
 
-class GamePageView(APIView):
+    def get(self, request):
+        try:
+            # Token kontrolü
+            if not request.user.is_authenticated:
+                return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    
+            return Response({
+                'status': 'success',
+                'message': 'Authentication successful',
+            })
+        except UserCreateProfile.DoesNotExist:
+            return Response({
+                'error': 'User profile not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetProfileView(APIView):
     permission_classes = [IsAuthenticated]
     
 
@@ -279,23 +286,103 @@ class GamePageView(APIView):
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class TokenCheckView(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-    def get(self, request):
-        return Response("basarili22222")
-    
-from rest_framework.exceptions import AuthenticationFailed
+logger = logging.getLogger(__name__)
 
 class TestApiView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        # Eğer token doğrulaması başarısızsa, burada özel hata mesajı dönebilirsiniz.
-        if not request.user.is_authenticated:
-            raise AuthenticationFailed('Token geçersiz veya süresi dolmuş.')
+        # Get tokens from cookies
+        access_token = request.COOKIES.get('accessToken')
+        refresh_token = request.COOKIES.get('refreshToken')
+
+        if not refresh_token:
+            logger.warning("No refresh token provided.")
+            response = Response({"error": "Refresh token is missing.", "flag": 'no_refresh'}, status=401)
+            response.delete_cookie('accessToken')
+            return response
+        try:
+            refresh = RefreshToken(refresh_token)
+        except TokenError as e:
+            logger.error(f"Token validation failed: {str(e)}")
+            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response.delete_cookie('refreshToken')
+            response.delete_cookie('accessToken')
+            return response
         
-        return Response("Token var")
+        # Handle missing tokens
+        if not access_token:
+            logger.warning("No access token provided.")
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                'message': 'Token is generating...',
+                'access': new_access_token,
+                'flag': 'new_token',
+            })
+            response.set_cookie(
+                "accessToken", new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="Strict"
+            )
+            logger.info("Generating access token...")
+            return response
+        
+        try:
+            # Verify access token
+            auth = JWTAuthentication()
+            validated_token = auth.get_validated_token(access_token)  # This will raise if invalid or expired
+
+            # Optionally, retrieve user associated with token
+            user = auth.get_user(validated_token)
+
+            logger.info(f"User {user.username} authenticated successfully.")
+
+            # Return new access token in the response
+            response = Response({
+                'message': 'Token is valid!',
+                'flag': 'all_ok',
+            })
+            return response
+
+        except InvalidToken as e:
+            logger.info(str(e).lower())
+            if 'accesstoken' in str(e).lower():
+                new_access_token = str(refresh.access_token)
+                response = Response({
+                    'message': 'Token is expired, generating new token...',
+                    'access': new_access_token,
+                    'flag': 'new_token',
+                })
+                response.set_cookie(
+                    "accessToken", new_access_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Strict"
+                )
+                return response
+        except TokenError as e:
+            logger.info("buraya girdim invalid token")
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                'message': 'Token values is invalid, generating new token...',
+                'access': new_access_token,
+                'flag': 'new_token',
+            })
+            response.set_cookie(
+                "accessToken", new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="Strict"
+            )
+            return response
+
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            response = Response({"error": "An unexpected error occurred."}, status=500)
+            response.delete_cookie('accessToken')
+            response.delete_cookie('refreshToken')
+            return response
 
 class IndexRender(View):
     def get(self, request):  # Use the appropriate HTTP method (GET)
