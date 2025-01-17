@@ -2,33 +2,56 @@ document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("app");
     const style = document.getElementById("test");
 
+    document.getElementById("testBut").addEventListener("click", async () => {
+        try {
+            const creatResponse = await fetch('/accounts/test/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+            const data = await creatResponse.json();
+            if (creatResponse.ok) {
+                console.log("Response OK");
+                const data = await creatResponse.json();  // Yanıtı JSON'a dönüştür
+                console.log(data);
+            }
+        } catch (error) {
+            console.error('Request failed', error);
+            alert('An error occurred: ' + error.message);
+        }
+    });
+    
+
+
     // Giriş başlatma işlemi !!!!!Buralara bakilacak
     document.getElementById("startLogin").addEventListener("click", async () => {
-            try {
-                // Game sayfasına istek at ve kullanıcı verilerini al
-                const tokenResponse = await fetch('/accounts/tokencheck/', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include'
-                });
-                const index_data = await tokenResponse.json();
-                if (tokenResponse.ok) {
-                    console.log(index_data);
-                    window.loadGamePage();
-                } else {
-                    throw new Error('Game sayfası yüklenemedi');
-                }
-            } catch (error) {
-                console.error('Hata:', error.message || error);
-                // Token ile ilgili bir sorun varsa token'ları temizle
-                // 42 login'e yönlendir
-                const loginResponse = await fetch('/accounts/loginintra42/');
-                const loginData = await loginResponse.json();
-                window.location.href = loginData.url;
+        try {
+            // Game sayfasına istek at ve kullanıcı verilerini al
+            const tokenResponse = await fetch('/accounts/tokencheck/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+            const index_data = await tokenResponse.json();
+            if (tokenResponse.ok) {
+                console.log(index_data);
+                window.loadGamePage();
+            } else {
+                throw new Error('Game sayfası yüklenemedi');
             }
-        
+        } catch (error) {
+            console.error('Hata:', error.message || error);
+            // Token ile ilgili bir sorun varsa token'ları temizle
+            // 42 login'e yönlendir
+            const loginResponse = await fetch('/accounts/loginintra42/');
+            const loginData = await loginResponse.json();
+            window.location.href = loginData.url;
+        }
+
 
             //try {
             //    // Giriş API'sine istek gönder
@@ -47,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //} catch (error) {
             //    console.error("Login error:", error);
             //}
-        
+
         });
 
     // Doğrulama sayfasını yükle
@@ -73,17 +96,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // Doğrulama işlemi
     async function handleVerification(event) {
         event.preventDefault(); // Formun varsayılan davranışını durdur
-    
+
         const form = document.getElementById("verifyForm"); // Formu seç
         const code = document.getElementById("code").value; // Kullanıcının girdiği kod
         const email = document.getElementById("email").value; // Kullanıcının girdiği e-posta
-    
+
         // Daha önce gösterilen mesajları temizle
         const existingMessage = document.getElementById("messageDiv");
         if (existingMessage) {
             existingMessage.remove(); // Eğer bir mesaj zaten varsa, kaldır
         }
-    
+
         try {
             // Doğrulama API'sine istek gönder
             const verifyApi = `${window.location.protocol}//${window.location.host}/accounts/verify-2fa/`;
@@ -94,14 +117,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify({ code, email }),
             });
-    
+
             // Yanıtı işle
             const result = await response.json();
-    
+
             // Mesajları göstermek için bir div oluştur
             const messageDiv = document.createElement("div");
             messageDiv.id = "messageDiv"; // Mesaj div'ine benzersiz bir ID ver
-    
+
             if (response.ok) {
                 // Başarılı yanıt
                 messageDiv.innerHTML = `<p style="color: green;">Verification successful! Access token: ${result.access || 'No access token provided.'}</p>`;
@@ -112,12 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const errorMessage = result.error || "An unexpected error occurred.";
                 messageDiv.innerHTML = `<p style="color: red;">Error: ${errorMessage}</p>`;
             }
-    
+
             // Mesajı forma ekle
             form.parentNode.appendChild(messageDiv);
         } catch (error) {
             console.error("Verification error:", error);
-    
+
             // Beklenmeyen hatalar için kullanıcıya mesaj göster
             const messageDiv = document.createElement("div");
             messageDiv.id = "messageDiv";
@@ -125,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
             form.parentNode.appendChild(messageDiv);
         }
     }
-    
+
 
     function checkCallback() {
         // Cookie'yi kontrol et
@@ -134,16 +157,16 @@ document.addEventListener("DOMContentLoaded", () => {
             acc[key] = value;
             return acc;
         }, {});
-    
+
         // Eğer "callback_complete" cookie'si varsa doğrulama sayfasını yükle
         if (cookies.callback_complete === 'true') {
             loadVerificationPage(); // Doğrulama sayfasını yükle
-    
+
             // Cookie'yi temizle (tek seferlik kontrol için)
             document.cookie = "callback_complete=; Max-Age=0; path=/";
         }
     }
-    
+
     // Sayfa yüklendiğinde callback kontrolü
     checkCallback();
 
@@ -155,12 +178,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw new Error("Failed to load game page.");
             }
-    
+
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const game2Html = doc.body.innerHTML;
-    
+
             // 2. ImportMap'i ekle
             const importMap = document.createElement('script');
             importMap.type = 'importmap';
@@ -173,15 +196,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
             document.head.appendChild(importMap);
-    
 
-    
+
+
             // 6. Info div'ini ekle
             const infoDiv = document.createElement('div');
             infoDiv.id = 'info';
             infoDiv.textContent = 'Description';
             document.body.appendChild(infoDiv);
-    
+
             // game2.html içeriğini app elementine ekle
             app.innerHTML = game2Html;
             // 3. CSS yükle
@@ -192,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error loading game page:", error);
         }
     }
-    
+
     // Modül script'lerini yükleme fonksiyonu
     function loadModules() {
         const modules = [
@@ -205,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
             '../js/MenuStuff.js',
             '../js/Player.js',
         ];
-    
+
         return Promise.all(modules.map(src => {
             const script = document.createElement('script');
             script.type = 'module';
@@ -220,7 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }));
     }
-    
+
     function loadCSS() {
         return new Promise((resolve) => {
             if (!document.querySelector('link[href="../css/game.css"]')) {
@@ -256,18 +279,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw new Error("Failed to load game page.");
             }
-    
+
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const indexHtml = doc.body.innerHTML;
-    
+
             // 6. Info div'ini ekle
             const infoDiv = document.createElement('div');
             infoDiv.id = 'info';
             infoDiv.textContent = 'Description';
             document.body.appendChild(infoDiv);
-    
+
             // game2.html içeriğini app elementine ekle
             app.innerHTML = indexHtml;
             // 3. CSS yükle
@@ -282,11 +305,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Giriş API'sine istek gönder
                 const loginApi = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
                 const response = await fetch(loginApi);
-    
+
                 if (!response.ok) {
                     throw new Error("Login request failed!");
                 }
-    
+
                 // API'den dönen URL'ye yönlendirme
                 const data = await response.json();
                 if (data.url) {
@@ -299,12 +322,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function loadIndexModules()
-    {
+    function loadIndexModules() {
         const modules = [
             '../js/app.js'
         ];
-    
+
         return Promise.all(modules.map(src => {
             const script = document.createElement('script');
             script.type = 'module';
@@ -319,7 +341,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }));
     }
-    
+
     function loadCSS() {
         return new Promise((resolve) => {
             if (!document.querySelector('link[href="../css/game.css"]')) {
@@ -335,4 +357,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
- 
