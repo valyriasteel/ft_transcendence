@@ -186,3 +186,19 @@
 2025-01-17 23:55:30,602 - INFO - User tkaraaga authenticated successfully.
 2025-01-17 23:57:18,541 - INFO - User tkaraaga authenticated successfully.
 2025-01-17 23:58:01,157 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:28:35,060 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:40:08,868 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:44:07,558 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:45:41,700 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:56:01,788 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 19:58:13,150 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 20:05:01,900 - INFO - User tkaraaga authenticated successfully.
+2025-01-18 20:06:49,848 - WARNING - No refresh token provided.
+2025-01-18 20:06:49,848 - WARNING - Unauthorized: /accounts/test/
+2025-01-18 20:08:37,517 - WARNING - No refresh token provided.
+2025-01-18 20:08:37,517 - WARNING - Unauthorized: /accounts/test/
+2025-01-18 20:08:37,705 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-18 20:08:38,457 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-18 20:08:38,458 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-18 20:08:39,017 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-18 20:10:41,854 - INFO - User tkaraaga authenticated successfully.
