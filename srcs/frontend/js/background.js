@@ -1,19 +1,18 @@
+console.log("background.js loaded");
 document.addEventListener("DOMContentLoaded", () => {
     ball();
 });
 
 function ball() {
     const ball = document.querySelector('.pong-ball');
+    
     if (ball) {
-        // Get ball dimensions
         const ballWidth = ball.offsetWidth;
         const ballHeight = ball.offsetHeight;
 
-        // Generate random start positions for the ball
         let ballX = Math.random() * (window.innerWidth - ballWidth);
         let ballY = Math.random() * (window.innerHeight - ballHeight);
 
-        // Ball speed
         let ballSpeedX = 4;
         let ballSpeedY = 3;
 
@@ -21,9 +20,7 @@ function ball() {
             ballX += ballSpeedX;
             ballY += ballSpeedY;
 
-            // Bounce on sides
             if (ballX <= 0 || ballX >= window.innerWidth - ballWidth) ballSpeedX *= -1;
-            // Bounce on top/bottom
             if (ballY <= 0 || ballY >= window.innerHeight - ballHeight) ballSpeedY *= -1;
 
             ball.style.left = `${ballX}px`;
@@ -42,7 +39,6 @@ function ball() {
             requestAnimationFrame(gameLoop);
         }
 
-        // Set the initial random position for the ball
         ball.style.position = 'absolute';
         ball.style.left = `${ballX}px`;
         ball.style.top = `${ballY}px`;
