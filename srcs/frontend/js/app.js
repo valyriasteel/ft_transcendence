@@ -1,5 +1,25 @@
 console.log("app.js loaded");
 document.addEventListener("DOMContentLoaded", () => {
+
+    function navigateTo(page) {
+        if (page === "game") {
+            window.loadGamePage();
+        } else if (page === "verification") {
+            loadVerificationPage();
+        } else {
+            window.loadIndexPage();
+        }
+        history.pushState({ page }, "", `#${page}`);
+    }
+
+    window.addEventListener("popstate", (event) => {
+        if (event.state && event.state.page) {
+            navigateTo(event.state.page);
+        } else {
+            window.loadIndexPage();
+        }
+    });
+
     const app = document.getElementById("app");
     if (!app) {
         console.error("app element not found");
@@ -19,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await tokenResponse.json();
 
             if (tokenResponse.ok) {
-                window.loadGamePage();
+                navigateTo("game");
             } else {
                 console.log("Not logged in, redirecting to 42 login page...");
                 const loginpage = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
@@ -115,6 +135,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     checkCallback();
+
+    if (window.location.hash) {
+        const currentPage = window.location.hash.substring(1);
+        navigateTo(currentPage);
+    }
 
     window.loadGamePage = async function loadGamePage() {
         try {
