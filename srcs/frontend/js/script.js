@@ -284,7 +284,6 @@ const logoutButton = document.getElementById("logoutBut");
 logoutButton.addEventListener("click", handleLogout);
 
 async function handleLogout() {
-    const csrfToken = getCookie('csrftoken');  // CSRF token'ı alıyoruz
 
     try {
         // Çıkış işlemi için API isteği gönderiyoruz
@@ -292,24 +291,19 @@ async function handleLogout() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // CSRF token'ı
             },
             credentials: 'include'  // Cookie'lerin gönderilmesini sağlamak için
-        });        
+        });
 
         const data = await response.json();
 
-        if (response.ok)
-            {
-                console.log("logoutagirdim");
-                renderer.setAnimationLoop(null); // This stops the rendering loop
-                renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
-                renderer.clear(); // Clear the canvas
-                renderer.domElement.remove();
-                window.loadIndexPage();
-            } 
-        else
-            alert(data.error || 'Çıkış yaparken bir hata oluştu!');
+        if (response.ok) {
+            renderer.setAnimationLoop(null); // This stops the rendering loop
+            renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
+            renderer.clear(); // Clear the canvas
+            renderer.domElement.remove();
+            window.loadIndexPage();
+        }
     } catch (error) {
         console.error('Çıkış sırasında hata:', error);
         alert('Bir hata oluştu, lütfen tekrar deneyin.');
@@ -318,43 +312,29 @@ async function handleLogout() {
 
 }
 
-function getCookie(name) {
-    const cookieArray = document.cookie.split(';');
-    for (const cookie of cookieArray) {
-        const trimmedCookie = cookie.trim();
-        if (trimmedCookie.startsWith(name + '=')) {
-            return decodeURIComponent(trimmedCookie.substring(name.length + 1));
-        }
-    }
-    return null;
-}
-
 try {
-const gameResponse = await fetch('/accounts/get_profile/', {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    credentials: 'include'
-});
-if (gameResponse.ok) {
-    const data = await gameResponse.json();
+    const gameResponse = await fetch('/accounts/get_profile/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+    });
+    if (gameResponse.ok) {
+        const data = await gameResponse.json();
 
-    // Kullanıcı bilgilerini göster
-    if (data.user) {
-        document.getElementById('username').textContent = data.user.username || 'N/A';
-        document.getElementById('userEmail').textContent = data.user.email || 'N/A';
-        document.getElementById('userName').textContent = `${data.user.name || ''} ${data.user.surname || ''}`;
-        if (data.user.avatar) {
-            document.getElementById('userAvatar').src = "https://" + data.user.avatar.slice(10);
+        // Kullanıcı bilgilerini göster
+        if (data.user) {
+            document.getElementById('username').textContent = data.user.username || 'N/A';
+            document.getElementById('userEmail').textContent = data.user.email || 'N/A';
+            document.getElementById('userName').textContent = `${data.user.name || ''} ${data.user.surname || ''}`;
+            if (data.user.avatar) {
+                document.getElementById('userAvatar').src = "https://" + data.user.avatar.slice(10);
+            }
         }
     }
-} else {
-    throw new Error('Failed to fetch user data');
-}
 } catch (error) {
-console.error('Error fetching user data:', error);
-//window.location.href = '/'; //buraya ne olacağı yazılacak
+    console.error('Error fetching user data:', error);
 }
 
 //--------------------------------------------------------------------------------------------//
@@ -497,22 +477,21 @@ function resizeRenderer()
     adjustFOV();
 }*/
 
- function resizeRenderer()
-{
-      // Update canvas dimensions
-  let width = window.innerWidth;
-  let height = window.innerHeight;
+function resizeRenderer() {
+    // Update canvas dimensions
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-  console.log("width", width, "height", height);
-  renderer.domElement.style.position = "absolute";
-  renderer.domElement.style.left = "0%";
-  renderer.domElement.style.top = "0%";
-  // Update renderer
-  renderer.setSize(width, height);
+    console.log("width", width, "height", height);
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.left = "0%";
+    renderer.domElement.style.top = "0%";
+    // Update renderer
+    renderer.setSize(width, height);
 
-  // Update camera aspect ratio and projection matrix
-  cam.camera.aspect = width / height;
-  cam.camera.updateProjectionMatrix();
+    // Update camera aspect ratio and projection matrix
+    cam.camera.aspect = width / height;
+    cam.camera.updateProjectionMatrix();
 }
 
 
@@ -1423,14 +1402,13 @@ document.addEventListener('keydown', (event) => {
         p1KeyDown(event);
         p2KeyDown(event);
         //if (!(modeFour))
-          //  return;
+        //  return;
         p3KeyDown(event);
         p4KeyDown(event);
     }
-    if (event.key === '+')
-    {
+    if (event.key === '+') {
         const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
+        // Update canvas dimensions
         let width = size.width + 10;
         let height = size.height;
 
@@ -1444,58 +1422,55 @@ document.addEventListener('keydown', (event) => {
         cam.camera.aspect = width / height;
         cam.camera.updateProjectionMatrix();
     }
-    if (event.key === '-')
-    {
+    if (event.key === '-') {
         const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
+        // Update canvas dimensions
         let width = size.width - 10;
         let height = size.height;
-    
-       renderer.domElement.style.position = "absolute";
+
+        renderer.domElement.style.position = "absolute";
         renderer.domElement.style.left = "0%";
         renderer.domElement.style.top = "0%";
         // Update renderer
         renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
+
+        // Update camera aspect ratio and projection matrix
         cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
+        cam.camera.updateProjectionMatrix();
     }
 
-    if (event.key === 'q')
-    {
+    if (event.key === 'q') {
         const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
+        // Update canvas dimensions
         let width = size.width;
         let height = size.height + 10;
-    
-       renderer.domElement.style.position = "absolute";
+
+        renderer.domElement.style.position = "absolute";
         renderer.domElement.style.left = "0%";
         renderer.domElement.style.top = "0%";
         // Update renderer
         renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
+
+        // Update camera aspect ratio and projection matrix
         cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
+        cam.camera.updateProjectionMatrix();
     }
-  
-    if (event.key === 'e')
-    {
+
+    if (event.key === 'e') {
         const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
+        // Update canvas dimensions
         let width = size.width;
         let height = size.height - 10;
-    
-       renderer.domElement.style.position = "absolute";
+
+        renderer.domElement.style.position = "absolute";
         renderer.domElement.style.left = "0%";
         renderer.domElement.style.top = "0%";
         // Update renderer
         renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
+
+        // Update camera aspect ratio and projection matrix
         cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
+        cam.camera.updateProjectionMatrix();
     }
 }
 );
