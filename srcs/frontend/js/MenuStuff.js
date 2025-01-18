@@ -63,6 +63,7 @@ export class Mode
 		this.rightSideText;
 		this.volume = 0.5;
 		this.darkMode = false;
+		this.backGround;
 	}
 }
 
@@ -141,6 +142,7 @@ export class mainMenu
 	{
 		this.playBut;
 		this.settingsBut;
+		this.profile;
 		this.everything;
 	}
 }
