@@ -1,10 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const app = document.getElementById("app");
-
-    // Giriş başlatma işlemi !!!!!Buralara bakilacak
     document.getElementById("start-button").addEventListener("click", async () => {
         try {
-            // Game sayfasına istek at ve kullanıcı verilerini al
             const tokenResponse = await fetch('/accounts/test/', {
                 method: 'GET',
                 headers: {
@@ -17,15 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log(index_data);
                 window.loadGamePage();
             } else {
-                throw new Error('Game sayfası yüklenemedi');
+                const loginResponse = await fetch('/accounts/loginintra42/');
+                const loginData = await loginResponse.json();
+                window.location.href = loginData.url;
             }
         } catch (error) {
             console.error('Hata:', error.message || error);
-            // Token ile ilgili bir sorun varsa token'ları temizle
-            // 42 login'e yönlendir
-            const loginResponse = await fetch('/accounts/loginintra42/');
-            const loginData = await loginResponse.json();
-            window.location.href = loginData.url;
         }
         });
 
