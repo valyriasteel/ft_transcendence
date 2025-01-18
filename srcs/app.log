@@ -116,3 +116,73 @@
 2025-01-17 19:45:12,280 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
 2025-01-17 19:45:12,282 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
 2025-01-17 19:45:12,980 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 19:59:09,346 - WARNING - No refresh token provided.
+2025-01-17 19:59:09,347 - WARNING - Unauthorized: /accounts/test/
+2025-01-17 19:59:09,921 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:59:10,624 - DEBUG - https://api.intra.42.fr:443 "POST /oauth/token HTTP/1.1" 200 None
+2025-01-17 19:59:10,626 - DEBUG - Starting new HTTPS connection (1): api.intra.42.fr:443
+2025-01-17 19:59:11,186 - DEBUG - https://api.intra.42.fr:443 "GET /v2/me HTTP/1.1" 200 None
+2025-01-17 20:00:14,881 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:18:01,660 - INFO - {'detail': errordetail(string='given token not valid for any token type', code='token_not_valid'), 'code': errordetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': errordetail(string='accesstoken', code='token_not_valid'), 'token_type': errordetail(string='access', code='token_not_valid'), 'message': errordetail(string='token is invalid or expired', code='token_not_valid')}]}
+2025-01-17 22:26:37,551 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:26:43,156 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:27:48,832 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:27:53,292 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:30:52,334 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:32:03,584 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:33:58,582 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:34:05,206 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:36:58,471 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:38:37,220 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:38:41,992 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:41:01,986 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:41:48,448 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:42:06,144 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:45:12,699 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:46:10,922 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:46:35,145 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:50:17,175 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:50:53,494 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:51:43,506 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:52:21,236 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:53:09,948 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:53:50,633 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 22:59:57,859 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:03:46,544 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:04:33,537 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:06:42,090 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:07:15,995 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:07:22,504 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:07:49,302 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:07:55,157 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:08:38,691 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:10:52,231 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:11:29,725 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:11:38,774 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:12:26,303 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:14:50,807 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:19:09,450 - INFO - {'detail': errordetail(string='given token not valid for any token type', code='token_not_valid'), 'code': errordetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': errordetail(string='accesstoken', code='token_not_valid'), 'token_type': errordetail(string='access', code='token_not_valid'), 'message': errordetail(string='token is invalid or expired', code='token_not_valid')}]}
+2025-01-17 23:19:35,765 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:20:55,547 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:22:03,310 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:24:57,391 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:27:33,726 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:29:29,861 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:31:53,089 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:39:54,530 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:40:16,576 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:40:59,451 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:44:55,538 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:45:34,126 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:47:49,381 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:48:24,565 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:48:43,519 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:49:26,676 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:50:01,216 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:50:43,876 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:51:06,142 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:52:42,217 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:54:40,917 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:55:30,602 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:57:18,541 - INFO - User tkaraaga authenticated successfully.
+2025-01-17 23:58:01,157 - INFO - User tkaraaga authenticated successfully.

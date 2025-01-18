@@ -56,6 +56,7 @@ function sceneTransition(before, after) {
 function loadMenuElements() {
     myMenu.startBut = document.getElementById("startBut");
     myMenu.settingsBut = document.getElementById("settingsBut");
+
     myMenu.everything = document.getElementById("menu");
     myMenu.startBut.addEventListener("click", function () {
         /*visibleControl(myMenu.everything, false, "none");
@@ -144,9 +145,21 @@ function loadSettingsElements() {
         else
             optMenu.darkModeText.textContent = "Dark mode: off";
         if (mode.darkMode)
+        {
             ambientLight.intensity = 0;
+            scene.remove(spotLight);
+            scene.add(pointLight);
+            scene.environment = null;
+            scene.background = null;
+        }
         else
-            ambientLight.intensity = 0.1;
+        {
+            scene.environment = mode.background;
+            scene.background = mode.background;
+            scene.remove(pointLight);
+            scene.add(spotLight);       
+            ambientLight.intensity = 0.3;
+        }
     });
 }
 
@@ -375,10 +388,26 @@ const textureLoader = new THREE.TextureLoader();
 const soccerBallTexture = textureLoader.load('../images/ball.jpg')
 const basketBallTexture = textureLoader.load('../images/basketball.png')
 ball.texture = soccerBallTexture;
-const pointLight = new THREE.PointLight(0xffffff, 1000, 100);  // Color, intensity, distance
-pointLight.position.set(0, 10, 0);  // Position the light in the scene
-pointLight.castShadow = true;  // Enable shadow casting
-//scene.add(pointLight);
+const pointLight = new THREE.SpotLight(0xffffff, 1000);  // Color, intensity, distance
+pointLight.position.set(0, 60, 0); // Position the light
+pointLight.angle = Math.PI / 3; // Cone angle (in radians)
+pointLight.penumbra = 0.2; // Soft edges
+//spotLight.decay = 2; // Light decay
+pointLight.distance = 200; // Maximum range of the light
+
+// Step 2: Enable Shadows
+pointLight.castShadow = true;
+pointLight.shadow.mapSize.width = 4096; // Shadow map resolution
+pointLight.shadow.mapSize.height = 4096;
+pointLight.shadow.camera.near = 0.5;
+pointLight.shadow.camera.far = 400;
+
+// Step 3: Add the Spotlight to the Scene
+scene.add(pointLight);
+
+// Optional: Add a Spotlight Helper
+//const pointLightHelper = new THREE.SpotLightHelper(pointLight);
+//scene.add(pointLightHelper);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // White light with intensity 1
 scene.add(ambientLight);
 document.body.appendChild(renderer.domElement);
@@ -530,7 +559,7 @@ cam.camera.lookAt(0, 0, 0);
 
 renderer.setAnimationLoop(menuLoop);  // Start the animation loop
 resizeRenderer();
-//loadEXREnvironment();
+loadEXREnvironment();
 initiateTourney();
 
 let lastTime = 0; // Tracks the last time the loop   ran
@@ -543,6 +572,7 @@ skybox.load(
         // Apply the texture as the environment map or background
         scene.background = texture;
         scene.environment = texture;
+        mode.background = texture;
 
         // You can apply transformations to this PNG texture as needed
     },
@@ -572,11 +602,11 @@ function loadEXREnvironment() {
 
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             mainMenu.environment = envMap;
-            scene.environment = envMap;
+            //scene.environment = envMap;
 
             // If you want the background too
             mainMenu.background = envMap;
-            scene.background = envMap;
+            //scene.background = envMap;
 
             // Clean up
             texture.dispose();
@@ -590,37 +620,8 @@ function loadEXREnvironment() {
             controls.maxPolarAngle = Math.PI / 2; // Limit vertical rotation
             controls.enableZoom = false; // Disable zooming
 
-            // Custom Key Bindings for rotating the skybox
-            const rotationSpeed = 0.1; // Speed at which the environment rotates
-            const keys = {
-                LEFT: 'g',   // Rotate left
-                UP: 'y',     // Rotate up
-                RIGHT: 'j',  // Rotate right
-                BOTTOM: 'h'  // Rotate down
-            }
-
             let rotation = 0;
 
-            // Event listener for key press
-            window.addEventListener('keydown', (event) => {
-                if (event.key === keys.LEFT) {
-                    rotation += rotationSpeed; // Rotate left
-                } else if (event.key === keys.RIGHT) {
-                    rotation -= rotationSpeed; // Rotate right
-                } else if (event.key === keys.UP) {
-                    rotation += rotationSpeed; // Rotate up (or forward)
-                } else if (event.key === keys.BOTTOM) {
-                    rotation -= rotationSpeed; // Rotate down (or backward)
-                }
-
-                // Apply the updated rotation to the environment map
-                envMap.rotation = rotation;
-
-                // Optional: Update PMREM for better performance
-                const rotatedEnvMap = pmremGenerator.fromEquirectangular(texture).texture;
-                scene.background = rotatedEnvMap;
-                scene.environment = rotatedEnvMap;
-            });
         },
 
         // Progress callback
@@ -682,8 +683,16 @@ function winScreen() {
     }
     cleanGameObj();
 }
-
+let flag = false;
+cam.camera.rotateX(Math.PI / 2);
 async function menuLoop() {
+    let interval = setInterval(() => {
+        if (flag)
+            clearInterval(interval);
+        flag = true;
+        let x = 0.01;
+        cam.camera.rotateY(x / 10); // Decrease opacity by a small amount (you can adjust this value)
+    }, 20); // Update every 20 milliseconds (adjust the interval for smoother/slower fading)
     renderer.render(mainMenu, cam.camera);
 }
 
@@ -748,12 +757,17 @@ function initiateP1(canvas) {
     else
         p1.Depth = 50;
     p1.geometry = new THREE.BoxGeometry(p1.Width, p1.Height, p1.Depth);
-    p1.material = new THREE.MeshStandardMaterial({ color: p1.color })
+    if (mode.darkMode)
+        p1.material = new THREE.MeshBasicMaterial({ color: p1.color })
+    else
+    {
+        p1.material = new THREE.MeshStandardMaterial({ color: p1.color })
+    }
     p1.pad = new THREE.Mesh(p1.geometry, p1.material);
-    p1.pad.position.x = -190;
-    p1.pad.position.y = 20;
     p1.pad.castShadow = true;
     p1.pad.receiveShadow = true;
+    p1.pad.position.x = -190;
+    p1.pad.position.y = 20;
     p1.maxX = -40;
     if (modeFour) {
         p1.pad.position.z = -45
@@ -777,7 +791,10 @@ function initiateP2(canvas) {
     if (modeSingle)
         p2.name = "Bot";
     p2.geometry = new THREE.BoxGeometry(p2.Width, p2.Height, p2.Depth);
-    p2.material = new THREE.MeshStandardMaterial({ color: p2.color })
+    if (mode.darkMode)
+        p2.material = new THREE.MeshBasicMaterial({ color: p2.color });
+    else
+        p2.material = new THREE.MeshStandardMaterial({ color: p2.color });
     p2.pad = new THREE.Mesh(p2.geometry, p2.material);
     p2.pad.position.x = 189;
     p2.pad.position.y = 20;
@@ -792,7 +809,6 @@ function initiateP2(canvas) {
         p2.pad.position.z = 0;
         p2.maxZ = 115;
     }
-
     scene.add(p2.pad);
     p2.pad.material.color.setHSL(235, 1, 0.5);
 }
@@ -898,7 +914,11 @@ function initiateScoreBoard() {
 }
 
 function makeWall() {
-    let material = new THREE.MeshStandardMaterial({ color: 0x8A2BE2 })
+    let material;
+    if (mode.darkMode)
+        material = new THREE.MeshBasicMaterial({ color: 0x8A2BE2 });
+    else
+        material = new THREE.MeshStandardMaterial({ color: 0x8A2BE2 })
     let vertGeo = new THREE.BoxGeometry(10, 50, 250);
     let horiGeo = new THREE.BoxGeometry(415, 50, 10);
     let leftWall = new THREE.Mesh(vertGeo, material);
