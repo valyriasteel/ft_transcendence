@@ -253,6 +253,93 @@ body
 	display: none;
 }
 
+#shadowControl 
+{
+	position: absolute;
+	top: 85%;
+	color: white;
+	z-index: 10;
+	display: none;
+	text-align: center;
+	flex-direction: column;
+}
+
+#leftColorSelection
+{
+	position: absolute;
+	top: 41.5%;
+	left: 53%;
+	z-index: 10;
+	display: none;
+}
+
+#leftColor
+{	position: absolute;
+	top: 40%;
+	left: 42%;
+	z-index: 10;
+	color: white;
+	display: none;
+	font-size: 2rem;
+}
+
+#rightColorSelection
+{
+	position: absolute;
+	top: 51.5%;
+	left: 53%;
+	z-index: 10;
+	display: none;
+}
+
+#rightColor
+{	position: absolute;
+	top: 50%;
+	left: 42%;
+	z-index: 10;
+	color: white;
+	display: none;
+	font-size: 2rem;
+}
+
+#wallColorSelection
+{
+	position: absolute;
+	top: 61.5%;
+	left: 53%;
+	z-index: 10;
+	display: none;
+}
+
+#wallColor
+{	position: absolute;
+	top: 60%;
+	left: 42%;
+	z-index: 10;
+	color: white;
+	display: none;
+	font-size: 2rem;
+}
+
+#backgroundSelection
+{
+	position: absolute;
+	top: 71.5%;
+	left: 53%;
+	z-index: 10;
+	display: none;
+}
+
+#backgroundSelect
+{	position: absolute;
+	top: 70%;
+	left: 42%;
+	z-index: 10;
+	color: white;
+	display: none;
+	font-size: 2rem;
+}
+
 /* Select Screen */
 
 #oneVsone
@@ -365,6 +452,17 @@ body
     position: absolute;
     font-size: 2rem;
 	opacity: 100%;
+}
+
+/* End Screen*/
+#endBackBut
+{
+	position: absolute;
+	left: 5%;
+	top: 10%;
+	z-index: 10;
+	display: none;
+	font-size: 3rem;
 }
 
 /* Profil kutusunun genel stili */

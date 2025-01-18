@@ -16,6 +16,7 @@
 			</div>
 		</div>
 
+		<div id="fps-counter" style="position: absolute; top: 10px; left: 10px; color: white; font-size: 16px; z-index: 100;">FPS: 0</div>
 		<!-- Settings-->
 		<div id="settings">
 			<div id="optionsText">Options</div>
@@ -25,9 +26,38 @@
 				<label for="volumeSlider" id="sliderLabel">Volume: %50</label><br>
 				<input type="range" id="volumeSlider" name="slider" min="0" max="100" value="50">
 			</div>
+			<div id="shadowControl">
+				<label for="shadowSlider" id="shadowLabel">Shadow resolution: 2048x2048</label><br>
+				<input type="range" id="shadowSlider" name="shadow" min="512" max="4096" value="2048">
+			</div>
+			<div id="leftColor">Left pad:</div>
+			<select id="leftColorSelection">
+				<option value="colorRainbow">Rainbow!</option>
+				<option value="colorRed">Red</option>
+				<option value="colorBlue">Blue</option>
+				<option value="colorGreen">Green</option>
+			</select>
+			<div id="rightColor">Right pad:</div>
+			<select id="rightColorSelection">
+				<option value="colorRainbow">Rainbow!</option>
+				<option value="colorRed">Red</option>
+				<option value="colorBlue">Blue</option>
+				<option value="colorGreen">Green</option>
+			</select>
+			<div id="wallColor">Walls:</div>
+			<select id="wallColorSelection">
+				<option value="colorRed">Red</option>
+				<option value="colorBlue">Blue</option>
+				<option value="colorGreen">Green</option>
+			</select>
 			<select id="ballSelection">
 				<option value="football">Football</option>
 				<option value="basketball">Basketball</option>
+			</select>
+			<div id="backgroundSelect">Background:</div>
+			<select id="backgroundSelection">
+				<option value="on">On</option>
+				<option value="off">Off</option>
 			</select>
 			<button id="volumeUp">+</button>
 			<button id="volumeDown">-</button>
@@ -49,13 +79,17 @@
 			<button id="backToSelect">Back</button>
 			<button id="lockBut">Lock in</button>
 			<button id="submitBut">Submit</button>
-			<button id="nextMatchBut">Next Match</button>
 			<input type="text" id="userInput" placeholder="Enter player" />
 			<button id="startTourneyBut">Start Tournament</button>
-			<div id="winner">selami</div>
-			<div id="champ">selami</div>
 			<div id="statusTourney">selami</div>
 			<div id="inPlayers">Players:<br></div>
+		</div>
+		<!-- End Screen-->
+		<div id="end">
+			<div id="winner">selami</div>
+			<button id="nextMatchBut">Next Match</button>
+			<button id="endBackBut">Back</button>
+			<div id="champ">selami</div>
 		</div>
 		
 		<!-- Game Screen-->

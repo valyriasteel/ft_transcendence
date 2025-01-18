@@ -88,6 +88,17 @@ export class optionsMenu
 		this.onText;
 		this.offText;
 		this.ballSelection;
+		this.shadowRes;
+		this.shadowSlider;
+		this.leftColor;
+		this.leftRainbow = true;
+		this.rightColor;
+		this.rightRainbow = true;
+		this.leftPadColor = 'red';
+		this.rightPadColor = 'blue';
+		this.colorWall = 0x8A2BE2;
+		this.wallColor;
+		this.background = true;	
 		this.everything;
 	}
 }
