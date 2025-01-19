@@ -11,8 +11,8 @@ import { TextGeometry } from 'TextGeo';
 import { EXRLoader } from 'ExrLoader';
 
 
-const p1 = new Player('P1', 2, 'blue');
-const p2 = new Player('P2', 2, 'red');
+const p1 = new Player('P1', 2);
+const p2 = new Player('P2', 2);
 const p3 = new Player('Blank', 0, 'purple');
 const p4 = new Player('Khonvoum', 0, 'yellow');
 const bot = new Bot();
@@ -56,6 +56,7 @@ function sceneTransition(before, after) {
 function loadMenuElements() {
     myMenu.startBut = document.getElementById("startBut");
     myMenu.settingsBut = document.getElementById("settingsBut");
+
     myMenu.everything = document.getElementById("menu");
     myMenu.startBut.addEventListener("click", function () {
         /*visibleControl(myMenu.everything, false, "none");
@@ -85,6 +86,89 @@ function loadSettingsElements() {
     optMenu.darkModeBut = document.getElementById("darkMode");
     optMenu.backBut = document.getElementById("backBut");
     optMenu.ballSelection = document.getElementById("ballSelection");
+    optMenu.shadowRes = document.getElementById("shadowControl");
+    optMenu.shadowSlider = document.getElementById("shadowSlider");
+    optMenu.leftColor = document.getElementById("leftColor");
+    optMenu.rightColor = document.getElementById("rightColor");
+    optMenu.wallColor = document.getElementById("wallColor");
+    optMenu.background = document.getElementById("backgroundSelect");
+
+    document.getElementById("leftColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("leftColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+        {
+            optMenu.leftPadColor = 'red';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorBlue")
+        {
+            optMenu.leftPadColor = 'blue';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorGreen")
+        {
+            optMenu.leftPadColor = 'green';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorRainbow")
+        {
+            optMenu.leftPadColor = 'red';
+            optMenu.leftRainbow = true;
+        }
+    });
+
+    document.getElementById("rightColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("rightColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+        {
+            optMenu.rightPadColor = 'red';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorBlue")
+        {
+            optMenu.rightPadColor = 'blue';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorGreen")
+        {
+            optMenu.rightPadColor = 'green';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorRainbow")
+        {
+            optMenu.rightPadColor = 'blue';
+            optMenu.rightRainbow = true;
+        }
+    });
+
+    document.getElementById("wallColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("wallColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+            optMenu.colorWall = 'red';
+        if (selectedValue === "colorBlue")
+            optMenu.colorWall = 'blue';
+        if (selectedValue === "colorGreen")
+            optMenu.colorWall = 'green';
+    });
+
+    document.getElementById("backgroundSelection").addEventListener("change", () =>{
+        const selectedValue = document.getElementById("backgroundSelection").value;
+        if (selectedValue === "on")
+        {
+            scene.background = mode.texture;
+            scene.environment = mode.texture;
+        }
+        else
+        {
+            console.log("off");
+            scene.background = null;
+            scene.environment = null;
+        }
+    });
+
 
     optMenu.backBut.addEventListener("click", function () {
         end.winner.style.display = "none";
@@ -144,9 +228,21 @@ function loadSettingsElements() {
         else
             optMenu.darkModeText.textContent = "Dark mode: off";
         if (mode.darkMode)
+        {
             ambientLight.intensity = 0;
+            scene.remove(spotLight);
+            scene.add(pointLight);
+            scene.environment = null;
+            scene.background = null;
+        }
         else
-            ambientLight.intensity = 0.1;
+        {
+            scene.environment = mode.background;
+            scene.background = mode.background;
+            scene.remove(pointLight);
+            scene.add(spotLight);       
+            ambientLight.intensity = 0.3;
+        }
     });
 }
 
@@ -260,14 +356,21 @@ function loadEndElements() {
     end.winner = document.getElementById("winner");
     end.nextBut = document.getElementById("nextMatchBut");
     end.champ = document.getElementById("champ");
+    end.backBut = document.getElementById("endBackBut");
 
     end.nextBut.addEventListener("click", function () {
         end.nextBut.style.display = "none";
         end.winner.style.display = "none";
         end.champ.style.display = "none";
+        end.backBut.style.display = "none";
         tourney.inPlayers.style.display = "none";
-        optMenu.backBut.style.display = "none";
         playNextMatch();
+    });
+    end.backBut.addEventListener("click", function () {
+        end.winner.style.display = "none";
+        end.backBut.style.display = "none";
+        sceneTransition(myMenu.everything, myMenu.everything);
+        renderer.setAnimationLoop(menuLoop);
     });
 }
 
@@ -375,10 +478,26 @@ const textureLoader = new THREE.TextureLoader();
 const soccerBallTexture = textureLoader.load('../images/ball.jpg')
 const basketBallTexture = textureLoader.load('../images/basketball.png')
 ball.texture = soccerBallTexture;
-const pointLight = new THREE.PointLight(0xffffff, 1000, 100);  // Color, intensity, distance
-pointLight.position.set(0, 10, 0);  // Position the light in the scene
-pointLight.castShadow = true;  // Enable shadow casting
-//scene.add(pointLight);
+const pointLight = new THREE.SpotLight(0xffffff, 1000);  // Color, intensity, distance
+pointLight.position.set(0, 60, 0); // Position the light
+pointLight.angle = Math.PI / 3; // Cone angle (in radians)
+pointLight.penumbra = 0.2; // Soft edges
+//spotLight.decay = 2; // Light decay
+pointLight.distance = 200; // Maximum range of the light
+
+// Step 2: Enable Shadows
+pointLight.castShadow = true;
+pointLight.shadow.mapSize.width = 512; // Shadow map resolution
+pointLight.shadow.mapSize.height = 512;
+pointLight.shadow.camera.near = 0.5;
+pointLight.shadow.camera.far = 400;
+
+// Step 3: Add the Spotlight to the Scene
+scene.add(pointLight);
+
+// Optional: Add a Spotlight Helper
+//const pointLightHelper = new THREE.SpotLightHelper(pointLight);
+//scene.add(pointLightHelper);
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // White light with intensity 1
 scene.add(ambientLight);
 document.body.appendChild(renderer.domElement);
@@ -399,8 +518,8 @@ spotLight.distance = 400; // Maximum range of the light
 
 // Step 2: Enable Shadows
 spotLight.castShadow = true;
-spotLight.shadow.mapSize.width = 4096; // Shadow map resolution
-spotLight.shadow.mapSize.height = 4096;
+spotLight.shadow.mapSize.width = 512; // Shadow map resolution
+spotLight.shadow.mapSize.height = 512;
 spotLight.shadow.camera.near = 0.5;
 spotLight.shadow.camera.far = 400;
 
@@ -411,28 +530,7 @@ scene.add(spotLight);
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
 //scene.add(spotLightHelper);
 
-//Spot light 2
-// Step 1: Create a Spotlight
-const spotLight2 = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
-spotLight2.position.set(0, 150, 100); // Position the light
-spotLight2.angle = Math.PI / 2.5; // Cone angle (in radians)
-spotLight2.penumbra = 0.2; // Soft edges
-//spotLight.decay = 2; // Light decay
-spotLight2.distance = 400; // Maximum range of the light
-
-// Step 2: Enable Shadows
-spotLight2.castShadow = true;
-spotLight2.shadow.mapSize.width = 4096; // Shadow map resolution
-spotLight2.shadow.mapSize.height = 4096;
-spotLight2.shadow.camera.near = 0.5;
-spotLight2.shadow.camera.far = 400;
-
-// Step 3: Add the Spotlight to the Scene
-//scene.add(spotLight2);
-
-// Optional: Add a Spotlight Helper
-const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
-//scene.add(spotLightHelper2);
+const eventListeners = [];
 
 function loadFont() {
     return new Promise((resolve, reject) => {
@@ -543,6 +641,7 @@ skybox.load(
         // Apply the texture as the environment map or background
         scene.background = texture;
         scene.environment = texture;
+        mode.background = texture;
 
         // You can apply transformations to this PNG texture as needed
     },
@@ -572,55 +671,16 @@ function loadEXREnvironment() {
 
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             mainMenu.environment = envMap;
-            scene.environment = envMap;
+            //scene.environment = envMap;
 
             // If you want the background too
             mainMenu.background = envMap;
-            scene.background = envMap;
+            //scene.background = envMap;
 
             // Clean up
             texture.dispose();
             pmremGenerator.dispose();
 
-            // Create controls to rotate the environment map
-            const controls = new OrbitControls(cam.camera, renderer.domElement);
-            controls.enableDamping = true; // Smooth rotation
-            controls.dampingFactor = 0.25;
-            controls.screenSpacePanning = false; // Keep the environment in place during zooming
-            controls.maxPolarAngle = Math.PI / 2; // Limit vertical rotation
-            controls.enableZoom = false; // Disable zooming
-
-            // Custom Key Bindings for rotating the skybox
-            const rotationSpeed = 0.1; // Speed at which the environment rotates
-            const keys = {
-                LEFT: 'g',   // Rotate left
-                UP: 'y',     // Rotate up
-                RIGHT: 'j',  // Rotate right
-                BOTTOM: 'h'  // Rotate down
-            }
-
-            let rotation = 0;
-
-            // Event listener for key press
-            window.addEventListener('keydown', (event) => {
-                if (event.key === keys.LEFT) {
-                    rotation += rotationSpeed; // Rotate left
-                } else if (event.key === keys.RIGHT) {
-                    rotation -= rotationSpeed; // Rotate right
-                } else if (event.key === keys.UP) {
-                    rotation += rotationSpeed; // Rotate up (or forward)
-                } else if (event.key === keys.BOTTOM) {
-                    rotation -= rotationSpeed; // Rotate down (or backward)
-                }
-
-                // Apply the updated rotation to the environment map
-                envMap.rotation = rotation;
-
-                // Optional: Update PMREM for better performance
-                const rotatedEnvMap = pmremGenerator.fromEquirectangular(texture).texture;
-                scene.background = rotatedEnvMap;
-                scene.environment = rotatedEnvMap;
-            });
         },
 
         // Progress callback
@@ -654,7 +714,7 @@ function winScreen() {
         tmpWinner = p2.name;
     }
     end.winner.style.display = "block";
-    optMenu.backBut.style.display = "block";
+    end.backBut.style.display = "block";
     board.scoreLeft.style.display = "none";
     board.scoreRight.style.display = "none";
     if (mode.isTourney) {
@@ -682,8 +742,16 @@ function winScreen() {
     }
     cleanGameObj();
 }
-
+let flag = false;
+cam.camera.rotateX(Math.PI / 2);
 async function menuLoop() {
+    let interval = setInterval(() => {
+        if (flag)
+            clearInterval(interval);
+        flag = true;
+        let x = 0.01;
+        cam.camera.rotateY(x / 10); // Decrease opacity by a small amount (you can adjust this value)
+    }, 20); // Update every 20 milliseconds (adjust the interval for smoother/slower fading)
     renderer.render(mainMenu, cam.camera);
 }
 
@@ -705,15 +773,19 @@ async function tourneyLoop() {
 
 const clock = new THREE.Clock();
 
+let fpsDisplay = document.getElementById('fps-counter');
 async function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime; // Time difference between frames
     lastTime = currentTime;
     const elapsedTime = clock.getElapsedTime();
+    const fps = Math.round(1000 / deltaTime);
 
+    fpsDisplay.textContent = `FPS: ${fps}`
     // Change color based on elapsed time
-    p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
-    p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
-
+    if (optMenu.leftRainbow)
+        p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
+    if (optMenu.rightRainbow)
+        p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
 
     update(deltaTime); // Update game state
     render();          // Render the game
@@ -724,6 +796,9 @@ function disposer(obj, scene) {
         obj.geometry.dispose();
     if (obj.material)
         obj.material.dispose();
+    if (obj.material.map) {
+        obj.material.map.dispose();
+    }
 
     scene.remove(obj);
 }
@@ -748,12 +823,17 @@ function initiateP1(canvas) {
     else
         p1.Depth = 50;
     p1.geometry = new THREE.BoxGeometry(p1.Width, p1.Height, p1.Depth);
-    p1.material = new THREE.MeshStandardMaterial({ color: p1.color })
+    if (mode.darkMode)
+        p1.material = new THREE.MeshBasicMaterial({ color: optMenu.leftPadColor })
+    else
+    {
+        p1.material = new THREE.MeshStandardMaterial({ color: optMenu.leftPadColor })
+    }
     p1.pad = new THREE.Mesh(p1.geometry, p1.material);
-    p1.pad.position.x = -190;
-    p1.pad.position.y = 20;
     p1.pad.castShadow = true;
     p1.pad.receiveShadow = true;
+    p1.pad.position.x = -190;
+    p1.pad.position.y = 20;
     p1.maxX = -40;
     if (modeFour) {
         p1.pad.position.z = -45
@@ -764,7 +844,6 @@ function initiateP1(canvas) {
         p1.maxZ = 115;
     }
     scene.add(p1.pad);
-    p1.pad.material.color.setHSL(0, 1, 0.5);
 }
 
 function initiateP2(canvas) {
@@ -777,7 +856,10 @@ function initiateP2(canvas) {
     if (modeSingle)
         p2.name = "Bot";
     p2.geometry = new THREE.BoxGeometry(p2.Width, p2.Height, p2.Depth);
-    p2.material = new THREE.MeshStandardMaterial({ color: p2.color })
+    if (mode.darkMode)
+        p2.material = new THREE.MeshBasicMaterial({ color: optMenu.rightPadColor });
+    else
+        p2.material = new THREE.MeshStandardMaterial({ color: optMenu.rightPadColor });
     p2.pad = new THREE.Mesh(p2.geometry, p2.material);
     p2.pad.position.x = 189;
     p2.pad.position.y = 20;
@@ -792,12 +874,12 @@ function initiateP2(canvas) {
         p2.pad.position.z = 0;
         p2.maxZ = 115;
     }
-
     scene.add(p2.pad);
-    p2.pad.material.color.setHSL(235, 1, 0.5);
 }
 
 function initiatePlane(canvas) {
+    if (mode.gameInitialized)
+        return;
     let geo;
     let mat;
     let plane;
@@ -898,7 +980,13 @@ function initiateScoreBoard() {
 }
 
 function makeWall() {
-    let material = new THREE.MeshStandardMaterial({ color: 0x8A2BE2 })
+    if (mode.gameInitialized)
+        return;
+    let material;
+    if (mode.darkMode)
+        material = new THREE.MeshBasicMaterial({ color: optMenu.colorWall });
+    else
+        material = new THREE.MeshStandardMaterial({ color: optMenu.colorWall })
     let vertGeo = new THREE.BoxGeometry(10, 50, 250);
     let horiGeo = new THREE.BoxGeometry(415, 50, 10);
     let leftWall = new THREE.Mesh(vertGeo, material);
@@ -1052,7 +1140,7 @@ function checkBallColl() {
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 33 || p2.score == 33) {
+        if (p1.score == 3 || p2.score == 3) {
             cam.camera.position.y = 100;
             winScreen();
             renderer.setAnimationLoop(endLoop);
@@ -1661,6 +1749,7 @@ function startGame() {
     makeWall();
     resizeRenderer();
     fixCam();
+    mode.gameInitialized = true;
     //createText("Test", 5, 0, 1, 0, scene);
 }
 

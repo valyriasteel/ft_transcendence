@@ -1,11 +1,11 @@
 // Player.js
 export class Player 
 {
-    constructor(name, score, color) 
+    constructor(name, score) 
 	{
         this.name = name;
         this.score = score;
-		this.color = color;
+		this.color;
 		this.movUp = false;
 		this.movDown = false;
 		this.movLeft = false;
