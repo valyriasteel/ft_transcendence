@@ -269,7 +269,13 @@ class TestApiView(APIView):
             response.delete_cookie('sessionid')
             response.delete_cookie('csrftoken')
             return response
-        
+        except InvalidToken as e:
+            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response.delete_cookie('refreshToken')
+            response.delete_cookie('accessToken')
+            response.delete_cookie('sessionid')
+            response.delete_cookie('csrftoken')
+
         if not access_token:
             new_access_token = str(refresh.access_token)
             response = Response({

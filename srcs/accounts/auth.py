@@ -1,5 +1,6 @@
 from rest_framework.authentication import BaseAuthentication
 from django.contrib.auth.models import User
+from rest_framework.exceptions import AuthenticationFailed
 import jwt
 from django.conf import settings
 
@@ -16,5 +17,6 @@ class CookieAuthentication(BaseAuthentication):
             return None
         except jwt.InvalidTokenError:
             return None
-
+        except User.DoesNotExist:
+                return None
         return (user, None)
