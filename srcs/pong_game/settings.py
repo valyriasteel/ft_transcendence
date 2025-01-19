@@ -148,7 +148,6 @@ CSRF_TRUSTED_ORIGINS = ['https://localhost']
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
         'accounts.auth.CookieAuthentication'
 
     ],
@@ -158,8 +157,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(seconds=int(os.getenv('ACCESS_TOKEN_LIFETIME'))),
-    'REFRESH_TOKEN_LIFETIME': timedelta(seconds=int(os.getenv('REFRESH_TOKEN_LIFETIME'))),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=int(os.getenv('ACCESS_TOKEN_LIFETIME'))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('REFRESH_TOKEN_LIFETIME'))),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'BLACKLIST_AFTER_ROTATION': True,
 }
