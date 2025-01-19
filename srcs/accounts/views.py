@@ -329,4 +329,6 @@ class TestApiView(APIView):
             response = Response({"error": "An unexpected error occurred."}, status=500)
             response.delete_cookie('accessToken')
             response.delete_cookie('refreshToken')
+            response.delete_cookie('sessionid')
+            response.delete_cookie('csrftoken')
             return response
