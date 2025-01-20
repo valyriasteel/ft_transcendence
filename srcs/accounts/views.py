@@ -19,6 +19,22 @@ from django.shortcuts import redirect
 from django.db import IntegrityError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+import logging
+
+# Logger oluştur ve seviyesini ayarla
+logging.basicConfig(level=logging.INFO)
+
+# Dosya handler'ı oluştur
+file_handler = logging.FileHandler("app.log")
+file_handler.setLevel(logging.INFO)
+
+# Formatter oluştur ve handler'a ekle
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Logger'ın root seviyesine handler'ı ekle
+logger = logging.getLogger()
+logger.addHandler(file_handler)
 
 class Verify2FAThrottle(UserRateThrottle):
     rate = '5/min'
@@ -49,6 +65,7 @@ class CallbackIntra42View(APIView):
                     'redirect_uri': settings.REDIRECT_URI,
                 }
             )
+            logging.info(settings.REDIRECT_URI)
             token_response.raise_for_status()
             access_token = token_response.json().get('access_token')
         except (requests.RequestException, ValueError) as e:
@@ -91,9 +108,10 @@ class CallbackIntra42View(APIView):
 
         self.send_2fa_code(profile)
 
-        scheme = request.scheme
+        scheme = "https"
         host = request.get_host()
-        frontend_url = f"{scheme}://{host}/"
+        frontend_url = f"{scheme}://{host}:4443/"
+        logging.info(f"Redirecting to: {frontend_url}")
         response = redirect(frontend_url)
         response.set_cookie('callback_complete', 'true', max_age=20)
         return response
