@@ -1,10 +1,14 @@
-body 
-{
-    margin: 0;
-    font-family: Arial, sans-serif;
+/* Tourney */
+
+#backToSelect {
+    z-index: 10;
+    display: none;
+    top: 6%;
+    left: 5%;
+    position: absolute;
+    font-size: 2rem;
 }
 
-/* Tourney */
 #submitBut 
 { 
 	position: absolute; 
@@ -105,6 +109,7 @@ body
 }
 
 /* Main Menu */
+
 #startBut
 {
 	position: absolute;
@@ -112,7 +117,7 @@ body
 	left: 75%;
 	z-index: 10;
 	font-size: 5rem;
-	display: block;
+	display: none;
 }
 
 #settingsBut
@@ -122,22 +127,14 @@ body
 	left: 75%;
 	z-index: 10;
 	font-size: 5rem;
-	display: block;
+	display: none;
 }
 
-#backToSelect {
-    z-index: 10;
-    display: none;
-    top: 6%;
-    left: 5%;
-    position: absolute;
-    font-size: 2rem;
-}
+
 
 #logoutBut
 {
 	z-index: 10;
-    display: block;
     top: 6%;
     left: 85%;
     position: absolute;
@@ -402,6 +399,8 @@ body
 	font-size: 2rem;
 }
 
+
+
 /* Game Screen*/
 
 #gameScreen
@@ -433,27 +432,6 @@ body
 	color: white;
 }
 
-#testBut
-{
-	z-index: 10;
-    display: block;
-    top: 20%;
-    left: 50%;
-    position: absolute;
-    font-size: 2rem;
-	opacity: 100%;
-}
-#test2But
-{
-	z-index: 10;
-    display: block;
-    top: 20%;
-    left: 30%;
-    position: absolute;
-    font-size: 2rem;
-	opacity: 100%;
-}
-
 /* End Screen*/
 #endBackBut
 {
@@ -476,6 +454,7 @@ body
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     z-index: 100;
     transition: transform 0.3s ease; /* Profildeki büyüme animasyonu */
+	display: none;
 }
 
 /* Profil bilgileri düzeni */

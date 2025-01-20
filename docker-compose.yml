@@ -13,7 +13,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./srcs/frontend:/usr/share/nginx/html
+      - ./srcs/frontend:/usr/share/nginx/html:ro
 
   backend:
     container_name: backend
@@ -23,7 +23,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      - db  
     networks:
       - transcendence_net
     restart: on-failure

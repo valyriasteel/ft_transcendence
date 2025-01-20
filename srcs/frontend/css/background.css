@@ -1,16 +1,21 @@
 /* Reset and Base Styles */
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Press Start 2P', sans-serif;
-    background: #000000;
-    color: white;
-    overflow: hidden;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+#app-body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Press Start 2P', sans-serif;
+  background: #000000;
+  color: white;
+  overflow: hidden;
+  height: 100vh;  /* Full height of the viewport */
+  display: flex;  /* Enables Flexbox */
+  justify-content: center;  /* Centers horizontally */
+  align-items: center;  /* Centers vertically */
+  position: relative;  /* Positioning context for absolute elements if needed */
 }
 
 /* Animated Dark Gradient Background */
@@ -25,7 +30,7 @@ body::before {
     background-size: 200% 200%;
     z-index: -2;
     animation: darkNeonBG 5s infinite alternate;
-}
+} 
 
 @keyframes darkNeonBG {
     0% { background-position: 0% 0%; }
@@ -90,6 +95,9 @@ body::after {
     -webkit-background-clip: text;
     color: transparent;
     animation: gradientShift 5s infinite, slideMotion 2s infinite ease-in-out;
+    top: 40vh;
+    left: 26.5vw;
+    position: absolute; 
 }
 
 /* Gradient Animation */
@@ -122,6 +130,7 @@ a {
     overflow: hidden;
     text-align: center;
     cursor: pointer; /* Added this line for hand cursor on hover */
+    top: 50vh;
 }
 
 a::before

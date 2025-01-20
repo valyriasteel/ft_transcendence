@@ -401,11 +401,7 @@ async function handleLogout() {
         const data = await response.json();
 
         if (response.ok) {
-            renderer.setAnimationLoop(null); // This stops the rendering loop
-            renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
-            renderer.clear(); // Clear the canvas
-            renderer.domElement.remove();
-            window.loadIndexPage();
+            stopGame();
         }
     } catch (error) {
         console.error('Çıkış sırasında hata:', error);
@@ -413,6 +409,13 @@ async function handleLogout() {
     }
 
 
+}
+export function    stopGame()
+{
+    renderer.setAnimationLoop(null); // This stops the rendering loop
+    renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
+    renderer.clear(); // Clear the canvas
+    renderer.domElement.remove();
 }
 
 try {
@@ -605,7 +608,7 @@ let modeSingle = false;
 cam.camera.position.y = 100;
 cam.camera.lookAt(0, 0, 0);
 
-renderer.setAnimationLoop(menuLoop);  // Start the animation loop
+//renderer.setAnimationLoop(menuLoop);  // Start the animation loop
 resizeRenderer();
 //loadEXREnvironment();
 initiateTourney();

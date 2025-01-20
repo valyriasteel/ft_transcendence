@@ -1,6 +1,16 @@
-body {
-	font-family: Arial, sans-serif;
-	margin: 2rem;
+#verification
+{
+	margin: 0;
+	padding: 0;
+	font-family: 'Press Start 2P', sans-serif;
+	background: #000000;
+	color: white;
+	overflow: hidden;
+	height: 100vh;  /* Full height of the viewport */
+	display: none;  /* Enables Flexbox */
+	justify-content: center;  /* Centers horizontally */
+	align-items: center;  /* Centers vertically */
+	position: relative;  /* Positioning context for absolute elements if needed */
 }
 
 form {
@@ -9,7 +19,7 @@ form {
 }
 
 label {
-	display: block;
+	display: none;
 	margin-bottom: 0.5rem;
 }
 
