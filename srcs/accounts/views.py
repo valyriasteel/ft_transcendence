@@ -274,7 +274,7 @@ class LogoutAPIView(APIView):
         return response
 
 class GetProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         try:
