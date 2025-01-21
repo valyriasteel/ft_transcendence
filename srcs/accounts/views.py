@@ -1,7 +1,6 @@
 from .models import UserCreateProfile, TwoFactorAuth
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.conf import settings
@@ -10,7 +9,6 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from datetime import timedelta
-from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import logout
 from .serializers import Verify2FASerializer, UserCreateProfileSerializer
@@ -35,10 +33,6 @@ file_handler.setFormatter(formatter)
 # Logger'ın root seviyesine handler'ı ekle
 logger = logging.getLogger()
 logger.addHandler(file_handler)
-
-class Verify2FAThrottle(UserRateThrottle):
-    rate = '5/min'
-
 
 class LoginIntra42View(APIView):
     permission_classes = [AllowAny]
@@ -115,13 +109,17 @@ class CallbackIntra42View(APIView):
 
         self.send_2fa_code(profile)
 
-        scheme = "https"
-        host = request.get_host()
-        frontend_url = f"{scheme}://{host}:4443/"
-        logging.info(f"Redirecting to: {frontend_url}")
-        response = redirect(frontend_url)
-        response.set_cookie('callback_complete', 'true', max_age=20)
-        return response
+        try:
+            scheme = "https"
+            host = request.get_host()
+            frontend_url = f"{scheme}://{host}:4443/"
+            logging.info(f"Redirecting to: {frontend_url}")
+            response = redirect(frontend_url)
+            response.set_cookie('callback_complete', 'true', max_age=20)
+            return response
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to redirect to frontend', 'details': str(e)},status=200)
 
     def send_2fa_code(self, profile):
         try:
@@ -137,25 +135,33 @@ class CallbackIntra42View(APIView):
                 'expires_at': expires_at,
             }
         )
-
-            send_mail(
-                'Your 2FA Code',
-                f'Your verification code is: {code}',
-                'no-reply@example.com',
-                [profile.email],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    'Your 2FA Code',
+                    f'Your verification code is: {code}',
+                    'no-reply@example.com',
+                    [profile.email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                return Response(
+                    {'error': 'Failed to send 2FA code', 'details': str(e)},status=200)
         except Exception as e:
             return Response({"error": "An unexpected error occurred while sending the 2FA code.", "details": str(e)},status=200,
         )
 
 class Verify2FAView(APIView):
     permission_classes = [AllowAny]
-    throttle_classes = [Verify2FAThrottle]
 
     def post(self, request):
-        serializer = Verify2FASerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer = Verify2FASerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to validate 2FA code', 'details': str(e), "flag": False},
+                status=200
+            )
 
         email = serializer.validated_data['email']
         code = serializer.validated_data['code']
@@ -175,11 +181,13 @@ class Verify2FAView(APIView):
         except TwoFactorAuth.DoesNotExist:
             return Response({'error': '2FA code not found', "flag": False}, status=200)
 
-       
-        if two_factor_record.expires_at < timezone.now():
-            two_factor_record.delete() 
-            return Response({'error': '2FA code expired', "flag": False}, status=200)
-
+        try:
+            if two_factor_record.expires_at < timezone.now():
+                two_factor_record.delete() 
+                return Response({'error': '2FA code expired', "flag": False}, status=200)
+        except Exception as e:
+            return Response(
+                {'error': 'An error occurred during 2FA verification', 'details': str(e), "flag": False},status=200)
         
         try:
             if check_password(code, two_factor_record.code):
@@ -201,7 +209,7 @@ class Verify2FAView(APIView):
                         'access': myToken,
                         'refresh': myRefreshToken,
                         "flag": True
-                    })
+                    },status=200)
                     table.set_cookie(
                         "accessToken", myToken,
                         httponly=True,
@@ -234,24 +242,20 @@ class LogoutAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+
         refresh_token = request.COOKIES.get('refreshToken')
-        print("Received refresh token:", refresh_token)
 
-        # Oturumu sonlandır
         logout(request)
+        request.session.flush()
 
-        # Refresh token blacklist işlemi
         if refresh_token:
             try:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
             except Exception as e:
                 return Response(
-                    {'error': 'Failed to blacklist refresh token.', 'details': str(e)},
-                    status=200
-                )
+                    {'error': 'Failed to blacklist refresh token.', 'flag': False}, status=200)
 
-        # Çerezleri sil
         try:
             response = Response(
                 {'message': 'Successfully logged out.', "flag": True},
@@ -270,14 +274,12 @@ class LogoutAPIView(APIView):
         return response
 
 class GetProfileView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            logging.info("teoooooooooooooo")
             if not request.user.is_authenticated:
-                logging.info("teoooooooooooooo2")
-                Response({'error': 'No valid token provided', 'status': 'error'}, status=200)
+                return Response({'error': 'No valid token provided', 'status': 'error'}, status=200)
             user_profile = UserCreateProfile.objects.get(user=request.user)
             serializer = UserCreateProfileSerializer(user_profile)
             
@@ -313,6 +315,7 @@ class TestApiView(APIView):
             response.delete_cookie('sessionid')
             response.delete_cookie('csrftoken')
             return response
+
         try:
             refresh = RefreshToken(refresh_token)
         except TokenError as e:
@@ -331,17 +334,14 @@ class TestApiView(APIView):
 
         if not access_token:
             try:
-                # Yeni access token oluştur
                 new_access_token = str(refresh.access_token)
             except (TokenError, InvalidToken) as e:
-                # Token oluşturma hatasını yönet
                 return Response(
                     {'error': 'Failed to generate new access token.', 'details': str(e), "flag": False},
                     status=200
                 )
         
             try:
-                # Yanıt ve çerez ayarlarını yap
                 response = Response({
                     'message': 'Token is generating...',
                     'access': new_access_token,
@@ -355,7 +355,6 @@ class TestApiView(APIView):
                 )
                 return response
             except Exception as e:
-                # Çerez ayarlarında hata oluşursa
                 return Response(
                     {'error': 'Failed to set cookies.', 'details': str(e), "flag": False},
                     status=200

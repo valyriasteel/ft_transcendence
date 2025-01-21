@@ -2,7 +2,7 @@
 import { initiateGameHtml } from './script.js';
 import { fullClean } from './script.js';
 
-window.history.pushState({ path: '/' }, '', '/');
+window.history.replaceState({ path: '/' }, '', '/');
 let lastPushedState = null;
 
 const route = (event, path) => {
