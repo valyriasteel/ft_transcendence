@@ -53,9 +53,9 @@ export function waitForBallElement() {
     const ball1 = document.querySelector('.pong-ball');
     if (ball1) {
         console.log(".pong-ball found!");
-        ball(); // Call ball() when the element exists
+        ball();
     } else {
         console.warn(".pong-ball not found yet, retrying...");
-        setTimeout(waitForBallElement, 100); // Retry every 100ms
+        setTimeout(waitForBallElement, 100);
     }
 }
