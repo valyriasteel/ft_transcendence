@@ -18,5 +18,5 @@ class CookieAuthentication(BaseAuthentication):
         except jwt.InvalidTokenError:
             return None
         except User.DoesNotExist:
-                return None
+            return None
         return (user, None)

@@ -45,14 +45,13 @@ class LoginIntra42View(APIView):
     def get(self, request):
         try:
             url = f"{settings.OAUTH_AUTHORIZE}?client_id={settings.SOCIAL_AUTH_42_KEY}&redirect_uri={settings.REDIRECT_URI}&response_type=code"
+            logging.info("urlden aşağı")
             return Response({'url': url})
         except Exception as e:
             return Response(
             {"error": "An unexpected error occurred.", "details": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     
-
 
 class CallbackIntra42View(APIView):
     permission_classes = [AllowAny]
@@ -91,6 +90,7 @@ class CallbackIntra42View(APIView):
             return Response({'error': 'Failed to fetch user data', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            logging.info("berat şişe")
             user, user_created = User.objects.get_or_create(
                 username=username,
                 defaults={
@@ -110,6 +110,7 @@ class CallbackIntra42View(APIView):
                     'email': email,
                 }
             )
+            logging.info("ensar şişe")
         except IntegrityError as e:
             return Response({'error': 'Database integrity error', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -230,6 +231,7 @@ class Verify2FAView(APIView):
 
 
 class LogoutAPIView(APIView):
+    
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -270,13 +272,15 @@ class LogoutAPIView(APIView):
 
 class GetProfileView(APIView):
 
-    permission_classes = [IsAuthenticated]
     
+    permission_classes = [IsAuthenticated]
+    logging.info("BIRSEYLER")
 
     def get(self, request):
+        console.log("31")
         try:
             if not request.user.is_authenticated:
-                return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+                 Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
 
             user_profile = UserCreateProfile.objects.get(user=request.user)
             serializer = UserCreateProfileSerializer(user_profile)
@@ -305,7 +309,7 @@ class TestApiView(APIView):
         refresh_token = request.COOKIES.get('refreshToken')
 
         if not refresh_token:
-            response = Response({"error": "Refresh token is missing.", "flag": 'no_refresh'}, status=401)
+            response = Response({"error": "Refresh token is missing.", "flag": 'no_refresh'})
             response.delete_cookie('accessToken')
             response.delete_cookie('refreshToken')
             response.delete_cookie('sessionid')
@@ -314,50 +318,33 @@ class TestApiView(APIView):
         try:
             refresh = RefreshToken(refresh_token)
         except TokenError as e:
-            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'})
             response.delete_cookie('refreshToken')
             response.delete_cookie('accessToken')
             response.delete_cookie('sessionid')
             response.delete_cookie('csrftoken')
             return response
         except InvalidToken as e:
-            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'})
             response.delete_cookie('refreshToken')
             response.delete_cookie('accessToken')
             response.delete_cookie('sessionid')
             response.delete_cookie('csrftoken')
 
         if not access_token:
-            try:
-                # Yeni access token oluştur
-                new_access_token = str(refresh.access_token)
-            except (TokenError, InvalidToken) as e:
-                # Token oluşturma hatasını yönet
-                return Response(
-                    {'error': 'Failed to generate new access token.', 'details': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        
-            try:
-                # Yanıt ve çerez ayarlarını yap
-                response = Response({
-                    'message': 'Token is generating...',
-                    'access': new_access_token,
-                    'flag': 'new_token',
-                })
-                response.set_cookie(
-                    "accessToken", new_access_token,
-                    httponly=True,
-                    secure=True,
-                    samesite="Strict"
-                )
-                return response
-            except Exception as e:
-                # Çerez ayarlarında hata oluşursa
-                return Response(
-                    {'error': 'Failed to set cookies.', 'details': str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            new_access_token = str(refresh.access_token)
+            response = Response({
+                'message': 'Token is generating...',
+                'access': new_access_token,
+                'flag': 'new_token',
+            })
+            response.set_cookie(
+                "accessToken", new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="Strict"
+            )
+            return response
         
         try:
             auth = JWTAuthentication()
@@ -371,7 +358,14 @@ class TestApiView(APIView):
 
         except InvalidToken as e:
             if 'accesstoken' in str(e).lower():
+                logging.info("1")
+                ##logger.info(User.objects.get('user'))
+                ##if(User.objects.get('user'))
+
+
+
                 new_access_token = str(refresh.access_token)
+                logging.info("nezir1")
                 response = Response({
                     'message': 'Token is expired, generating new token...',
                     'access': new_access_token,
@@ -383,8 +377,10 @@ class TestApiView(APIView):
                     secure=True,
                     samesite="Strict"
                 )
+                logging.info("nezir")
                 return response
         except TokenError as e:
+            logging.info("2")
             new_access_token = str(refresh.access_token)
             response = Response({
                 'message': 'Token values is invalid, generating new token...',

@@ -12,6 +12,15 @@ import { EXRLoader } from 'ExrLoader';
 
 export function    initiateGameHtml()
 {
+    try
+    {
+        getProfile();
+    }
+    catch
+    {
+        console.log("AAAA DIYE BAGIRDIM");
+    }
+    
     canvas = document.getElementById("game-canvas");
 
     if (!canvas) {
@@ -23,7 +32,6 @@ export function    initiateGameHtml()
     canvas.remove();
     initiateGlobals();
     loadElements();
-    getProfile();
     eventListenerHandler();
 }
 
@@ -503,9 +511,15 @@ async function  getProfile()
             },
             credentials: 'include'
         });
+        if (gameResponse.status === 401) {
+            console.log("ENVER FUCK ENVER\' CODE");
+            return; 
+        }
+        console.log("GAME STATUS : " + gameResponse.status)
+        console.log("selam")
         if (gameResponse.ok) {
             const data = await gameResponse.json();
-
+            console.log("bebek")
             // Kullanıcı bilgilerini göster
             if (data.user) {
                 document.getElementById('username').textContent = data.user.username || 'N/A';
@@ -517,6 +531,7 @@ async function  getProfile()
             }
         }
     } catch (error) {
+        console.log("sıkıs")
         console.error('Error fetching user data:', error);
     }
 }
