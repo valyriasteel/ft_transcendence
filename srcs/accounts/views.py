@@ -271,17 +271,14 @@ class LogoutAPIView(APIView):
         return response
 
 class GetProfileView(APIView):
-
-    
     permission_classes = [IsAuthenticated]
-    logging.info("BIRSEYLER")
 
     def get(self, request):
-        console.log("31")
         try:
+            logging.info("teoooooooooooooo")
             if not request.user.is_authenticated:
-                 Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
-
+                logging.info("teoooooooooooooo2")
+                Response({'error': 'No valid token provided', 'status': 'error'}, status=200)
             user_profile = UserCreateProfile.objects.get(user=request.user)
             serializer = UserCreateProfileSerializer(user_profile)
             
@@ -292,12 +289,14 @@ class GetProfileView(APIView):
             })
         except UserCreateProfile.DoesNotExist:
             return Response({
+                'status': 'error',
                 'error': 'User profile not found'
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status = 200)
         except Exception as e:
             return Response({
+                'status': 'error',
                 'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status = 200)
 
 
 class TestApiView(APIView):
