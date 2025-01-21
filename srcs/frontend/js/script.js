@@ -480,12 +480,12 @@ async function handleLogout() {
 
         const data = await response.json();
 
-        if (response.ok) {
+        if (response.flag === true) {
             fullClean();
             route(null, "/");
         }
     } catch (error) {
-        console.error('Çıkış sırasında hata:', error);
+        console.log('Çıkış sırasında hata:', error);
         fullClean();
         route(null, "/");
     }
@@ -503,9 +503,15 @@ async function  getProfile()
             },
             credentials: 'include'
         });
+
         if (gameResponse.ok) {
             const data = await gameResponse.json();
-
+            if (data.status === 'error')
+            {
+                console.log("error testi");
+                return;
+            }
+            console.log("bebek");
             // Kullanıcı bilgilerini göster
             if (data.user) {
                 document.getElementById('username').textContent = data.user.username || 'N/A';
@@ -517,6 +523,7 @@ async function  getProfile()
             }
         }
     } catch (error) {
+        console.log("sıkıs")
         console.error('Error fetching user data:', error);
     }
 }

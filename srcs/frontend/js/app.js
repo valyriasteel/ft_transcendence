@@ -1,3 +1,19 @@
+function createPopupWin(pageURL, pageTitle, popupWinWidth, popupWinHeight)
+{
+    let left = (screen.width - popupWinWidth) / 2;
+    let top = (screen.height - popupWinHeight) / 4;
+
+    let myWindow = window.open(
+        pageURL,
+        pageTitle,
+        'resizable=yes, width=' + popupWinWidth +
+        ', height=' + popupWinHeight +
+        ', top=' + top +
+        ', left=' + left
+    );
+    return myWindow;
+}
+
 document.body.addEventListener('click', async (event) => {
     if (event.target.id === "start-button")
     {
@@ -10,15 +26,17 @@ document.body.addEventListener('click', async (event) => {
                 credentials: 'include'
             });
 
-            await tokenResponse.json();
+            const data = await tokenResponse.json();
 
-            if (tokenResponse.ok) {
+            if (data.flag) {
                 route(null, "/game");
             } else {
                 const loginpage = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
                 const loginResponse = await fetch(loginpage);
+                if (loginResponse.flag === false)
+                    return;
                 const loginData = await loginResponse.json();   
-                const loginWindow = window.open(loginData.url, 'loginWindow', 'width=600,height=800,scrollbars=yes,resizable=yes, left=${myLeft}' );
+                const loginWindow = createPopupWin(loginData.url, "Login", 800, 600);
 
                 const checkLoginStatus = setInterval(async () => {
                     if (loginWindow.closed) {
@@ -66,7 +84,7 @@ document.body.addEventListener('click', async (event) => {
             const messageDiv = document.createElement("div");
             messageDiv.id = "messageDiv";
 
-            if (response.ok) {
+            if (result.flag === true) {
                 messageDiv.innerHTML = `<p style="color: green;">Verification successful! Redirect to the game page...</p>`;
                 form.reset();
                 setTimeout(() => {
