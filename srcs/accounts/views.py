@@ -45,11 +45,11 @@ class LoginIntra42View(APIView):
     def get(self, request):
         try:
             url = f"{settings.OAUTH_AUTHORIZE}?client_id={settings.SOCIAL_AUTH_42_KEY}&redirect_uri={settings.REDIRECT_URI}&response_type=code"
-            return Response({'url': url})
+            return Response({'url': url, "flag": True}, status = 200)
         except Exception as e:
             return Response(
-            {"error": "An unexpected error occurred.", "details": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": "An unexpected error occurred.", "details": str(e), "flag": False},
+            status=200
         )
     
 
@@ -59,7 +59,7 @@ class CallbackIntra42View(APIView):
     def get(self, request):
         code = request.GET.get('code')
         if not code:
-            return Response({'error': 'No code provided'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No code provided'}, status=200)
 
         try:
             token_response = requests.post(
@@ -76,7 +76,7 @@ class CallbackIntra42View(APIView):
             token_response.raise_for_status()
             access_token = token_response.json().get('access_token')
         except (requests.RequestException, ValueError) as e:
-            return Response({'error': 'Failed to get token', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Failed to get token', 'details': str(e)}, status=200)
 
         try:
             user_response = requests.get(
@@ -88,7 +88,7 @@ class CallbackIntra42View(APIView):
             username = user_data.get('login')
             email = user_data.get('email')
         except (requests.RequestException, ValueError) as e:
-            return Response({'error': 'Failed to fetch user data', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Failed to fetch user data', 'details': str(e)}, status=200)
 
         try:
             user, user_created = User.objects.get_or_create(
@@ -111,7 +111,7 @@ class CallbackIntra42View(APIView):
                 }
             )
         except IntegrityError as e:
-            return Response({'error': 'Database integrity error', 'details': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': 'Database integrity error', 'details': str(e)}, status=200)
 
         self.send_2fa_code(profile)
 
@@ -146,7 +146,7 @@ class CallbackIntra42View(APIView):
                 fail_silently=False,
             )
         except Exception as e:
-            return Response({"error": "An unexpected error occurred while sending the 2FA code.", "details": str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            return Response({"error": "An unexpected error occurred while sending the 2FA code.", "details": str(e)},status=200,
         )
 
 class Verify2FAView(APIView):
@@ -164,7 +164,7 @@ class Verify2FAView(APIView):
         try:
             user_profile = UserCreateProfile.objects.get(email=email)
         except UserCreateProfile.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'User not found', "flag": False}, status=200)
 
         
         user = user_profile.user
@@ -173,12 +173,12 @@ class Verify2FAView(APIView):
         try:
             two_factor_record = TwoFactorAuth.objects.get(user=user)
         except TwoFactorAuth.DoesNotExist:
-            return Response({'error': '2FA code not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': '2FA code not found', "flag": False}, status=200)
 
        
         if two_factor_record.expires_at < timezone.now():
             two_factor_record.delete() 
-            return Response({'error': '2FA code expired'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': '2FA code expired', "flag": False}, status=200)
 
         
         try:
@@ -187,8 +187,8 @@ class Verify2FAView(APIView):
                     two_factor_record.delete()
                 except Exception as e:
                     return Response(
-                        {'error': 'Failed to delete 2FA record', 'details': str(e)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        {'error': 'Failed to delete 2FA record', 'details': str(e), "flag": False},
+                        status=200
                     )
 
                 try:
@@ -199,7 +199,8 @@ class Verify2FAView(APIView):
 
                     table = Response({
                         'access': myToken,
-                        'refresh': myRefreshToken
+                        'refresh': myRefreshToken,
+                        "flag": True
                     })
                     table.set_cookie(
                         "accessToken", myToken,
@@ -217,15 +218,15 @@ class Verify2FAView(APIView):
                     return table
                 except Exception as e:
                     return Response(
-                        {'error': 'Failed to generate tokens or set cookies', 'details': str(e)},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        {'error': 'Failed to generate tokens or set cookies', 'details': str(e), "flag": False},
+                        status=200
                     )
 
-            return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid code', "flag": False}, status=200)
         except Exception as e:
             return Response(
-                {'error': 'An error occurred during 2FA verification', 'details': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'An error occurred during 2FA verification', 'details': str(e), "flag": False},
+                status=200
             )
 
 
@@ -247,14 +248,14 @@ class LogoutAPIView(APIView):
             except Exception as e:
                 return Response(
                     {'error': 'Failed to blacklist refresh token.', 'details': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=200
                 )
 
         # Çerezleri sil
         try:
             response = Response(
-                {'message': 'Successfully logged out.'},
-                status=status.HTTP_200_OK
+                {'message': 'Successfully logged out.', "flag": True},
+                status=200
             )
             response.delete_cookie('accessToken')
             response.delete_cookie('refreshToken')
@@ -262,22 +263,21 @@ class LogoutAPIView(APIView):
             response.delete_cookie('csrftoken')
         except Exception as e:
             return Response(
-                {'error': 'Failed to clear cookies.', 'details': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'Failed to clear cookies.', 'details': str(e), "flag": False},
+                status=200
             )
 
         return response
 
 class GetProfileView(APIView):
-
-    permission_classes = [IsAuthenticated]
-    
+    permission_classes = [AllowAny]
 
     def get(self, request):
         try:
+            logging.info("teoooooooooooooo")
             if not request.user.is_authenticated:
-                return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
-
+                logging.info("teoooooooooooooo2")
+                Response({'error': 'No valid token provided', 'status': 'error'}, status=200)
             user_profile = UserCreateProfile.objects.get(user=request.user)
             serializer = UserCreateProfileSerializer(user_profile)
             
@@ -288,12 +288,14 @@ class GetProfileView(APIView):
             })
         except UserCreateProfile.DoesNotExist:
             return Response({
+                'status': 'error',
                 'error': 'User profile not found'
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status = 200)
         except Exception as e:
             return Response({
+                'status': 'error',
                 'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            }, status = 200)
 
 
 class TestApiView(APIView):
@@ -305,7 +307,7 @@ class TestApiView(APIView):
         refresh_token = request.COOKIES.get('refreshToken')
 
         if not refresh_token:
-            response = Response({"error": "Refresh token is missing.", "flag": 'no_refresh'}, status=401)
+            response = Response({"error": "Refresh token is missing.", "flag": False}, status=200)
             response.delete_cookie('accessToken')
             response.delete_cookie('refreshToken')
             response.delete_cookie('sessionid')
@@ -314,14 +316,14 @@ class TestApiView(APIView):
         try:
             refresh = RefreshToken(refresh_token)
         except TokenError as e:
-            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response = Response({"message": "Refresh token is invalid or expired", "flag": False}, status=200)
             response.delete_cookie('refreshToken')
             response.delete_cookie('accessToken')
             response.delete_cookie('sessionid')
             response.delete_cookie('csrftoken')
             return response
         except InvalidToken as e:
-            response = Response({"message": "Refresh token is invalid or expired", "flag": 'invalid_refresh'}, status=401)
+            response = Response({"message": "Refresh token is invalid or expired", "flag": False}, status=200)
             response.delete_cookie('refreshToken')
             response.delete_cookie('accessToken')
             response.delete_cookie('sessionid')
@@ -334,8 +336,8 @@ class TestApiView(APIView):
             except (TokenError, InvalidToken) as e:
                 # Token oluşturma hatasını yönet
                 return Response(
-                    {'error': 'Failed to generate new access token.', 'details': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {'error': 'Failed to generate new access token.', 'details': str(e), "flag": False},
+                    status=200
                 )
         
             try:
@@ -343,7 +345,7 @@ class TestApiView(APIView):
                 response = Response({
                     'message': 'Token is generating...',
                     'access': new_access_token,
-                    'flag': 'new_token',
+                    'flag': True,
                 })
                 response.set_cookie(
                     "accessToken", new_access_token,
@@ -355,8 +357,8 @@ class TestApiView(APIView):
             except Exception as e:
                 # Çerez ayarlarında hata oluşursa
                 return Response(
-                    {'error': 'Failed to set cookies.', 'details': str(e)},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    {'error': 'Failed to set cookies.', 'details': str(e), "flag": False},
+                    status=200
                 )
         
         try:
@@ -365,7 +367,7 @@ class TestApiView(APIView):
             auth.get_user(validated_token)
             response = Response({
                 'message': 'Token is valid!',
-                'flag': 'all_ok',
+                'flag': True,
             })
             return response
 
@@ -375,7 +377,7 @@ class TestApiView(APIView):
                 response = Response({
                     'message': 'Token is expired, generating new token...',
                     'access': new_access_token,
-                    'flag': 'new_token',
+                    'flag': True,
                 })
                 response.set_cookie(
                     "accessToken", new_access_token,
@@ -389,7 +391,7 @@ class TestApiView(APIView):
             response = Response({
                 'message': 'Token values is invalid, generating new token...',
                 'access': new_access_token,
-                'flag': 'new_token',
+                'flag': True,
             })
             response.set_cookie(
                 "accessToken", new_access_token,
@@ -400,7 +402,7 @@ class TestApiView(APIView):
             return response
 
         except Exception as e:
-            response = Response({"error": "An unexpected error occurred."}, status=500)
+            response = Response({"error": "An unexpected error occurred.", 'flag': False}, status=200)
             response.delete_cookie('accessToken')
             response.delete_cookie('refreshToken')
             response.delete_cookie('sessionid')
