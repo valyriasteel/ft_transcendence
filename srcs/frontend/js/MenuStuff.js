@@ -1,27 +1,4 @@
 import * as THREE from 'three';
-export class startBut 
-{
-	constructor() 
-	{
-		this.geometry = new THREE.BoxGeometry( 50, 1, 50 );
-		this.material = new THREE.MeshBasicMaterial( { color: 'green' } );
-		this.cube = new THREE.Mesh( this.geometry, this.material );
-		this.cube.position.x = -40;
-		this.startText;
-	}
-}
-
-export class optionsBut 
-{
-	constructor() 
-	{
-		this.geometry = new THREE.BoxGeometry( 50, 1, 50 );
-		this.material = new THREE.MeshBasicMaterial( { color: 'red' } );
-		this.cube = new THREE.Mesh( this.geometry, this.material );
-		this.cube.position.x = 40;
-		this.optText;
-	}
-}
 
 export class scoreBoard 
 {
@@ -58,6 +35,7 @@ export class Mode
 	constructor() 
 	{
 		this.gameInitialized = false;
+		this.gameMeshesCreated = false;
 		this.isTourney = false;
 		this.leftSideText;
 		this.rightSideText;

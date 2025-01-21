@@ -1,9 +1,9 @@
-console.log("background.js loaded");
-document.addEventListener("DOMContentLoaded", () => {
-    ball();
-});
 
-function ball() {
+
+waitForBallElement();
+
+export function ball() {
+    console.log("ball called");
     const ball = document.querySelector('.pong-ball');
     
     if (ball) {
@@ -46,5 +46,16 @@ function ball() {
         gameLoop();
     } else {
         console.error("Ball element not found");
+    }
+}
+
+export function waitForBallElement() {
+    const ball1 = document.querySelector('.pong-ball');
+    if (ball1) {
+        console.log(".pong-ball found!");
+        ball(); // Call ball() when the element exists
+    } else {
+        console.warn(".pong-ball not found yet, retrying...");
+        setTimeout(waitForBallElement, 100); // Retry every 100ms
     }
 }

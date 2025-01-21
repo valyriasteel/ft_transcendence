@@ -1,3 +1,10 @@
+		<!-- Base layout -->
+		<div id="game-container">
+		    <div id="main-page"></div>  <!-- This is where route content is injected -->
+		    <div id="threejs-canvas-container">
+		        <canvas id="game-canvas"></canvas>
+		    </div>
+		</div>
 		<!-- Main Menu-->
 		<div id="menu">
 			<button id="startBut">Play</button>
@@ -16,7 +23,6 @@
 			</div>
 		</div>
 
-		<div id="fps-counter" style="position: absolute; top: 10px; left: 10px; color: white; font-size: 16px; z-index: 100;">FPS: 0</div>
 		<!-- Settings-->
 		<div id="settings">
 			<div id="optionsText">Options</div>
@@ -96,4 +102,5 @@
 		<div id="gameScreen">
 			<div id="leftScore"></div>
 			<div id="rightScore"></div>
+			<div id="fps-counter" style="position: absolute; top: 10px; left: 10px; color: white; font-size: 16px; z-index: 100;">FPS: 0</div>
 		</div>
