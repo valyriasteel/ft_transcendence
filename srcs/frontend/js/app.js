@@ -1,24 +1,137 @@
-console.log("app.js loaded");
-document.addEventListener("DOMContentLoaded", () => {
+document.body.addEventListener('click', async (event) => {
+    //console.log(event.target.id);
+    if (event.target.id === "start-button")
+    {
+        try {
+            const tokenResponse = await fetch('/accounts/test/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
 
-    function navigateTo(page) {
-        if (page === "game") {
-            window.loadGamePage();
-        } else if (page === "verification") {
-            loadVerificationPage();
-        } else {
-            window.loadIndexPage();
+            await tokenResponse.json();
+
+            if (tokenResponse.ok) {
+                route(null, "/game");
+            } else {
+                console.log("Not logged in, redirecting to 42 login page...");
+                const loginpage = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
+                const loginResponse = await fetch(loginpage);
+                const loginData = await loginResponse.json();   
+                const loginWindow = window.open(loginData.url, 'loginWindow', 'width=600,height=800,scrollbars=yes,resizable=yes, left=${myLeft}' );
+
+                const checkLoginStatus = setInterval(async () => {
+                    if (loginWindow.closed) {
+                        clearInterval(checkLoginStatus);
+
+                        const response = await fetch('../html/verify-2fa.html');
+                        if (response.ok) {
+                            route(null, "/verify-2fa");
+                        }   
+                    }
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error("Error loading game page:", error);
         }
-        history.pushState({ page }, "", `#${page}`);
     }
 
-    window.addEventListener("popstate", (event) => {
-        if (event.state && event.state.page) {
-            navigateTo(event.state.page);
-        } else {
-            window.loadIndexPage();
+    if (event.target.id === "submit-2fa")
+    {
+        event.preventDefault();
+
+        const form = document.getElementById("verifyForm");
+        const code = document.getElementById("code").value;
+        const email = document.getElementById("email").value;
+
+        const existingMessage = document.getElementById("messageDiv");
+    
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        try {
+            const verifyApi = `${window.location.protocol}//${window.location.host}/accounts/verify-2fa/`;
+            const response = await fetch(verifyApi, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, code }),
+            });
+
+            const result = await response.json();
+
+            const messageDiv = document.createElement("div");
+            messageDiv.id = "messageDiv";
+
+            if (response.ok) {
+                messageDiv.innerHTML = `<p style="color: green;">Verification successful! Redirect to the game page...</p>`;
+                form.reset();
+                setTimeout(() => {
+                    route(null, "/game");
+                }, 2000);
+            } else {
+                const errorMessage = result.error || "An unexpected error occurred.";
+                messageDiv.innerHTML = `<p style="color: red;">Error: ${errorMessage}</p>`;
+            }
+
+            form.parentNode.appendChild(messageDiv);
+        } catch (error) {
+            console.error("Verification error:", error);
+        }
+    }
+});
+
+function checkCallback() {
+    const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.trim().split('=');
+        acc[key] = value;
+        return acc;
+    }, {});
+
+    if (cookies.callback_complete === 'true') {
+        window.close();
+    }
+}
+
+checkCallback();
+
+/*console.log("app.js loaded");
+let flag = true;
+
+function visibleControl(every, flag, display) {
+    const childrenArray = Array.from(every.children);
+
+    childrenArray.forEach(child => {
+        if (flag)
+            child.style.display = display;
+        else
+            child.style.display = "none";
+    });
+}
+document.addEventListener("DOMContentLoaded", () => {
+
+    window.addEventListener('popstate', (event) => {
+        if (event.state) {
+            if (event.state.page === 'game') {
+                console.log("gameye girmeye çalıstım")
+                window.loadGamePage();
+            } else if (event.state.page === 'index') {
+                window.loadIndexPage();
+                console.log("indexe girmeye çalıstımqqqqqqqqqqqqqqqqqq")
+            }
         }
     });
+
+    if (flag) {
+        history.pushState({ page: "index" }, " Index", "/index");
+        flag = false;
+    }
+    
 
     const app = document.getElementById("app");
     if (!app) {
@@ -39,13 +152,27 @@ document.addEventListener("DOMContentLoaded", () => {
             await tokenResponse.json();
 
             if (tokenResponse.ok) {
-                navigateTo("game");
+                window.loadGamePage();
             } else {
                 console.log("Not logged in, redirecting to 42 login page...");
                 const loginpage = `${window.location.protocol}//${window.location.host}/accounts/loginintra42/`;
                 const loginResponse = await fetch(loginpage);
-                const loginData = await loginResponse.json();
-                window.location.href = loginData.url;
+                const loginData = await loginResponse.json();   
+                const myLeft = window.innerWidth / 2;
+                const loginWindow = window.open(loginData.url, 'loginWindow', 'width=600,height=800,scrollbars=yes,resizable=yes, left=${myLeft}' );
+
+                const checkLoginStatus = setInterval(async () => {
+                    if (loginWindow.closed) {
+                        clearInterval(checkLoginStatus);
+    
+                        const response = await fetch('../html/verify-2fa.html');
+                        if (response.ok) {
+                            const twofaHtml = await response.text();
+                            document.getElementById("verification").style.display = "flex";
+                            document.getElementById("app").style.display = "none";
+                        }   
+                    }
+                }, 1000);
             }
 
         } catch (error) {
@@ -130,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, {});
 
         if (cookies.callback_complete === 'true') {
-            loadVerificationPage();
+            window.close();
         }
     }
 
@@ -154,22 +281,10 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.remove('d-flex', 'flex-column', 'justify-content-center', 'align-items-center', 'vh-100');
 
             document.title = "Pong Game";
-
-            const importMap = document.createElement('script');
-            importMap.type = 'importmap';
-            importMap.id = 'map';
-            importMap.textContent = JSON.stringify({
-                imports: {
-                    "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
-                    "FontLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/FontLoader.js",
-                    "TextGeo": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/geometries/TextGeometry.js",
-                    "ExrLoader": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/loaders/EXRLoader.js",
-                }
-            });
-            document.body.appendChild(importMap);
-
+            
             app.innerHTML = html;
             addCSSById('css', '../css/game.css');
+            removeScript('../js/background.js');
             loadScript('../js/script.js');
             loadScript('../js/ai.js');
             loadScript('../js/AudioMan.js');
@@ -178,6 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
             loadScript('../js/CursorDetect.js');
             loadScript('../js/MenuStuff.js');
             loadScript('../js/Player.js');
+            history.pushState({ page: "game" }, "Pong Game", "/game");
         } catch (error) {
             console.error("Error loading game page:", error);
         }
@@ -187,14 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             removeCSSById('css');
 
-            const importmap = document.getElementById('map');
-
-            if (importmap) {
-                importmap.remove();
-            }
-
             document.body.classList.add('d-flex', 'flex-column', 'justify-content-center', 'align-items-center', 'vh-100');
-
             removeScript('../js/script.js');
             removeScript('../js/ai.js');
             removeScript('../js/AudioMan.js');
@@ -205,17 +314,18 @@ document.addEventListener("DOMContentLoaded", () => {
             removeScript('../js/Player.js');
             addCSSById('css', '../css/background.css');
             loadScript('../js/background.js');
-
+            
             const response = await fetch("../html/index2.html");
             if (response.ok) {
                 console.log("Back to index page");
             }
-
+            
             const html = await response.text();
             const app = document.getElementById('app');
             app.innerHTML = html;
-
+            
             ball();
+            history.pushState({ page: "index" }, " Index", "/index");
         } catch (error) {
             console.error("Error loading index page:", error);
         }
@@ -259,7 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const script = document.createElement("script");
         script.src = scriptPath;
         script.type = "module";
-        script.defer = true;
         document.body.appendChild(script);
     }
     
@@ -275,4 +384,4 @@ document.addEventListener("DOMContentLoaded", () => {
         newLink.href = href;
         document.head.appendChild(newLink);
     }
-});
+});*/

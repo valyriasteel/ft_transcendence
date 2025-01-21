@@ -213,7 +213,6 @@ class LogoutAPIView(APIView):
         refresh_token = request.COOKIES.get('refreshToken')
         
         logout(request)
-        request.session.flush()
 
         if refresh_token:
             try:
