@@ -1,3 +1,5 @@
+let tempWindow = null;
+
 function createPopupWin(pageURL, pageTitle, popupWinWidth, popupWinHeight)
 {
     let left = (screen.width - popupWinWidth) / 2;
@@ -36,10 +38,10 @@ document.body.addEventListener('click', async (event) => {
                 if (loginResponse.flag === false)
                     return;
                 const loginData = await loginResponse.json();   
-                const loginWindow = createPopupWin(loginData.url, "Login", 800, 600);
+                tempWindow = createPopupWin(loginData.url, "Login", 800, 600);
 
                 const checkLoginStatus = setInterval(async () => {
-                    if (loginWindow.closed) {
+                    if (tempWindow.closed) {
                         clearInterval(checkLoginStatus);
 
                         const response = await fetch('../html/verify-2fa.html');
@@ -49,9 +51,8 @@ document.body.addEventListener('click', async (event) => {
                     }
                 }, 1000);
             }
-
         } catch (error) {
-            console.error("Error loading game page:", error);
+            console.log("Error loading game page:", error);
         }
     }
 
@@ -97,7 +98,7 @@ document.body.addEventListener('click', async (event) => {
 
             form.parentNode.appendChild(messageDiv);
         } catch (error) {
-            console.error("Verification error:", error);
+            console.log("Verification error:", error);
         }
     }
 });
@@ -116,7 +117,9 @@ function checkCallback() {
     }, {});
 
     if (cookies.callback_complete === 'true') {
-        window.close();
+        if (!(tempWindow)) {
+            window.close();
+        }
     }
 }
 checkCallback();

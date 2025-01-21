@@ -15,7 +15,7 @@ export function    initiateGameHtml()
     canvas = document.getElementById("game-canvas");
 
     if (!canvas) {
-        console.error("Canvas not found.");
+        console.log("Canvas not found.");
         return;
     }
     else
@@ -480,12 +480,11 @@ async function handleLogout() {
 
         const data = await response.json();
 
-        if (response.flag === true) {
-            fullClean();
-            route(null, "/");
-        }
+        fullClean();
+        route(null, "/");
+
     } catch (error) {
-        console.log('Çıkış sırasında hata:', error);
+        console.log("Error logging out:", error);
         fullClean();
         route(null, "/");
     }
@@ -523,8 +522,7 @@ async function  getProfile()
             }
         }
     } catch (error) {
-        console.log("sıkıs")
-        console.error('Error fetching user data:', error);
+        console.log("Error loading profile:", error);
     }
 }
 
@@ -636,7 +634,7 @@ function    initiateGlobals()
         },
         undefined, // progress callback
         function (error) {
-            console.error('Error loading PNG:', error);
+            console.log('Error loading PNG:', error);
         }
     );
     flag = false;
@@ -850,7 +848,7 @@ function loadEXREnvironment() {
         },
         // Error callback
         function (error) {
-            console.error('Error loading EXR:', error);
+            console.log('Error loading EXR:', error);
         }
     );
 }

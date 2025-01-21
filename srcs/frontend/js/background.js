@@ -45,7 +45,7 @@ export function ball() {
 
         gameLoop();
     } else {
-        console.error("Ball element not found");
+        console.log("Ball element not found");
     }
 }
 
@@ -55,7 +55,7 @@ export function waitForBallElement() {
         console.log(".pong-ball found!");
         ball();
     } else {
-        console.warn(".pong-ball not found yet, retrying...");
+        console.log(".pong-ball not found yet, retrying...");
         setTimeout(waitForBallElement, 100);
     }
 }
