@@ -144,10 +144,9 @@ STATIC_ROOT = BASE_DIR / 'frontend' / 'static'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://localhost:4443']
-#'rest_framework_simplejwt.authentication.JWTAuthentication',
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'accounts.auth.CookieAuthentication'
 
     ],

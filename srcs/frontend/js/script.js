@@ -511,15 +511,15 @@ async function  getProfile()
             },
             credentials: 'include'
         });
-        if (gameResponse.status === 401) {
-            console.log("ENVER FUCK ENVER\' CODE");
-            return; 
-        }
-        console.log("GAME STATUS : " + gameResponse.status)
-        console.log("selam")
+
         if (gameResponse.ok) {
             const data = await gameResponse.json();
-            console.log("bebek")
+            if (data.status === 'error')
+            {
+                console.log("error testi");
+                return;
+            }
+            console.log("bebek");
             // Kullanıcı bilgilerini göster
             if (data.user) {
                 document.getElementById('username').textContent = data.user.username || 'N/A';
