@@ -4,7 +4,6 @@ services:
     build: ./srcs/frontend
     ports:
       - 4443:443
-      - 8000:80
     env_file:
       - .env
     networks:

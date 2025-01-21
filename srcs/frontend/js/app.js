@@ -86,6 +86,13 @@ document.body.addEventListener('click', async (event) => {
     }
 });
 
+document.body.addEventListener('keydown', async (event) => {
+    if (event.key === "Enter" && event.target.id == "code") {
+        document.getElementById("submit-2fa").click();
+    }
+});
+
+
 function checkCallback() {
     const cookies = document.cookie.split(';').reduce((acc, cookie) => {
         const [key, value] = cookie.trim().split('=');

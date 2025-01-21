@@ -2,9 +2,8 @@
 import { initiateGameHtml } from './script.js';
 import { fullClean } from './script.js';
 
-window.history.pushState({ path: '/' }, 'TestName', '/');
+window.history.pushState({ path: '/' }, '', '/');
 let lastPushedState = null;
-let currentPushedState = null;
 
 const route = (event, path) => {
     //console.log("path:", path);
@@ -15,7 +14,7 @@ const route = (event, path) => {
 
     if (path) {
         // Correctly push the state with the path in the state object
-        window.history.pushState({ path }, "", path);  // Add new history entry and set state
+        window.history.pushState({ path }, "", "");  // Add new history entry and set state
 		lastPushedState = window.history.state;
         handleLocation(path);  // Update the page content based on the new path
     }
@@ -44,7 +43,6 @@ window.onpopstate = (event) => {
 };
 
 const routes = {
-    404: "/pages/404.html",
     "/": "/html/index2.html",
     "/game": "/html/game.html",
     "/verify-2fa": "/html/verify-2fa.html"
@@ -52,10 +50,9 @@ const routes = {
 
 const handleLocation = async (path = window.location.pathname) => {
     //console.log("handleLocation path:", path);  // Log the current path
-    const route = routes[path] || routes[404];
+    const route = routes[path];
     const html = await fetch(route).then((data) => data.text());
     document.getElementById("main-page").innerHTML = html;
-
     if (path === "/game") {
         initiateGameHtml();
     }
