@@ -129,8 +129,6 @@ function loadSettingsElements() {
     optMenu.darkModeBut = document.getElementById("darkMode");
     optMenu.backBut = document.getElementById("backBut");
     optMenu.ballSelection = document.getElementById("ballSelection");
-    optMenu.shadowRes = document.getElementById("shadowControl");
-    optMenu.shadowSlider = document.getElementById("shadowSlider");
     optMenu.leftColor = document.getElementById("leftColor");
     optMenu.rightColor = document.getElementById("rightColor");
     optMenu.wallColor = document.getElementById("wallColor");
@@ -443,6 +441,14 @@ function loadEndElements() {
         playNextMatch();
     });
     end.backBut.addEventListener("click", function () {
+        mode.isTourney = false;
+        end.champ.style.display = "none";
+        end.nextBut.style.display = "none";
+        tourney.playerArray = [];
+        tourney.MatchArray = [];
+        tourney.inPlayers.innerHTML = `Players:<br>`;
+        p1.name = "P1";
+        p2.name = "P2";
         end.winner.style.display = "none";
         end.backBut.style.display = "none";
         sceneTransition(myMenu.everything, myMenu.everything);
@@ -522,10 +528,10 @@ async function  getProfile()
 // Create scene, camera, and renderer
 function    initiateGlobals()
 {
-    p1 = new Player('P1', 2);
-    p2 = new Player('P2', 2);
-    p3 = new Player('Blank', 0, 'purple');
-    p4 = new Player('Khonvoum', 0, 'yellow');
+    p1 = new Player('P1', 0);
+    p2 = new Player('P2', 0);
+    p3 = new Player('Blank', 0);
+    p4 = new Player('Khonvoum', 0);
     bot = new Bot();
     ball = new Ball('orange');
     Aud = new AuMan();
@@ -558,8 +564,8 @@ function    initiateGlobals()
 
     // Step 2: Enable Shadows
     pointLight.castShadow = true;
-    pointLight.shadow.mapSize.width = 512; // Shadow map resolution
-    pointLight.shadow.mapSize.height = 512;
+    pointLight.shadow.mapSize.width = 4096; // Shadow map resolution
+    pointLight.shadow.mapSize.height = 4096;
     pointLight.shadow.camera.near = 0.5;
     pointLight.shadow.camera.far = 400;
 
@@ -615,6 +621,8 @@ function    initiateGlobals()
             // Apply the texture as the environment map or background
             scene.background = texture;
             scene.environment = texture;
+            mainMenu.background = texture;
+            mainMenu.environment = texture;
             mode.background = texture;
 
             // You can apply transformations to this PNG texture as needed
@@ -888,13 +896,6 @@ function winScreen() {
 }
 
 async function menuLoop() {
-    let interval = setInterval(() => {
-        if (flag)
-            clearInterval(interval);
-        flag = true;
-        let x = 0.01;
-        cam.camera.rotateY(x / 10); // Decrease opacity by a small amount (you can adjust this value)
-    }, 20); // Update every 20 milliseconds (adjust the interval for smoother/slower fading)
     animationRequestId = renderer.render(mainMenu, cam.camera);
 }
 
@@ -916,7 +917,9 @@ async function gameLoop(currentTime) {
     fpsDisplay.textContent = `FPS: ${fps}`
     // Change color based on elapsed time
     if (optMenu.leftRainbow)
+    {
         p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
+    }
     if (optMenu.rightRainbow)
         p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
 
@@ -939,6 +942,18 @@ export function fullClean()
     }
     if (!mode || !mode.gameMeshesCreated)
         return;
+
+    if (mainMenu.environment) {
+        mainMenu.environment.dispose();
+        mainMenu.environment = null;
+        scene.environment = null;
+    }
+    
+    if (mainMenu.background) {
+        mainMenu.background.dispose();
+        mainMenu.background = null;
+        scene.background = null;
+    }
 
     disposer(p1.pad, scene);
     disposer(p2.pad, scene);
@@ -977,8 +992,8 @@ function cleanGameObj() {
     if (p4.geometry)
         disposer(p4.pad, scene);
     disposer(ball.sphere, scene);
-    p1.score = 2;
-    p2.score = 2;
+    p1.score = 0;
+    p2.score = 0;
 }
 
 function initiateP1(canvas) {
@@ -1069,8 +1084,7 @@ function initiateP3(canvas) {
     p3.Height = 10;
     p3.Depth = 30;
     p3.geometry = new THREE.BoxGeometry(p3.Width, p3.Height, p3.Depth);
-    p3.material = new THREE.MeshStandardMaterial({ color: p3.color })
-    p3.pad = new THREE.Mesh(p3.geometry, p3.material);
+    p3.pad = new THREE.Mesh(p3.geometry, p1.material);
     p3.pad.castShadow = true;
     p3.pad.receiveShadow = true;
     p3.pad.position.x = -190;
@@ -1088,8 +1102,7 @@ function initiateP4(canvas) {
     p4.Height = 10;
     p4.Depth = 30;
     p4.geometry = new THREE.BoxGeometry(p4.Width, p4.Height, p4.Depth);
-    p4.material = new THREE.MeshStandardMaterial({ color: p4.color })
-    p4.pad = new THREE.Mesh(p4.geometry, p4.material);
+    p4.pad = new THREE.Mesh(p4.geometry, p2.material);
     p4.minX = 39;
     p4.pad.castShadow = true;
     p4.pad.receiveShadow = true;
