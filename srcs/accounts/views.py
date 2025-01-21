@@ -43,8 +43,15 @@ class Verify2FAThrottle(UserRateThrottle):
 class LoginIntra42View(APIView):
     permission_classes = [AllowAny]
     def get(self, request):
-        url = f"{settings.OAUTH_AUTHORIZE}?client_id={settings.SOCIAL_AUTH_42_KEY}&redirect_uri={settings.REDIRECT_URI}&response_type=code"
-        return Response({'url': url})
+        try:
+            url = f"{settings.OAUTH_AUTHORIZE}?client_id={settings.SOCIAL_AUTH_42_KEY}&redirect_uri={settings.REDIRECT_URI}&response_type=code"
+            return Response({'url': url})
+        except Exception as e:
+            return Response(
+            {"error": "An unexpected error occurred.", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
 
 
 class CallbackIntra42View(APIView):
@@ -117,25 +124,29 @@ class CallbackIntra42View(APIView):
         return response
 
     def send_2fa_code(self, profile):
-        code = get_random_string(length=6, allowed_chars='0123456789')
+        try:
+            code = get_random_string(length=6, allowed_chars='0123456789')
 
-        expires_at = timezone.now() + timedelta(minutes=5)
+            expires_at = timezone.now() + timedelta(minutes=5)
 
-        hashed_code = make_password(code)
-        two_factor_auth, created = TwoFactorAuth.objects.update_or_create(
-        user=profile.user,
-        defaults={
-            'code': hashed_code,
-            'expires_at': expires_at,
-        }
-    )
+            hashed_code = make_password(code)
+            two_factor_auth, created = TwoFactorAuth.objects.update_or_create(
+            user=profile.user,
+            defaults={
+                'code': hashed_code,
+                'expires_at': expires_at,
+            }
+        )
 
-        send_mail(
-            'Your 2FA Code',
-            f'Your verification code is: {code}',
-            'no-reply@example.com',
-            [profile.email],
-            fail_silently=False,
+            send_mail(
+                'Your 2FA Code',
+                f'Your verification code is: {code}',
+                'no-reply@example.com',
+                [profile.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            return Response({"error": "An unexpected error occurred while sending the 2FA code.", "details": str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 class Verify2FAView(APIView):
@@ -170,68 +181,91 @@ class Verify2FAView(APIView):
             return Response({'error': '2FA code expired'}, status=status.HTTP_400_BAD_REQUEST)
 
         
-        if check_password(code, two_factor_record.code):
-            two_factor_record.delete()
+        try:
+            if check_password(code, two_factor_record.code):
+                try:
+                    two_factor_record.delete()
+                except Exception as e:
+                    return Response(
+                        {'error': 'Failed to delete 2FA record', 'details': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
 
-            
-            refresh = RefreshToken.for_user(user)
+                try:
+                    # JWT token oluştur ve cookie ayarlarını yap
+                    refresh = RefreshToken.for_user(user)
+                    myToken = str(refresh.access_token)
+                    myRefreshToken = str(refresh)
 
-            myToken = str(refresh.access_token)
-            myRefreshToken = str(refresh)
+                    table = Response({
+                        'access': myToken,
+                        'refresh': myRefreshToken
+                    })
+                    table.set_cookie(
+                        "accessToken", myToken,
+                        httponly=True,
+                        secure=True,
+                        samesite="Strict",
+                    )
+                    table.set_cookie(
+                        "refreshToken", myRefreshToken,
+                        httponly=True,
+                        secure=True,
+                        samesite="Strict",
+                    )
 
-            table = Response({
-                'access': myToken,
-                'refresh': myRefreshToken
-            })
-            table.set_cookie(
-                "accessToken", myToken,
-                httponly=True,
-                secure=True,
-                samesite="Strict",
+                    return table
+                except Exception as e:
+                    return Response(
+                        {'error': 'Failed to generate tokens or set cookies', 'details': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+
+            return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {'error': 'An error occurred during 2FA verification', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            table.set_cookie(
-                "refreshToken", myRefreshToken,
-                httponly=True,
-                secure=True,
-                samesite="Strict",
-            )
-
-            return table
-
-        return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutAPIView(APIView):
-
     permission_classes = [AllowAny]
 
-    
     def post(self, request):
         refresh_token = request.COOKIES.get('refreshToken')
         print("Received refresh token:", refresh_token)
 
-        refresh_token = request.COOKIES.get('refreshToken')
-        
+        # Oturumu sonlandır
         logout(request)
 
+        # Refresh token blacklist işlemi
         if refresh_token:
             try:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        response = Response(
-            {'message': 'Successfully logged out.'},
-            status=status.HTTP_200_OK
-        )
-        response = Response(
-            {'message': 'Successfully logged out.'},
-            status=status.HTTP_200_OK
-        )
-        response.delete_cookie('accessToken')
-        response.delete_cookie('refreshToken')
-        response.delete_cookie('sessionid')
-        response.delete_cookie('csrftoken')
+                return Response(
+                    {'error': 'Failed to blacklist refresh token.', 'details': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Çerezleri sil
+        try:
+            response = Response(
+                {'message': 'Successfully logged out.'},
+                status=status.HTTP_200_OK
+            )
+            response.delete_cookie('accessToken')
+            response.delete_cookie('refreshToken')
+            response.delete_cookie('sessionid')
+            response.delete_cookie('csrftoken')
+        except Exception as e:
+            return Response(
+                {'error': 'Failed to clear cookies.', 'details': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
         return response
 
 class GetProfileView(APIView):
@@ -294,19 +328,36 @@ class TestApiView(APIView):
             response.delete_cookie('csrftoken')
 
         if not access_token:
-            new_access_token = str(refresh.access_token)
-            response = Response({
-                'message': 'Token is generating...',
-                'access': new_access_token,
-                'flag': 'new_token',
-            })
-            response.set_cookie(
-                "accessToken", new_access_token,
-                httponly=True,
-                secure=True,
-                samesite="Strict"
-            )
-            return response
+            try:
+                # Yeni access token oluştur
+                new_access_token = str(refresh.access_token)
+            except (TokenError, InvalidToken) as e:
+                # Token oluşturma hatasını yönet
+                return Response(
+                    {'error': 'Failed to generate new access token.', 'details': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+            try:
+                # Yanıt ve çerez ayarlarını yap
+                response = Response({
+                    'message': 'Token is generating...',
+                    'access': new_access_token,
+                    'flag': 'new_token',
+                })
+                response.set_cookie(
+                    "accessToken", new_access_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Strict"
+                )
+                return response
+            except Exception as e:
+                # Çerez ayarlarında hata oluşursa
+                return Response(
+                    {'error': 'Failed to set cookies.', 'details': str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         
         try:
             auth = JWTAuthentication()
