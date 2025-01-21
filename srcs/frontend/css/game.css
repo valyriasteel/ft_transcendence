@@ -46,6 +46,7 @@ body
 	position: absolute; 
 	top: 50vh; 
 	left: 45vw; 
+	width: 13%;
 	z-index: 10; 
 	display: none;
 }
@@ -402,6 +403,18 @@ body
 	font-size: 2rem;
 }
 
+#rule
+{
+	position: absolute;
+	top: 40%;
+	left: 65%;
+	z-index: 10;
+	color: white;
+	background-color: #2980b9;
+	display: none;
+	font-size: 1.4rem;
+}
+
 /* Game Screen*/
 
 #gameScreen
@@ -420,6 +433,7 @@ body
 	top: 0%;
 	z-index: 10;
 	display: none;
+	background-color: #333;
 	color: white;
 }
 
@@ -430,6 +444,7 @@ body
 	top: 0%;
 	z-index: 10;
 	display: none;
+	background-color: #333;
 	color: white;
 }
 
