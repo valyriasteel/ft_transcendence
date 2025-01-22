@@ -23,18 +23,16 @@ const route = (event, path) => {
 // This handles browser back/forward navigation
 window.onpopstate = (event) => {
     if (event.state && event.state.path) {
-        console.log("popstate path:", event.state.path); // Log the state path
         handleLocation(event.state.path); // Update page content based on the URL stored in the history state
     } else {
         console.log("popstate state is null or doesn't contain path");
+        return;
     }
-	console.log("state path:", event.state.path);
 	if (event.state.path === "/")
 		waitForBallElement();
 		
     // Handle "/game" specific logic
     if (event.state && (lastPushedState?.path === "/game" || event.state.path === "/game")) {
-        console.log("oyundan cıktım");
         fullClean();
     }
 

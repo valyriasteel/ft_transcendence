@@ -14,12 +14,8 @@ export function    initiateGameHtml()
 {
     canvas = document.getElementById("game-canvas");
 
-    if (!canvas) {
-        console.log("Canvas not found.");
+    if (!canvas)
         return;
-    }
-    else
-        console.log("wegotcanvas");
     canvas.remove();
     initiateGlobals();
     loadElements();
@@ -29,7 +25,6 @@ export function    initiateGameHtml()
 
 window.onbeforeunload = () => {
     fullClean();
-    console.log("temizlendi");
 };
 
 async function eventListenerHandler()
@@ -510,7 +505,6 @@ async function  getProfile()
                 console.log("error testi");
                 return;
             }
-            console.log("bebek");
             // Kullanıcı bilgilerini göster
             if (data.user) {
                 document.getElementById('username').textContent = data.user.username || 'N/A';
