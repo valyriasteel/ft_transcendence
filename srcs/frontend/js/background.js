@@ -3,7 +3,6 @@
 waitForBallElement();
 
 export function ball() {
-    console.log("ball called");
     const ball = document.querySelector('.pong-ball');
     
     if (ball) {
@@ -44,18 +43,14 @@ export function ball() {
         ball.style.top = `${ballY}px`;
 
         gameLoop();
-    } else {
-        console.log("Ball element not found");
     }
 }
 
 export function waitForBallElement() {
     const ball1 = document.querySelector('.pong-ball');
     if (ball1) {
-        console.log(".pong-ball found!");
         ball();
     } else {
-        console.log(".pong-ball not found yet, retrying...");
         setTimeout(waitForBallElement, 100);
     }
 }
