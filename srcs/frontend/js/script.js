@@ -10,24 +10,60 @@ import * as THREE from 'three';
 import { TextGeometry } from 'TextGeo';
 import { EXRLoader } from 'ExrLoader';
 
+export function    initiateGameHtml()
+{
+    canvas = document.getElementById("game-canvas");
 
-const p1 = new Player('P1', 2, 'blue');
-const p2 = new Player('P2', 2, 'red');
-const p3 = new Player('Blank', 0, 'purple');
-const p4 = new Player('Khonvoum', 0, 'yellow');
-const bot = new Bot();
-const ball = new Ball('orange');
-const Aud = new AuMan();
-const cam = new Camera();
-const start = new MENU.startBut();
-const opt = new MENU.optionsBut();
-const select = new MENU.selectMenu();
-const mode = new MENU.Mode();
-const optMenu = new MENU.optionsMenu();
-const tourney = new MENU.tourneyMenu();
-const board = new MENU.scoreBoard();
-const end = new MENU.endScreen();
-const myMenu = new MENU.mainMenu();
+    if (!canvas)
+        return;
+    canvas.remove();
+    initiateGlobals();
+    loadElements();
+    getProfile();
+    eventListenerHandler();
+}
+
+window.onbeforeunload = () => {
+    fullClean();
+};
+
+async function eventListenerHandler()
+{
+    document.addEventListener('keydown', (event) => {
+        //let cam = true;
+        if (event.key === '"')
+            cam.enable = !cam.enable;
+        if (cam.enable)
+            cameraDown(event);
+        else {
+            p1KeyDown(event);
+            p2KeyDown(event);
+            if (!(modeFour))
+              return;
+            p3KeyDown(event);
+            p4KeyDown(event);
+        }
+    }
+    );
+
+    document.addEventListener('keyup', (event) => {
+        cameraUp(event);
+        p1KeyUp(event);
+        p2KeyUp(event);
+        if (!(modeFour))
+            return;
+        p3KeyUp(event);
+        p4KeyUp(event);
+    }
+    );
+
+    tourney.inputBox.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            tourney.submitButton.click(); // Trigger the button click
+        }
+    });
+    window.addEventListener("resize", resizeRenderer);
+}   
 
 function visibleControl(every, flag, display) {
     const childrenArray = Array.from(every.children);
@@ -56,6 +92,7 @@ function sceneTransition(before, after) {
 function loadMenuElements() {
     myMenu.startBut = document.getElementById("startBut");
     myMenu.settingsBut = document.getElementById("settingsBut");
+
     myMenu.everything = document.getElementById("menu");
     myMenu.startBut.addEventListener("click", function () {
         /*visibleControl(myMenu.everything, false, "none");
@@ -70,6 +107,8 @@ function loadMenuElements() {
         visibleControl(optMenu.everything, true, "block");
         renderer.setAnimationLoop(optionsLoop);
     });
+    logoutButton.addEventListener("click", handleLogout);
+
 }
 
 function loadSettingsElements() {
@@ -85,6 +124,87 @@ function loadSettingsElements() {
     optMenu.darkModeBut = document.getElementById("darkMode");
     optMenu.backBut = document.getElementById("backBut");
     optMenu.ballSelection = document.getElementById("ballSelection");
+    optMenu.leftColor = document.getElementById("leftColor");
+    optMenu.rightColor = document.getElementById("rightColor");
+    optMenu.wallColor = document.getElementById("wallColor");
+    optMenu.background = document.getElementById("backgroundSelect");
+
+    document.getElementById("leftColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("leftColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+        {
+            optMenu.leftPadColor = 'red';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorBlue")
+        {
+            optMenu.leftPadColor = 'blue';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorGreen")
+        {
+            optMenu.leftPadColor = 'green';
+            optMenu.leftRainbow = false;
+        }
+        if (selectedValue === "colorRainbow")
+        {
+            optMenu.leftPadColor = 'red';
+            optMenu.leftRainbow = true;
+        }
+    });
+
+    document.getElementById("rightColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("rightColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+        {
+            optMenu.rightPadColor = 'red';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorBlue")
+        {
+            optMenu.rightPadColor = 'blue';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorGreen")
+        {
+            optMenu.rightPadColor = 'green';
+            optMenu.rightRainbow = false;
+        }
+        if (selectedValue === "colorRainbow")
+        {
+            optMenu.rightPadColor = 'blue';
+            optMenu.rightRainbow = true;
+        }
+    });
+
+    document.getElementById("wallColorSelection").addEventListener("change", ()=>{
+        const selectedValue = document.getElementById("wallColorSelection").value;
+        console.log(selectedValue);
+        if (selectedValue === "colorRed")
+            optMenu.colorWall = 'red';
+        if (selectedValue === "colorBlue")
+            optMenu.colorWall = 'blue';
+        if (selectedValue === "colorGreen")
+            optMenu.colorWall = 'green';
+    });
+
+    document.getElementById("backgroundSelection").addEventListener("change", () =>{
+        const selectedValue = document.getElementById("backgroundSelection").value;
+        if (selectedValue === "on")
+        {
+            scene.background = mode.texture;
+            scene.environment = mode.texture;
+        }
+        else
+        {
+            console.log("off");
+            scene.background = null;
+            scene.environment = null;
+        }
+    });
+
 
     optMenu.backBut.addEventListener("click", function () {
         end.winner.style.display = "none";
@@ -144,9 +264,21 @@ function loadSettingsElements() {
         else
             optMenu.darkModeText.textContent = "Dark mode: off";
         if (mode.darkMode)
+        {
             ambientLight.intensity = 0;
+            scene.remove(spotLight);
+            scene.add(pointLight);
+            scene.environment = null;
+            scene.background = null;
+        }
         else
-            ambientLight.intensity = 0.1;
+        {
+            scene.environment = mode.background;
+            scene.background = mode.background;
+            scene.remove(pointLight);
+            scene.add(spotLight);       
+            ambientLight.intensity = 0.3;
+        }
     });
 }
 
@@ -235,15 +367,48 @@ function loadTourneyElements() {
         p2.name = "P2";
         sceneTransition(tourney.everything, select.everything);
     });
+    tourney.submitButton.addEventListener("click", function () {
+        if (tourney.inputBox.value == "")
+            return;
+        if (tourney.inputBox.value.length > 12) {
+            tourney.statusText.innerText = "Player name is too long";
+            tourney.statusText.style.display = "block";
+            return;
+        }
+        if (!(/^[\x20-\x7E]*$/.test(tourney.inputBox.value))) {
+            tourney.statusText.innerText = "Unsupported characters found";
+            tourney.statusText.style.display = "block";
+            return;
+        }
+    
+        if (tourney.playerArray.length == 8) {
+            tourney.statusText.innerText = "Maximum number of players are 8.";
+            tourney.statusText.style.display = "block";
+            tourney.inputBox.value = "";
+            return;
+        }
+        tourney.playerArray.push(tourney.inputBox.value);
+        tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>";
+        tourney.inPlayers.style.display = "block";
+        tourney.inputBox.value = "";
+    });
+    
+    
+    tourney.startTourneyBut.addEventListener("click", function () {
+        visibleControl(tourney.everything, false, "none");
+        playNextMatch();
+    });    
 }
 
-loadMenuElements();
-loadSettingsElements();
-loadSelectElements();
-loadTourneyElements();
-loadEndElements();
-loadScoreElements();
-
+function loadElements()
+{
+    loadMenuElements();
+    loadSettingsElements();
+    loadSelectElements();
+    loadTourneyElements();
+    loadEndElements();
+    loadScoreElements();
+}
 
 function announceNextMatches() {
     let i = 1;
@@ -260,14 +425,29 @@ function loadEndElements() {
     end.winner = document.getElementById("winner");
     end.nextBut = document.getElementById("nextMatchBut");
     end.champ = document.getElementById("champ");
+    end.backBut = document.getElementById("endBackBut");
 
     end.nextBut.addEventListener("click", function () {
         end.nextBut.style.display = "none";
         end.winner.style.display = "none";
         end.champ.style.display = "none";
+        end.backBut.style.display = "none";
         tourney.inPlayers.style.display = "none";
-        optMenu.backBut.style.display = "none";
         playNextMatch();
+    });
+    end.backBut.addEventListener("click", function () {
+        mode.isTourney = false;
+        end.champ.style.display = "none";
+        end.nextBut.style.display = "none";
+        tourney.playerArray = [];
+        tourney.MatchArray = [];
+        tourney.inPlayers.innerHTML = `Players:<br>`;
+        p1.name = "P1";
+        p2.name = "P2";
+        end.winner.style.display = "none";
+        end.backBut.style.display = "none";
+        sceneTransition(myMenu.everything, myMenu.everything);
+        renderer.setAnimationLoop(menuLoop);
     });
 }
 
@@ -280,11 +460,8 @@ function loadScoreElements() {
 //---------------------BACKEND----------------------------------------------------------------//
 
 
-const logoutButton = document.getElementById("logoutBut");
-logoutButton.addEventListener("click", handleLogout);
 
 async function handleLogout() {
-    const csrfToken = getCookie('csrftoken');  // CSRF token'ı alıyoruz
 
     try {
         // Çıkış işlemi için API isteği gönderiyoruz
@@ -292,69 +469,55 @@ async function handleLogout() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken  // CSRF token'ı
             },
             credentials: 'include'  // Cookie'lerin gönderilmesini sağlamak için
-        });        
+        });
 
         const data = await response.json();
 
-        if (response.ok)
-            {
-                console.log("logoutagirdim");
-                renderer.setAnimationLoop(null); // This stops the rendering loop
-                renderer.setClearColor(0x000000, 1); // Optional: Set the clear color to black
-                renderer.clear(); // Clear the canvas
-                renderer.domElement.remove();
-                window.loadIndexPage();
-            } 
-        else
-            alert(data.error || 'Çıkış yaparken bir hata oluştu!');
+        fullClean();
+        route(null, "/");
+
     } catch (error) {
-        console.error('Çıkış sırasında hata:', error);
-        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+        console.log("Error logging out:", error);
+        fullClean();
+        route(null, "/");
     }
 
 
 }
 
-function getCookie(name) {
-    const cookieArray = document.cookie.split(';');
-    for (const cookie of cookieArray) {
-        const trimmedCookie = cookie.trim();
-        if (trimmedCookie.startsWith(name + '=')) {
-            return decodeURIComponent(trimmedCookie.substring(name.length + 1));
+async function  getProfile()
+{
+    try {
+        const gameResponse = await fetch('/accounts/get_profile/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        });
+
+        if (gameResponse.ok) {
+            const data = await gameResponse.json();
+            if (data.status === 'error')
+            {
+                console.log("error testi");
+                return;
+            }
+            // Kullanıcı bilgilerini göster
+            if (data.user) {
+                document.getElementById('username').textContent = data.user.username || 'N/A';
+                document.getElementById('userEmail').textContent = data.user.email || 'N/A';
+                document.getElementById('userName').textContent = `${data.user.name || ''} ${data.user.surname || ''}`;
+                if (data.user.avatar) {
+                    document.getElementById('userAvatar').src = "https://" + data.user.avatar.slice(10);
+                }
+            }
         }
+    } catch (error) {
+        console.log("Error loading profile:", error);
     }
-    return null;
-}
-
-try {
-const gameResponse = await fetch('/accounts/get_profile/', {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    credentials: 'include'
-});
-if (gameResponse.ok) {
-    const data = await gameResponse.json();
-
-    // Kullanıcı bilgilerini göster
-    if (data.user) {
-        document.getElementById('username').textContent = data.user.username || 'N/A';
-        document.getElementById('userEmail').textContent = data.user.email || 'N/A';
-        document.getElementById('userName').textContent = `${data.user.name || ''} ${data.user.surname || ''}`;
-        if (data.user.avatar) {
-            document.getElementById('userAvatar').src = "https://" + data.user.avatar.slice(10);
-        }
-    }
-} else {
-    throw new Error('Failed to fetch user data');
-}
-} catch (error) {
-console.error('Error fetching user data:', error);
-//window.location.href = '/'; //buraya ne olacağı yazılacak
 }
 
 //--------------------------------------------------------------------------------------------//
@@ -362,94 +525,217 @@ console.error('Error fetching user data:', error);
 
 
 // Create scene, camera, and renderer
-const scene = new THREE.Scene();
-const mainMenu = new THREE.Scene();
-const optionsMenu = new THREE.Scene();
-const selectMenu = new THREE.Scene();
-const gameEnd = new THREE.Scene();
-const tournamentMenu = new THREE.Scene();
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.autoClear = true; // Ensures the canvas is cleared before rendering
-renderer.shadowMap.enabled = true;
-const textureLoader = new THREE.TextureLoader();
-const soccerBallTexture = textureLoader.load('../images/ball.jpg')
-const basketBallTexture = textureLoader.load('../images/basketball.png')
-ball.texture = soccerBallTexture;
-const pointLight = new THREE.PointLight(0xffffff, 1000, 100);  // Color, intensity, distance
-pointLight.position.set(0, 10, 0);  // Position the light in the scene
-pointLight.castShadow = true;  // Enable shadow casting
-//scene.add(pointLight);
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // White light with intensity 1
-scene.add(ambientLight);
-document.body.appendChild(renderer.domElement);
-let loadedFont;
-const fontLoader = new FontLoader();
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1;
-Aud.volumeChange(mode.volume);
+function    initiateGlobals()
+{
+    p1 = new Player('P1', 0);
+    p2 = new Player('P2', 0);
+    p3 = new Player('Blank', 0);
+    p4 = new Player('Khonvoum', 0);
+    bot = new Bot();
+    ball = new Ball('orange');
+    Aud = new AuMan();
+    cam = new Camera();
+    select = new MENU.selectMenu();
+    mode = new MENU.Mode();
+    optMenu = new MENU.optionsMenu();
+    tourney = new MENU.tourneyMenu();
+    board = new MENU.scoreBoard();
+    end = new MENU.endScreen();
+    myMenu = new MENU.mainMenu();
 
-//Spot light
-// Step 1: Create a Spotlight
-const spotLight = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
-spotLight.position.set(0, 150, -100); // Position the light
-spotLight.angle = Math.PI / 2.5; // Cone angle (in radians)
-spotLight.penumbra = 0.2; // Soft edges
-//spotLight.decay = 2; // Light decay
-spotLight.distance = 400; // Maximum range of the light
+    scene = new THREE.Scene();
+    mainMenu = new THREE.Scene();
+    optionsMenu = new THREE.Scene();
+    gameEnd = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.autoClear = true; // Ensures the canvas is cleared before rendering
+    renderer.shadowMap.enabled = true;
+    textureLoader = new THREE.TextureLoader();
+    soccerBallTexture = textureLoader.load('../images/ball.jpg')
+    basketBallTexture = textureLoader.load('../images/basketball.png')
+    ball.texture = soccerBallTexture;
+    pointLight = new THREE.SpotLight(0xffffff, 1000);  // Color, intensity, distance
+    pointLight.position.set(0, 60, 0); // Position the light
+    pointLight.angle = Math.PI / 3; // Cone angle (in radians)
+    pointLight.penumbra = 0.2; // Soft edges
+    //spotLight.decay = 2; // Light decay
+    pointLight.distance = 200; // Maximum range of the light
 
-// Step 2: Enable Shadows
-spotLight.castShadow = true;
-spotLight.shadow.mapSize.width = 4096; // Shadow map resolution
-spotLight.shadow.mapSize.height = 4096;
-spotLight.shadow.camera.near = 0.5;
-spotLight.shadow.camera.far = 400;
+    // Step 2: Enable Shadows
+    pointLight.castShadow = true;
+    pointLight.shadow.mapSize.width = 4096; // Shadow map resolution
+    pointLight.shadow.mapSize.height = 4096;
+    pointLight.shadow.camera.near = 0.5;
+    pointLight.shadow.camera.far = 400;
 
-// Step 3: Add the Spotlight to the Scene
-scene.add(spotLight);
+    // Step 3: Add the Spotlight to the Scene
+    scene.add(pointLight);
 
-// Optional: Add a Spotlight Helper
-const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-//scene.add(spotLightHelper);
+    // Optional: Add a Spotlight Helper
+    //pointLightHelper = new THREE.SpotLightHelper(pointLight);
+    //scene.add(pointLightHelper);
+    ambientLight = new THREE.AmbientLight(0xffffff, 0.3); // White light with intensity 1
+    scene.add(ambientLight);
+    document.body.appendChild(renderer.domElement);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
+    Aud.volumeChange(mode.volume);
 
-//Spot light 2
-// Step 1: Create a Spotlight
-const spotLight2 = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
-spotLight2.position.set(0, 150, 100); // Position the light
-spotLight2.angle = Math.PI / 2.5; // Cone angle (in radians)
-spotLight2.penumbra = 0.2; // Soft edges
-//spotLight.decay = 2; // Light decay
-spotLight2.distance = 400; // Maximum range of the light
+    //Spot light
+    // Step 1: Create a Spotlight
+    spotLight = new THREE.SpotLight(0xffffff, 30000); // White light, intensity of 1
+    spotLight.position.set(0, 150, -100); // Position the light
+    spotLight.angle = Math.PI / 2.5; // Cone angle (in radians)
+    spotLight.penumbra = 0.2; // Soft edges
+    //spotLight.decay = 2; // Light decay
+    spotLight.distance = 400; // Maximum range of the light
 
-// Step 2: Enable Shadows
-spotLight2.castShadow = true;
-spotLight2.shadow.mapSize.width = 4096; // Shadow map resolution
-spotLight2.shadow.mapSize.height = 4096;
-spotLight2.shadow.camera.near = 0.5;
-spotLight2.shadow.camera.far = 400;
+    // Step 2: Enable Shadows
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 512; // Shadow map resolution
+    spotLight.shadow.mapSize.height = 512;
+    spotLight.shadow.camera.near = 0.5;
+    spotLight.shadow.camera.far = 400;
 
-// Step 3: Add the Spotlight to the Scene
-//scene.add(spotLight2);
+    // Step 3: Add the Spotlight to the Scene
+    scene.add(spotLight);
 
-// Optional: Add a Spotlight Helper
-const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
-//scene.add(spotLightHelper2);
+    // Optional: Add a Spotlight Helper
+    spotLightHelper = new THREE.SpotLightHelper(spotLight);
+    //scene.add(spotLightHelper);
 
-function loadFont() {
-    return new Promise((resolve, reject) => {
-        const fontLoader = new FontLoader();
-        fontLoader.load(
-            'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
-            (font) => {
-                loadedFont = font; // Store the loaded font
-                resolve(font); // Resolve the promise
-            },
-            undefined,
-            (err) => reject(err) // Handle loading errors
-        );
+    modeFour = false;
+    modeSingle = false;
+    cam.camera.position.y = 100;
+    cam.camera.lookAt(0, 0, 0);
+
+    renderer.setAnimationLoop(menuLoop);  // Start the animation loop
+    resizeRenderer();
+    //loadEXREnvironment();
+    initiateTourney();
+    skybox = new THREE.TextureLoader();
+    skybox.load(
+        '../images/kloppenheim_02_puresky_4k.png',
+        function (texture) {
+            // Apply the texture as the environment map or background
+            scene.background = texture;
+            scene.environment = texture;
+            mainMenu.background = texture;
+            mainMenu.environment = texture;
+            mode.background = texture;
+
+            // You can apply transformations to this PNG texture as needed
+        },
+        undefined, // progress callback
+        function (error) {
+            console.log('Error loading PNG:', error);
+        }
+    );
+    flag = false;
+    cam.camera.rotateX(Math.PI / 2);
+    clock = new THREE.Clock();
+
+    fpsDisplay = document.getElementById('fps-counter');
+
+    // KEY PRESS MIMIC
+    upArrowKeyDown = new KeyboardEvent("keydown", {
+        key: "ArrowUp",
+        code: "ArrowUp",
+        keyCode: 38,
+        which: 38,
+        bubbles: true,
+        cancelable: true
     });
-}
 
-const originalZPosition = cam.camera.position.z;
+    // Create KeyboardEvent for Up Arrow key (keyup)
+    upArrowKeyUp = new KeyboardEvent("keyup", {
+        key: "ArrowUp",
+        code: "ArrowUp",
+        keyCode: 38,
+        which: 38,
+        bubbles: true,
+        cancelable: true
+    });
+
+    // Create KeyboardEvent for Down Arrow key (keydown)
+    downArrowKeyDown = new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        code: "ArrowDown",
+        keyCode: 40,
+        which: 40,
+        bubbles: true,
+        cancelable: true
+    });
+
+    // Create KeyboardEvent for Down Arrow key (keyup)
+    downArrowKeyUp = new KeyboardEvent("keyup", {
+        key: "ArrowDown",
+        code: "ArrowDown",
+        keyCode: 40,
+        which: 40,
+        bubbles: true,
+        cancelable: true
+    });
+
+    logoutButton = document.getElementById("logoutBut");
+}
+let p1;
+let p2;
+let p3;
+let p4;
+let bot;
+let ball;
+let Aud;
+let cam;
+let select;
+let mode;
+let optMenu;
+let tourney;
+let board;
+let end ;
+let myMenu;
+
+let logoutButton;
+
+
+let canvas;
+let scene;
+let mainMenu;
+let optionsMenu;
+let gameEnd;
+let renderer;
+let textureLoader;
+let soccerBallTexture;
+let basketBallTexture;
+let pointLight;
+let ambientLight;
+let loadedFont;
+let spotLight;
+let spotLightHelper;
+let plane;
+
+let modeFour;
+let modeSingle;
+
+let skybox;
+let lastTime = 0; // Tracks the last time the loop   ran
+let flag;
+let clock;
+let fpsDisplay;
+
+// KEY PRESS MIMIC
+let upArrowKeyDown;
+let upArrowKeyUp;
+let downArrowKeyDown
+let downArrowKeyUp;
+
+let leftWall;
+let rightWall;
+let topWall;
+let bottomWall;
+let animationRequestId;
+
+//const originalZPosition = cam.camera.position.z;
 // Function to resize and center the canvas
 /*function resizeRenderer() {
     const targetAspect = 16 / 9; // Target aspect ratio (16:9)
@@ -497,60 +783,26 @@ function resizeRenderer()
     adjustFOV();
 }*/
 
- function resizeRenderer()
-{
-      // Update canvas dimensions
-  let width = window.innerWidth;
-  let height = window.innerHeight;
+function resizeRenderer() {
+    // Update canvas dimensions
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-  console.log("width", width, "height", height);
-  renderer.domElement.style.position = "absolute";
-  renderer.domElement.style.left = "0%";
-  renderer.domElement.style.top = "0%";
-  // Update renderer
-  renderer.setSize(width, height);
+    //console.log("width", width, "height", height);
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.left = "0%";
+    renderer.domElement.style.top = "0%";
+    // Update renderer
+    renderer.setSize(width, height);
 
-  // Update camera aspect ratio and projection matrix
-  cam.camera.aspect = width / height;
-  cam.camera.updateProjectionMatrix();
+    // Update camera aspect ratio and projection matrix
+    cam.camera.aspect = width / height;
+    cam.camera.updateProjectionMatrix();
 }
 
 
 // Initial resize and on window resize
 
-window.addEventListener("resize", resizeRenderer);
-
-
-let modeFour = false;
-let modeSingle = false;
-
-
-cam.camera.position.y = 100;
-cam.camera.lookAt(0, 0, 0);
-
-renderer.setAnimationLoop(menuLoop);  // Start the animation loop
-resizeRenderer();
-//loadEXREnvironment();
-initiateTourney();
-
-let lastTime = 0; // Tracks the last time the loop   ran
-
-
-const skybox = new THREE.TextureLoader();
-skybox.load(
-    '../images/kloppenheim_02_puresky_4k.png',
-    function (texture) {
-        // Apply the texture as the environment map or background
-        scene.background = texture;
-        scene.environment = texture;
-
-        // You can apply transformations to this PNG texture as needed
-    },
-    undefined, // progress callback
-    function (error) {
-        console.error('Error loading PNG:', error);
-    }
-);
 
 function loadEXREnvironment() {
     const exrLoader = new EXRLoader();
@@ -572,55 +824,16 @@ function loadEXREnvironment() {
 
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             mainMenu.environment = envMap;
-            scene.environment = envMap;
+            //scene.environment = envMap;
 
             // If you want the background too
             mainMenu.background = envMap;
-            scene.background = envMap;
+            //scene.background = envMap;
 
             // Clean up
             texture.dispose();
             pmremGenerator.dispose();
 
-            // Create controls to rotate the environment map
-            const controls = new OrbitControls(cam.camera, renderer.domElement);
-            controls.enableDamping = true; // Smooth rotation
-            controls.dampingFactor = 0.25;
-            controls.screenSpacePanning = false; // Keep the environment in place during zooming
-            controls.maxPolarAngle = Math.PI / 2; // Limit vertical rotation
-            controls.enableZoom = false; // Disable zooming
-
-            // Custom Key Bindings for rotating the skybox
-            const rotationSpeed = 0.1; // Speed at which the environment rotates
-            const keys = {
-                LEFT: 'g',   // Rotate left
-                UP: 'y',     // Rotate up
-                RIGHT: 'j',  // Rotate right
-                BOTTOM: 'h'  // Rotate down
-            }
-
-            let rotation = 0;
-
-            // Event listener for key press
-            window.addEventListener('keydown', (event) => {
-                if (event.key === keys.LEFT) {
-                    rotation += rotationSpeed; // Rotate left
-                } else if (event.key === keys.RIGHT) {
-                    rotation -= rotationSpeed; // Rotate right
-                } else if (event.key === keys.UP) {
-                    rotation += rotationSpeed; // Rotate up (or forward)
-                } else if (event.key === keys.BOTTOM) {
-                    rotation -= rotationSpeed; // Rotate down (or backward)
-                }
-
-                // Apply the updated rotation to the environment map
-                envMap.rotation = rotation;
-
-                // Optional: Update PMREM for better performance
-                const rotatedEnvMap = pmremGenerator.fromEquirectangular(texture).texture;
-                scene.background = rotatedEnvMap;
-                scene.environment = rotatedEnvMap;
-            });
         },
 
         // Progress callback
@@ -629,12 +842,10 @@ function loadEXREnvironment() {
         },
         // Error callback
         function (error) {
-            console.error('Error loading EXR:', error);
+            console.log('Error loading EXR:', error);
         }
     );
 }
-
-
 
 function initiateTourney() {
     tourney.inputBox = document.getElementById("userInput");
@@ -654,7 +865,7 @@ function winScreen() {
         tmpWinner = p2.name;
     }
     end.winner.style.display = "block";
-    optMenu.backBut.style.display = "block";
+    end.backBut.style.display = "block";
     board.scoreLeft.style.display = "none";
     board.scoreRight.style.display = "none";
     if (mode.isTourney) {
@@ -684,46 +895,90 @@ function winScreen() {
 }
 
 async function menuLoop() {
-    renderer.render(mainMenu, cam.camera);
+    animationRequestId = renderer.render(mainMenu, cam.camera);
 }
 
 async function optionsLoop() {
-    renderer.render(optionsMenu, cam.camera);
+    animationRequestId = renderer.render(optionsMenu, cam.camera);
 }
 
-async function selectLoop() {
-    renderer.render(selectMenu, cam.camera);
-}
 
 async function endLoop() {
-    renderer.render(gameEnd, cam.camera);
+    animationRequestId = renderer.render(gameEnd, cam.camera);
 }
-
-async function tourneyLoop() {
-    renderer.render(tournamentMenu, cam.camera);
-}
-
-const clock = new THREE.Clock();
 
 async function gameLoop(currentTime) {
     const deltaTime = currentTime - lastTime; // Time difference between frames
     lastTime = currentTime;
     const elapsedTime = clock.getElapsedTime();
+    const fps = Math.round(1000 / deltaTime);
 
+    fpsDisplay.textContent = `FPS: ${fps}`
     // Change color based on elapsed time
-    p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
-    p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
-
+    if (optMenu.leftRainbow)
+    {
+        p1.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
+    }
+    if (optMenu.rightRainbow)
+        p2.pad.material.color.setHSL(((elapsedTime / 8) % 100), 1, 0.5);
 
     update(deltaTime); // Update game state
     render();          // Render the game
 }
 
+export function fullClean()
+{
+    if (canvas) {
+        canvas.remove();
+    }
+    if (renderer && renderer.dispose) {
+        renderer.dispose();
+    }
+    if (animationRequestId !== null) {
+        cancelAnimationFrame(animationRequestId);
+        animationRequestId = null;  // Reset the request ID after stopping
+        console.log("Rendering loop stopped");
+    }
+    if (!mode || !mode.gameMeshesCreated)
+        return;
+
+    if (mainMenu.environment) {
+        mainMenu.environment.dispose();
+        mainMenu.environment = null;
+        scene.environment = null;
+    }
+    
+    if (mainMenu.background) {
+        mainMenu.background.dispose();
+        mainMenu.background = null;
+        scene.background = null;
+    }
+
+    disposer(p1.pad, scene);
+    disposer(p2.pad, scene);
+    disposer(p3.pad, scene);
+    disposer(p4.pad, scene);
+    disposer(ball.sphere, scene);
+    disposer(plane, scene);
+    disposer(leftWall, scene);
+    disposer(rightWall, scene);
+    disposer(topWall, scene);
+    disposer(bottomWall, scene);
+    
+    mode.gameMeshesCreated = false;  // Ensure the state is reset
+    console.log("Game fully cleaned.");
+}
+
 function disposer(obj, scene) {
+    if (!obj || !scene)
+        return;
     if (obj.geometry)
         obj.geometry.dispose();
     if (obj.material)
         obj.material.dispose();
+    if (obj.material.map) {
+        obj.material.map.dispose();
+    }
 
     scene.remove(obj);
 }
@@ -736,8 +991,8 @@ function cleanGameObj() {
     if (p4.geometry)
         disposer(p4.pad, scene);
     disposer(ball.sphere, scene);
-    p1.score = 2;
-    p2.score = 2;
+    p1.score = 0;
+    p2.score = 0;
 }
 
 function initiateP1(canvas) {
@@ -748,12 +1003,17 @@ function initiateP1(canvas) {
     else
         p1.Depth = 50;
     p1.geometry = new THREE.BoxGeometry(p1.Width, p1.Height, p1.Depth);
-    p1.material = new THREE.MeshStandardMaterial({ color: p1.color })
+    if (mode.darkMode)
+        p1.material = new THREE.MeshBasicMaterial({ color: optMenu.leftPadColor })
+    else
+    {
+        p1.material = new THREE.MeshStandardMaterial({ color: optMenu.leftPadColor })
+    }
     p1.pad = new THREE.Mesh(p1.geometry, p1.material);
-    p1.pad.position.x = -190;
-    p1.pad.position.y = 20;
     p1.pad.castShadow = true;
     p1.pad.receiveShadow = true;
+    p1.pad.position.x = -190;
+    p1.pad.position.y = 20;
     p1.maxX = -40;
     if (modeFour) {
         p1.pad.position.z = -45
@@ -764,7 +1024,6 @@ function initiateP1(canvas) {
         p1.maxZ = 115;
     }
     scene.add(p1.pad);
-    p1.pad.material.color.setHSL(0, 1, 0.5);
 }
 
 function initiateP2(canvas) {
@@ -777,7 +1036,10 @@ function initiateP2(canvas) {
     if (modeSingle)
         p2.name = "Bot";
     p2.geometry = new THREE.BoxGeometry(p2.Width, p2.Height, p2.Depth);
-    p2.material = new THREE.MeshStandardMaterial({ color: p2.color })
+    if (mode.darkMode)
+        p2.material = new THREE.MeshBasicMaterial({ color: optMenu.rightPadColor });
+    else
+        p2.material = new THREE.MeshStandardMaterial({ color: optMenu.rightPadColor });
     p2.pad = new THREE.Mesh(p2.geometry, p2.material);
     p2.pad.position.x = 189;
     p2.pad.position.y = 20;
@@ -792,12 +1054,12 @@ function initiateP2(canvas) {
         p2.pad.position.z = 0;
         p2.maxZ = 115;
     }
-
     scene.add(p2.pad);
-    p2.pad.material.color.setHSL(235, 1, 0.5);
 }
 
 function initiatePlane(canvas) {
+    if (mode.gameInitialized)
+        return;
     let geo;
     let mat;
     let plane;
@@ -821,8 +1083,7 @@ function initiateP3(canvas) {
     p3.Height = 10;
     p3.Depth = 30;
     p3.geometry = new THREE.BoxGeometry(p3.Width, p3.Height, p3.Depth);
-    p3.material = new THREE.MeshStandardMaterial({ color: p3.color })
-    p3.pad = new THREE.Mesh(p3.geometry, p3.material);
+    p3.pad = new THREE.Mesh(p3.geometry, p1.material);
     p3.pad.castShadow = true;
     p3.pad.receiveShadow = true;
     p3.pad.position.x = -190;
@@ -840,8 +1101,7 @@ function initiateP4(canvas) {
     p4.Height = 10;
     p4.Depth = 30;
     p4.geometry = new THREE.BoxGeometry(p4.Width, p4.Height, p4.Depth);
-    p4.material = new THREE.MeshStandardMaterial({ color: p4.color })
-    p4.pad = new THREE.Mesh(p4.geometry, p4.material);
+    p4.pad = new THREE.Mesh(p4.geometry, p2.material);
     p4.minX = 39;
     p4.pad.castShadow = true;
     p4.pad.receiveShadow = true;
@@ -898,13 +1158,19 @@ function initiateScoreBoard() {
 }
 
 function makeWall() {
-    let material = new THREE.MeshStandardMaterial({ color: 0x8A2BE2 })
+    if (mode.gameInitialized)
+        return;
+    let material;
+    if (mode.darkMode)
+        material = new THREE.MeshBasicMaterial({ color: optMenu.colorWall });
+    else
+        material = new THREE.MeshStandardMaterial({ color: optMenu.colorWall })
     let vertGeo = new THREE.BoxGeometry(10, 50, 250);
     let horiGeo = new THREE.BoxGeometry(415, 50, 10);
-    let leftWall = new THREE.Mesh(vertGeo, material);
-    let rightWall = new THREE.Mesh(vertGeo, material);
-    let topWall = new THREE.Mesh(horiGeo, material);
-    let bottomWall = new THREE.Mesh(horiGeo, material);
+    leftWall = new THREE.Mesh(vertGeo, material);
+    rightWall = new THREE.Mesh(vertGeo, material);
+    topWall = new THREE.Mesh(horiGeo, material);
+    bottomWall = new THREE.Mesh(horiGeo, material);
 
     leftWall.position.x = -211;
     rightWall.position.x = 209;
@@ -1052,7 +1318,7 @@ function checkBallColl() {
         ball.speed = 0.1;
         ball.sphere.position.x = ball.startX;
         ball.sphere.position.z = ball.startZ;
-        if (p1.score == 33 || p2.score == 33) {
+        if (p1.score == 3 || p2.score == 3) {
             cam.camera.position.y = 100;
             winScreen();
             renderer.setAnimationLoop(endLoop);
@@ -1079,7 +1345,6 @@ function ballUpdate(deltaTime) {
     ball.speed += 0.00001 * deltaTime;
     checkBallColl();
 }
-//0.1
 
 function movementUpdate(deltaTime, player) {
 
@@ -1099,17 +1364,6 @@ function movementUpdate(deltaTime, player) {
         player.pad.position.z += player.speed * deltaTime;
     }
 }
-
-const temp = (function () {
-    let test = 0; // Persistent variable inside the closure
-    return function (deltaTime) {
-        test += deltaTime;
-        if (test > 1) {
-            ballUpdate(deltaTime);
-        }
-    };
-})();
-
 
 function movementCam(deltaTime) {
     const forward = new THREE.Vector3();
@@ -1212,8 +1466,6 @@ function updateBot() {
 
 function impBot(deltaTime) {
     let dist;
-    let bounceCount;
-    let tempDist;
     if (ball.freeze || bot.clock > 0) {
         bot.clock = -3000;
         return;
@@ -1275,48 +1527,8 @@ function update(deltaTime) {
 
 // Render the game
 function render() {
-    renderer.render(scene, cam.camera);
+    animationRequestId =  renderer.render(scene, cam.camera);
 }
-
-// KEY PRESS MIMIC
-const upArrowKeyDown = new KeyboardEvent("keydown", {
-    key: "ArrowUp",
-    code: "ArrowUp",
-    keyCode: 38,
-    which: 38,
-    bubbles: true,
-    cancelable: true
-});
-
-// Create KeyboardEvent for Up Arrow key (keyup)
-const upArrowKeyUp = new KeyboardEvent("keyup", {
-    key: "ArrowUp",
-    code: "ArrowUp",
-    keyCode: 38,
-    which: 38,
-    bubbles: true,
-    cancelable: true
-});
-
-// Create KeyboardEvent for Down Arrow key (keydown)
-const downArrowKeyDown = new KeyboardEvent("keydown", {
-    key: "ArrowDown",
-    code: "ArrowDown",
-    keyCode: 40,
-    which: 40,
-    bubbles: true,
-    cancelable: true
-});
-
-// Create KeyboardEvent for Down Arrow key (keyup)
-const downArrowKeyUp = new KeyboardEvent("keyup", {
-    key: "ArrowDown",
-    code: "ArrowDown",
-    keyCode: 40,
-    which: 40,
-    bubbles: true,
-    cancelable: true
-});
 
 function p1KeyDown(event) {
     if (event.key === 'w') {
@@ -1406,99 +1618,7 @@ function cameraDown(event) {
         fixCam();
     }
 
-    if (event.key === 't') {
-        console.log("x", cam.camera.position.x);
-        console.log("y", cam.camera.position.y);
-        console.log("z", cam.camera.position.z);
-    }
 }
-
-document.addEventListener('keydown', (event) => {
-    //let cam = true;
-    if (event.key === '"')
-        cam.enable = !cam.enable;
-    if (cam.enable)
-        cameraDown(event);
-    else {
-        p1KeyDown(event);
-        p2KeyDown(event);
-        //if (!(modeFour))
-          //  return;
-        p3KeyDown(event);
-        p4KeyDown(event);
-    }
-    if (event.key === '+')
-    {
-        const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
-        let width = size.width + 10;
-        let height = size.height;
-
-        renderer.domElement.style.position = "absolute";
-        renderer.domElement.style.left = "0%";
-        renderer.domElement.style.top = "0%";
-        // Update renderer
-        renderer.setSize(width, height);
-
-        // Update camera aspect ratio and projection matrix
-        cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();
-    }
-    if (event.key === '-')
-    {
-        const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
-        let width = size.width - 10;
-        let height = size.height;
-    
-       renderer.domElement.style.position = "absolute";
-        renderer.domElement.style.left = "0%";
-        renderer.domElement.style.top = "0%";
-        // Update renderer
-        renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
-        cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
-    }
-
-    if (event.key === 'q')
-    {
-        const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
-        let width = size.width;
-        let height = size.height + 10;
-    
-       renderer.domElement.style.position = "absolute";
-        renderer.domElement.style.left = "0%";
-        renderer.domElement.style.top = "0%";
-        // Update renderer
-        renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
-        cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
-    }
-  
-    if (event.key === 'e')
-    {
-        const size = renderer.getSize(new THREE.Vector2());
-              // Update canvas dimensions
-        let width = size.width;
-        let height = size.height - 10;
-    
-       renderer.domElement.style.position = "absolute";
-        renderer.domElement.style.left = "0%";
-        renderer.domElement.style.top = "0%";
-        // Update renderer
-        renderer.setSize(width, height);
-    
-       // Update camera aspect ratio and projection matrix
-        cam.camera.aspect = width / height;
-        cam.camera.updateProjectionMatrix();    
-    }
-}
-);
 
 function p1KeyUp(event) {
     if (event.key === 'w') {
@@ -1588,17 +1708,6 @@ function cameraUp(event) {
     }
 }
 
-document.addEventListener('keyup', (event) => {
-    cameraUp(event);
-    p1KeyUp(event);
-    p2KeyUp(event);
-    if (!(modeFour))
-        return;
-    p3KeyUp(event);
-    p4KeyUp(event);
-}
-);
-
 function changeText(text, mesh, size) {
     let x = mesh.position.x;
     let y = mesh.position.y;
@@ -1661,7 +1770,8 @@ function startGame() {
     makeWall();
     resizeRenderer();
     fixCam();
-    //createText("Test", 5, 0, 1, 0, scene);
+    mode.gameMeshesCreated = true;
+    //createText("Test", 5, 0, 1, 0, scene) ;
 }
 
 function createMatch(p1, p2) {
@@ -1701,44 +1811,6 @@ function matchMaker() {
         createMatch(leftSide, rightSide);
     }
 }
-
-tourney.inputBox.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-        tourney.submitButton.click(); // Trigger the button click
-    }
-});
-
-tourney.submitButton.addEventListener("click", function () {
-    if (tourney.inputBox.value == "")
-        return;
-    if (tourney.inputBox.value.length > 12) {
-        tourney.statusText.innerText = "Player name is too long";
-        tourney.statusText.style.display = "block";
-        return;
-    }
-    if (!(/^[\x20-\x7E]*$/.test(tourney.inputBox.value))) {
-        tourney.statusText.innerText = "Unsupported characters found";
-        tourney.statusText.style.display = "block";
-        return;
-    }
-
-    if (tourney.playerArray.length == 8) {
-        tourney.statusText.innerText = "Maximum number of players are 8.";
-        tourney.statusText.style.display = "block";
-        tourney.inputBox.value = "";
-        return;
-    }
-    tourney.playerArray.push(tourney.inputBox.value);
-    tourney.inPlayers.innerHTML += tourney.inputBox.value + "<br>";
-    tourney.inPlayers.style.display = "block";
-    tourney.inputBox.value = "";
-});
-
-
-tourney.startTourneyBut.addEventListener("click", function () {
-    visibleControl(tourney.everything, false, "none");
-    playNextMatch();
-});
 
 function appearBut(button) {
     let op = parseFloat(window.getComputedStyle(button).opacity); // Convert opacity to a number

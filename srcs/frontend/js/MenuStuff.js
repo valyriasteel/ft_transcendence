@@ -1,27 +1,4 @@
 import * as THREE from 'three';
-export class startBut 
-{
-	constructor() 
-	{
-		this.geometry = new THREE.BoxGeometry( 50, 1, 50 );
-		this.material = new THREE.MeshBasicMaterial( { color: 'green' } );
-		this.cube = new THREE.Mesh( this.geometry, this.material );
-		this.cube.position.x = -40;
-		this.startText;
-	}
-}
-
-export class optionsBut 
-{
-	constructor() 
-	{
-		this.geometry = new THREE.BoxGeometry( 50, 1, 50 );
-		this.material = new THREE.MeshBasicMaterial( { color: 'red' } );
-		this.cube = new THREE.Mesh( this.geometry, this.material );
-		this.cube.position.x = 40;
-		this.optText;
-	}
-}
 
 export class scoreBoard 
 {
@@ -58,11 +35,13 @@ export class Mode
 	constructor() 
 	{
 		this.gameInitialized = false;
+		this.gameMeshesCreated = false;
 		this.isTourney = false;
 		this.leftSideText;
 		this.rightSideText;
 		this.volume = 0.5;
 		this.darkMode = false;
+		this.backGround;
 	}
 }
 
@@ -87,6 +66,17 @@ export class optionsMenu
 		this.onText;
 		this.offText;
 		this.ballSelection;
+		this.shadowRes;
+		this.shadowSlider;
+		this.leftColor;
+		this.leftRainbow = true;
+		this.rightColor;
+		this.rightRainbow = true;
+		this.leftPadColor = 'red';
+		this.rightPadColor = 'blue';
+		this.colorWall = 0x8A2BE2;
+		this.wallColor;
+		this.background = true;	
 		this.everything;
 	}
 }
@@ -141,6 +131,7 @@ export class mainMenu
 	{
 		this.playBut;
 		this.settingsBut;
+		this.profile;
 		this.everything;
 	}
 }

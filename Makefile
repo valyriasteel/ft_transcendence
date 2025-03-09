@@ -1,9 +1,9 @@
 COMPOSE_FILE=./docker-compose.yml
 
-.PHONY: all down re clean logs
+
 
 all:
-	@docker-compose -f $(COMPOSE_FILE) up
+	@docker-compose -f $(COMPOSE_FILE) up --build
 
 down:
 	@docker-compose -f $(COMPOSE_FILE) down
